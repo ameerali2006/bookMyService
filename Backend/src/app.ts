@@ -1,12 +1,14 @@
 import  express from "express";
 import cors from 'cors'
+import cookieParser from 'cookie-parser';
 import { UserRoute } from "./routes/user.route";
 import {AdminRoute} from "./routes/admin.route"
+import {ENV} from './config/env/env'
 const app=express()
 
 app.use(
     cors({
-        origin:process.env.FRONTEND_URI||'http://localhost:5173',
+        origin:ENV.FRONTEND_URI,
         credentials:true
     })
 )

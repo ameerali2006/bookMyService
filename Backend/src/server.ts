@@ -3,8 +3,9 @@ import { createServer } from "http";
 import app from "./app";
 import { connectRedis } from "./config/redis";
 import { connectDB } from "./config/db";
+import {ENV} from './config/env/env'
 
-const port:number|string=process.env.POST||5000
+const port:number|string=ENV.PORT
 console.log('hello')
 const startServer=async ():Promise<void>=>{
     try {
@@ -17,11 +18,12 @@ const startServer=async ():Promise<void>=>{
         })
     } catch (error) {
         console.error('server Error',error)
-        
+         
     }  
  
 } 
 
 
 
-startServer()
+startServer()  
+ 

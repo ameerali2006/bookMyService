@@ -28,5 +28,8 @@ import {
             authController.googleLogin(req, res, next)
             
         );
+        this.router.post('/logout',(req:Request,res:Response,next:NextFunction)=>{
+            authController.logout(req,res,next)
+        })
     }
  } 

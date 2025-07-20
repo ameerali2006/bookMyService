@@ -6,10 +6,11 @@ import {
 } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addUserToken } from "@/redux/slice/userTokenSlice";
+import { addUser } from "@/redux/slice/userTokenSlice";
 import { authService } from "@/api/AuthService";
+import { ENV } from "@/config/env/env";
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const clientId = ENV.VITE_GOOGLE_CLIENT_ID;
 console.log("Google Client ID:", clientId);
   
 
@@ -26,7 +27,7 @@ const GoogleLoginComponent = () => {
       const response = await authService.googleLogin(token);
 
       if (response.data.success) {
-        dispatch(addUserToken(response.data.accessToken));
+        dispatch(addUser(response.data.user));
         navigate("/");
       }
     } catch (error) {

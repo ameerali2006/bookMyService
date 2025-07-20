@@ -1,7 +1,6 @@
-import axios, {AxiosError} from "axios";
-import type { AxiosResponse, InternalAxiosRequestConfig} from 'axios'
-
-import { addAdminToken, removeAdminToken } from "@/redux/slice/adminTokenSlice";
+import axios from "axios";
+import { WarningToast,ErrorToast } from '@/components/shared/Toaster';
+import {  removeAdmin } from "@/redux/slice/adminTokenSlice";
 import store from "../../redux/store";
 
 // Define an Axios instance
@@ -10,71 +9,60 @@ const adminAxios = axios.create({
   withCredentials: true,
 });
 
-// Request Interceptor
-adminAxios.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = store.getState().adminTokenSlice.adminToken;
+let isRefreshing = false;
 
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    } else {
-      console.warn(" No token found in Redux store!");
-    }
-
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response Interceptor
 adminAxios.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
-    if (!error.response) {
-      console.error(" No response from server!");
-      return Promise.reject(error);
-    }
+  (response) => response,
+  async (error) => {
+		console.log(error)
+		const originalRequest = error.config;
+        
+        if (originalRequest.url === "/login") {
+            return Promise.reject(error);
+        }
 
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
-    const status = error.response.status;
+		if (
+			error.response?.status === 401 &&
+			error.response.data.message === "Token Expired" &&
+			!originalRequest._retry
+		) {
+			originalRequest._retry = true;
+			if (!isRefreshing) {
+				isRefreshing = true;
+				try {
+					await adminAxios.post("/refresh-token");
+					isRefreshing = false;
+					return adminAxios(originalRequest);
+				} catch (refreshError) {
+					isRefreshing = false;
+					store.dispatch(removeAdmin());
+					await adminAxios.post("/logout")
+					window.location.href = "/admin/login";
+					WarningToast("Please login again");
+					return Promise.reject(refreshError);
+				}
+			}
+		}
+		if (
+			(error.response.status === 401 &&
+				error.response.data.message === "Invalid token") ||
+			(error.response.status === 403 &&
+				error.response.data.message === "Token is blacklisted") ||
+			(error.response.status === 403 &&
+				error.response.data.message ===
+					"Access denied: Your account has been blocked" &&
+				!originalRequest._retry)
+		) {
+			console.log("Session ended");
+			store.dispatch(removeAdmin ());
 
-    //  Handle Token Expiry
-    if (
-      status === 403 &&
-      (error.response.data as { message: string })?.message ===
-        "Invalid or expired token." &&
-      !originalRequest._retry
-    ) {
-      originalRequest._retry = true;
-      try {
-        console.log(" Refreshing Token...");
-        const refreshResponse = await axios.post<{ accessToken: string }>(
-          import.meta.env.VITE_SERVER_BASEURL+"/admin/refresh-token",
-          {},
-          { withCredentials: true }
-        );
+			window.location.href = "/admin/login";
+			WarningToast("Please login again");
+			return Promise.reject(error);
+		}
 
-        const newAccessToken = refreshResponse.data.accessToken;
-        // console.log(" New Access Token:", newAccessToken);
-
-        store.dispatch(addAdminToken(newAccessToken));
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-        return adminAxios(originalRequest);
-      } catch (refreshError) {
-        console.error(" Refresh Token Failed:", refreshError);
-        store.dispatch(removeAdminToken());
-        window.location.href = "/admin/login";
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
+		return Promise.reject(error);
+	}
 );
 
 export default adminAxios;

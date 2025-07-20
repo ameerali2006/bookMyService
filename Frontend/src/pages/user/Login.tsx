@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/shared/Login'
 
 import { useDispatch } from 'react-redux';
-import { addUserToken } from '@/redux/slice/userTokenSlice';
+import { addUser } from '@/redux/slice/userTokenSlice';
 import { authService } from '@/api/AuthService';
 
 function Login() {
@@ -18,7 +18,8 @@ function Login() {
     console.log(response.data.success);
     
     if (response.data.success) {
-      dispatch(addUserToken(response.data.accessToken));
+      console.log( "user for redux",response.data.user)
+      dispatch(addUser(response.data.user));
       navigate("/");
     } else {
       throw new Error("Invalid credentials");

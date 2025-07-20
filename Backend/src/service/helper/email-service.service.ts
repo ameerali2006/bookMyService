@@ -1,28 +1,34 @@
 import nodemailer from "nodemailer";
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
-import dotenv from "dotenv";
+
 import { injectable } from "tsyringe";
 import { IUser } from "../../model/user.model";
+import {ENV} from '../../config/env/env'
 
-dotenv.config();
+
 @injectable()
 export class EmailService implements IEmailService {
   private transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
-      user: process.env.EMAIL_USER as string,
-      pass: process.env.EMAIL_PASS as string,
+      user: ENV.EMAIL_USER as string,
+      pass: ENV.EMAIL_PASS as string,
     },
   });
   async sendEmail(toEmail: string, subject: string, content: string): Promise<void> {
-      const mailOptions = {
-      from: process.env.EMAIL_USER as string,
-      to: toEmail,
-      subject,
-      html: content,
-    };
+     try {
+       const mailOptions = {
+          from: ENV.EMAIL_USER as string,
+          to: toEmail,
+          subject,
+          html: content,
+        };
 
-    await this.transporter.sendMail(mailOptions);
+        await this.transporter.sendMail(mailOptions);
+     } catch (error) {
+      console.error(error)
+      
+     }
   }
   generateOtpEmailContent(otp: number): string {
     return `
@@ -63,7 +69,7 @@ export class EmailService implements IEmailService {
                 <tr>
                     <td align="center" style="font-size: 14px; padding-top: 20px; color: #555;">
                     If you did not request this, ignore this email. <br>For assistance, contact 
-                    <a href="mailto:support@quicfin.com" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">support@quicfin.com</a>.
+                    <a href="mailto:support@quicfin.com" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">support@bookmyservice.com</a>.
                     </td>
                 </tr>
                 </table>

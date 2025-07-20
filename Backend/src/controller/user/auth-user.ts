@@ -6,11 +6,16 @@ import { TYPES } from "../../config/constants/types.js";
 import { MESSAGES } from "../../config/constants/message.js";
 import { STATUS_CODES } from "../../config/constants/status-code.js";
 import {LoginDto} from "../../dto/shared/login.dto.js"
+import {clearAuthCookies, setAuthCookies} from "../../utils/cookie-helper.js"
+import { ITokenservice } from "../../interface/service/token.service.interface.js";
+import { CustomRequest } from "../../middleware/auth.middleware.js";
 
 @injectable()
 export class AuthUserController implements IAuthController {
   constructor(
-    @inject(TYPES.AuthUserService) private _authUserService: IAuthUserService
+    @inject(TYPES.AuthUserService) private _authUserService: IAuthUserService,
+    @inject(TYPES.TokenService) private _tokenService:ITokenservice,
+    
   ) {}
 
   async register(req: Request, res: Response,next:NextFunction) {
@@ -53,18 +58,33 @@ export class AuthUserController implements IAuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const loginCredential: LoginDto = req.body;
-      const { refreshToken, accessToken } = await this._authUserService.login(
+      const { refreshToken, accessToken,userData } = await this._authUserService.login(
         loginCredential
       );
 
-      res.cookie("userRefreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      const accessTokenName = "user_access_token";
+      const refreshTokenName = "user_refresh_token";
+      setAuthCookies(
+        res,
+        accessToken,
+        refreshToken,
+        accessTokenName,
+        refreshTokenName
+      )
+
       res 
         .status(STATUS_CODES.OK)
-        .json({ success: true, message: MESSAGES.LOGIN_SUCCESS, accessToken });
+        .json({ 
+          success: true,
+          message: MESSAGES.LOGIN_SUCCESS,
+          user: {
+            name:userData.name,
+            email:userData.email,
+            image:userData?.image
+
+
+          }
+        });
     } catch (error) {
       next(error);
     }
@@ -72,19 +92,58 @@ export class AuthUserController implements IAuthController {
   async googleLogin(req: Request, res: Response, next: NextFunction) {
     try {
       const googleToken: string = req.body.token;
-      const { refreshToken, accessToken } =
+      const { refreshToken, accessToken ,userData} =
         await this._authUserService.googleLogin(googleToken);
-      res.cookie("userRefreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-      res
-        .status(STATUS_CODES.CREATED)
-        .json({ success: true, message: MESSAGES.LOGIN_SUCCESS, accessToken });
+      const accessTokenName = "user_access_token";
+      const refreshTokenName = "user_refresh_token";
+      setAuthCookies(
+        res,
+        accessToken,
+        refreshToken,
+        accessTokenName,
+        refreshTokenName
+      )
+
+      res 
+        .status(STATUS_CODES.OK)
+        .json({ 
+          success: true,
+          message: MESSAGES.LOGIN_SUCCESS,
+          user: {
+            name:userData.name,
+            email:userData.email,
+            image:userData?.email
+
+
+          }
+        });
     } catch (error) {
       next(error);
     }
+  }
+  async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      
+			await this._tokenService.blacklistToken(
+				(req as CustomRequest).user.access_token
+			);
+
+			await this._tokenService.revokeRefreshToken(
+				(req as CustomRequest).user.refresh_token
+			);
+      const user = (req as CustomRequest).user;
+			const accessTokenName = `user_access_token`;
+			const refreshTokenName = `user_refresh_token`;
+			clearAuthCookies(res, accessTokenName, refreshTokenName);
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.LOGOUT_SUCCESS,
+			});
+
+    } catch (error) {
+      
+    }
+    
   }
   
 }

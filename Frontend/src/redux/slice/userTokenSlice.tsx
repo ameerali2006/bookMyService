@@ -1,28 +1,33 @@
-import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-
-interface UserTokenState {
-  userToken: string | null;
+interface UserData {
+  name: string;
+  email: string;
+  image?: string;
 }
 
-const initialState: UserTokenState = {
-  userToken: JSON.parse(localStorage.getItem("userAccessToken") || "null"),
+interface UserState {
+  user: UserData | null;
+}
+
+const initialState: UserState = {
+  user: JSON.parse(localStorage.getItem("userData") || "null"),
 };
 
-const userTokenSlice = createSlice({
-  name: "userTokenSlice", 
+const userSlice = createSlice({
+  name: "userSlice",
   initialState,
   reducers: {
-    addUserToken: (state, action: PayloadAction<string>) => {
-      state.userToken = action.payload;
-      localStorage.setItem("userAccessToken", JSON.stringify(action.payload));
+    addUser: (state, action: PayloadAction<UserData>) => {
+      state.user = action.payload;
+      localStorage.setItem("userData", JSON.stringify(action.payload));
     },
-    removeUserToken: (state) => {
-      state.userToken = null;
-      localStorage.removeItem("userAccessToken");
+    removeUser: (state) => {
+      state.user = null;
+      localStorage.removeItem("userData");
     },
   },
 });
 
-export const { addUserToken, removeUserToken } = userTokenSlice.actions;
-export default userTokenSlice.reducer;
+export const { addUser, removeUser } = userSlice.actions;
+export default userSlice.reducer;

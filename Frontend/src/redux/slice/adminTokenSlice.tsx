@@ -1,26 +1,32 @@
-import {createSlice , type PayloadAction} from  '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-interface AdminTokenState{
-    adminToken :string |null;
-
+interface AdminData {
+  name: string;
+  email: string;
 }
-const initialState:AdminTokenState={
-    adminToken : JSON.parse(localStorage.getItem('adminAccessTocken')||"null")
+
+interface AdminState {
+  admin: AdminData | null;
+}
+
+const initialState: AdminState = {
+  admin: JSON.parse(localStorage.getItem('adminData') || 'null'),
 };
-const adminTokenSlice = createSlice({
-  name: "admintokenSlice", // Updated to match the store
+
+const adminSlice = createSlice({
+  name: 'adminSlice',
   initialState,
   reducers: {
-    addAdminToken: (state, action: PayloadAction<string>) => {
-      state.adminToken = action.payload;
-      localStorage.setItem("adminAccessToken", JSON.stringify(action.payload));
+    addAdmin: (state, action: PayloadAction<AdminData>) => {
+      state.admin = action.payload;
+      localStorage.setItem('adminData', JSON.stringify(action.payload));
     },
-    removeAdminToken: (state) => {
-      state.adminToken = null;
-      localStorage.removeItem("adminAccessToken");
+    removeAdmin: (state) => {
+      state.admin = null;
+      localStorage.removeItem('adminData');
     },
   },
 });
-export const { addAdminToken, removeAdminToken } = adminTokenSlice.actions;
-export default adminTokenSlice.reducer;
 
+export const { addAdmin, removeAdmin } = adminSlice.actions;
+export default adminSlice.reducer;

@@ -1,26 +1,24 @@
 import { createClient } from "redis";
-import dotenv from 'dotenv'
+import {ENV} from './env/env'
 
-dotenv.config()
-
-const redisClint=createClient({
+const redisClient=createClient({
     name:'defalt',
-    password:process.env.REDIS_PASSWORD as string,
+    password:ENV.REDIS_PASSWORD as string,
     socket:{
-        host:process.env.REDIS_HOST,
-        port:Number(process.env.REDIS_PORT),
+        host:ENV.REDIS_HOST,
+        port:Number(ENV.REDIS_PORT),
 
     }
 })
-redisClint.on('error',(err)=>{
+redisClient.on('error',(err)=>{
     console.error('redis clint error:',err)
 })
 const connectRedis=async ():Promise<void>=>{
     try {
-        await redisClint.connect()
+        await redisClient.connect()
         console.log('redis is connected succesfully')
     } catch (error) {
         console.error('redis clint error:',error)
     }
 }
-export {connectRedis,redisClint}
+export {connectRedis,redisClient}

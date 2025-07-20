@@ -2,7 +2,6 @@ import userAxios from "@/config/axiosSevice/UserAxios";
 import adminAxios from "@/config/axiosSevice/AdminAxios"; 
 
 
-
 interface RegisterPayload{
     name:string
     email:string
@@ -30,6 +29,9 @@ export const authService={
         return await userAxios.post("/login", credentials);
     },
     adminLogin: async (credentials: { email: string; password: string }) => {
-    return await adminAxios.post("/login", credentials);
-  },
+        return await adminAxios.post("/login", credentials);
+    },
+    logout: async ()=>{
+        return await userAxios.post('/logout')
+    }
 }

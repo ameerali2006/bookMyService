@@ -42,6 +42,9 @@ CREATED:'Created Successfully',
   BAD_REQUEST: "Invalid request. Please check the input data.",
   RESOURCE_NOT_FOUND: "Requested resource not found.",
   VALIDATION_ERROR: "Validation failed. Please check your input.",
+   TOKEN_EXPIRED: "Session expired login again",
+  TOKEN_BLACKLISTED: "Session is no longer valid",
+    INVALID_TOKEN: "Invalid session please login again",
 
 
 }

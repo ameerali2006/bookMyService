@@ -1,6 +1,6 @@
 import { authService } from '@/api/AuthService';
 import Login from '@/components/shared/Login'
-import { addAdminToken } from '@/redux/slice/adminTokenSlice';
+import { addAdmin } from '@/redux/slice/adminTokenSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ function LoginPage() {
         console.log(response.data.success);
 
         if (response.data.success) {
-          dispatch(addAdminToken(response.data.accessToken));
+          dispatch(addAdmin(response.data.accessToken));
           navigate("/admin");
         } else {
           throw new Error("Invalid credentials");
