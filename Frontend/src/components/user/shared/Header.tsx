@@ -9,14 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {authService} from '@/api/AuthService'
-import { useDispatch } from "react-redux";
+import { authService } from "@/api/AuthService";
+import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "@/redux/slice/userTokenSlice";
-
+import type { RootState } from "@/redux/store"; // Adjust the path as per your store setup
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.userTokenSlice.user);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -24,8 +25,10 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      console.log('logout')
       await authService.logout();
-      dispatch(removeUser())
+      dispatch(removeUser());
+      console.log('logout after',user)
       
     } catch (error) {
       console.error("Logout failed", error);
@@ -71,39 +74,65 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Icons */}
+          {/* Icons or Auth */}
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="flex items-center justify-center w-8 h-8 text-white hover:text-blue-200 transition-colors"
-            >
-              <Calendar className="h-5 w-5" />
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-400 text-black hover:bg-yellow-300 transition-colors">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="mt-2 w-32 bg-white rounded shadow-md z-50">
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/profile"
-                    className="block w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                  >
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+            {user ? (
+              <>
+                {/* Calendar Icon */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="flex items-center justify-center w-8 h-8 text-white hover:text-blue-200 transition-colors"
                 >
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <Calendar className="h-5 w-5" />
+                </Button>
+
+                {/* Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-400 text-black hover:bg-yellow-300 transition-colors">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="mt-2 w-32 bg-white rounded shadow-md z-50">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/profile"
+                        className="block w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={()=>handleLogout()}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="text-sm bg-white text-blue-900 hover:bg-gray-100"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button
+                    size="sm"
+                    className="text-sm bg-yellow-400 text-black hover:bg-yellow-300"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

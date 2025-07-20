@@ -5,6 +5,7 @@ import {
     
 
  } from '../config/di/resolver.js' 
+import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
  export class UserRoute extends BaseRoute{
     constructor (){
         super()
@@ -28,7 +29,7 @@ import {
             authController.googleLogin(req, res, next)
             
         );
-        this.router.post('/logout',(req:Request,res:Response,next:NextFunction)=>{
+        this.router.post('/logout',verifyAuth,authorizeRole(["user"]),(req:Request,res:Response,next:NextFunction)=>{
             authController.logout(req,res,next)
         })
     }

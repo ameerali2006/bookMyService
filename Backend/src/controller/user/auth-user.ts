@@ -6,7 +6,7 @@ import { TYPES } from "../../config/constants/types.js";
 import { MESSAGES } from "../../config/constants/message.js";
 import { STATUS_CODES } from "../../config/constants/status-code.js";
 import {LoginDto} from "../../dto/shared/login.dto.js"
-import {clearAuthCookies, setAuthCookies} from "../../utils/cookie-helper.js"
+import {clearAuthCookies, setAuthCookies, updateCookieWithAccessToken} from "../../utils/cookie-helper.js"
 import { ITokenservice } from "../../interface/service/token.service.interface.js";
 import { CustomRequest } from "../../middleware/auth.middleware.js";
 
@@ -112,7 +112,7 @@ export class AuthUserController implements IAuthController {
           user: {
             name:userData.name,
             email:userData.email,
-            image:userData?.email
+            image:userData?.email 
 
 
           }
@@ -122,28 +122,59 @@ export class AuthUserController implements IAuthController {
     }
   }
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+
     try {
+      console.log('log out')
       
 			await this._tokenService.blacklistToken(
 				(req as CustomRequest).user.access_token
 			);
+      console.log('1')
 
 			await this._tokenService.revokeRefreshToken(
 				(req as CustomRequest).user.refresh_token
 			);
+      console.log('12')
       const user = (req as CustomRequest).user;
 			const accessTokenName = `user_access_token`;
 			const refreshTokenName = `user_refresh_token`;
 			clearAuthCookies(res, accessTokenName, refreshTokenName);
+      console.log('13')
 			res.status(STATUS_CODES.OK).json({
 				success: true,
 				message: MESSAGES.LOGOUT_SUCCESS,
 			});
 
     } catch (error) {
+      console.error(error)
       
     }
     
   }
+  handleTokenRefresh(req: Request, res: Response): void {
+		try {
+			const refreshToken = (req as CustomRequest).user.refresh_token;
+			const newTokens = this._tokenService.refreshToken(refreshToken);
+			const accessTokenName = `${newTokens.role}_access_token`;
+			updateCookieWithAccessToken(
+				res,
+				newTokens.accessToken,
+				accessTokenName
+			);
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.UPDATE_SUCCESS,
+			});
+		} catch (error) {
+			clearAuthCookies(
+				res,
+				`${(req as CustomRequest).user.role}_access_token`,
+				`${(req as CustomRequest).user.role}_refresh_token`
+			);
+			res.status(STATUS_CODES.UNAUTHORIZED).json({
+				message: MESSAGES.INVALID_TOKEN,
+			});
+		}
+	}
   
 }

@@ -5,6 +5,11 @@ import { IRedisTokenRepository } from "../../interface/repository/redis/redis.re
 @injectable()
 export class RedisTokenRepository implements IRedisTokenRepository {
   async blackListToken(token: string, expiresIn: number): Promise<void> {
+    if (typeof token !== 'string') {
+      console.error('Invalid token type:', typeof token, token);
+      throw new Error('Token must be a string');
+    }
+
     await redisClient.set(token, "blacklisted", { EX: expiresIn });
   }
 
