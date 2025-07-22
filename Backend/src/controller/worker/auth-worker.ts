@@ -64,8 +64,43 @@ export class AuthWorkerController implements IWorkerAuthController {
                 message: MESSAGES.REGISTRATION_SUCCESS,
             });
         } catch (error) {
+          console.error(error)
             
         }
+    }
+    async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+      try {
+         const loginCredential: LoginDto = req.body;
+        const { refreshToken, accessToken,workerData } = await this._authWorkerService.login(
+        loginCredential
+      );
+
+      const accessTokenName = "worker_access_token";
+      const refreshTokenName = "worker_refresh_token";
+      setAuthCookies(
+        res,
+        accessToken,
+        refreshToken,
+        accessTokenName,
+        refreshTokenName
+      )
+
+      res 
+        .status(STATUS_CODES.OK)
+        .json({ 
+          success: true,
+          message: MESSAGES.LOGIN_SUCCESS,
+          worker: {
+            name:workerData.name,
+            email:workerData.email,
+            image:workerData?.profileImage
+
+
+          }
+        });
+    } catch (error) {
+      next(error);
+    }
     }
   
   handleTokenRefresh(req: Request, res: Response): void {

@@ -1,24 +1,30 @@
 import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
 
 
-interface WorkerTokenState {
-  WorkerToken: string | null;
+interface WorkerData {
+  name: string;
+  email: string;
+  image?: string;
 }
 
-const initialState: WorkerTokenState = {
-  WorkerToken: JSON.parse(localStorage.getItem("workerAccessToken") || "null"),
+interface WorkerState {
+  worker: WorkerData | null;
+}
+
+const initialState: WorkerState = {
+  worker: JSON.parse(localStorage.getItem("WorkerData") || "null"),
 };
 
 const workerTokenSlice = createSlice({
   name: "workerTokenSlice",
   initialState,
   reducers: {
-    addWorker: (state, action: PayloadAction<string>) => {
-      state.WorkerToken = action.payload;
+    addWorker: (state, action: PayloadAction<WorkerData>) => {
+      state.worker = action.payload;
       localStorage.setItem("workerAccessToken", JSON.stringify(action.payload));
     },
     removeWorker: (state) => {
-      state.WorkerToken = null;
+      state.worker = null;
       localStorage.removeItem("workerAccessToken");
     },
   },

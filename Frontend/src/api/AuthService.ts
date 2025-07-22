@@ -51,8 +51,11 @@ export const authService={
         return await workerAxios.post('/cloudinary-signature')
     },
     workerRegister: async (data: WorkerRegistrationData) => {
-    return await workerAxios.post("/register", data); 
-  },
+        return await workerAxios.post("/register", data); 
+    },
+    workerLogin:async (data:{email:string,password:string}) => {
+        return await workerAxios.post("/login", data); 
+    },
 
 
 

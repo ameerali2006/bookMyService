@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IWorker extends Document {
+  _id:string;
   name: string;
   email: string;
   phone: string;

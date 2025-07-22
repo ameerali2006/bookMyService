@@ -25,5 +25,10 @@ export class WorkerRoute extends BaseRoute{
             authWorkerController.register(req, res, next)
                     
         );
+        this.router.post("/login", (req: Request, res: Response, next: NextFunction) =>
+        
+            authWorkerController.login(req, res, next)
+                    
+        );
     }
 }

@@ -11,6 +11,8 @@ import { IWorker } from "../../model/worker.model";
 import { IOtp } from "../../model/otp.model";
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
 import { IOtpRepository } from "../../interface/repository/otp.repository.interface";
+import { LoginDto } from "../../dto/shared/login.dto";
+import { IJwtService } from "../../interface/helpers/jwt-service.service.interface";
 
 @injectable()
 export class AuthWorkerService implements IAuthWorkerService {
@@ -18,7 +20,9 @@ export class AuthWorkerService implements IAuthWorkerService {
         @inject(TYPES.WorkerRepository) private _authWorkerRepo: IWorkerRepository,
         @inject(TYPES.PasswordService) private _passwordHash: IHashService,
         @inject(TYPES.EmailService) private _emailService: IEmailService,
-        @inject(TYPES.OtpRepository) private _otpRepo: IOtpRepository
+        @inject(TYPES.OtpRepository) private _otpRepo: IOtpRepository,
+        @inject(TYPES.JwtService) private _jwtService: IJwtService
+
     ) {}
 
     async generateOtp(email: string): Promise<IOtp> {
@@ -94,6 +98,56 @@ export class AuthWorkerService implements IAuthWorkerService {
         console.log(dbWorker)
 
         return await this._authWorkerRepo.create(dbWorker);
+    }
+    async login(workerCredential: LoginDto): Promise<{ accessToken: string; refreshToken: string; workerData: IWorker; }> {
+        try {
+            const workerData: IWorker | null = await this._authWorkerRepo.findByEmail(workerCredential.email);
+            console.log(workerData)
+
+            if (!workerData) {
+                throw new CustomError(
+                    MESSAGES.INVALID_CREDENTIALS,
+                    STATUS_CODES.UNAUTHORIZED
+                );
+            }
+            if (!workerData.password) {
+                throw new CustomError(
+                    MESSAGES.INVALID_CREDENTIALS,
+                    STATUS_CODES.UNAUTHORIZED
+                );
+            }
+
+            const isPasswordValid: boolean =
+            await this._passwordHash.compare(
+                workerCredential.password,
+                workerData.password
+            );
+            if (!isPasswordValid) {
+                console.log('password wrong')
+                throw new CustomError(
+                    MESSAGES.INVALID_CREDENTIALS,
+                    STATUS_CODES.UNAUTHORIZED
+                );
+            }
+
+            const accessToken = this._jwtService.generateAccessToken(workerData._id,"worker");
+            const refreshToken = this._jwtService.generateRefreshToken(workerData._id,"worker");
+
+            return { accessToken, refreshToken,workerData };            
+            
+        } catch (error) {
+            console.error("Login error:", error);
+
+            
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError(
+                MESSAGES.UNAUTHORIZED_ACCESS,
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+            
+        }
     }
 
 }

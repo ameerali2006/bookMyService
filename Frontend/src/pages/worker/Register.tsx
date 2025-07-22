@@ -208,7 +208,7 @@ export default function WorkerRegistration() {
 
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
           );
           const data = await response.json();
           console.log(data)
@@ -246,7 +246,7 @@ function LocationSelector({ setFormData }: Props) {
         longitude: lng.toFixed(6),
       }));
 
-      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`)
         .then((res) => res.json())
         .then((data) => {
           const city = data?.address?.city || data?.address?.town || data?.address?.village || "";

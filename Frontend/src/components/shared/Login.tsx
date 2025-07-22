@@ -141,7 +141,7 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
               />
 
               {/* Show "Forgot Password" and "Google Login" only for users */}
-              {role !== "admin" && (
+              {role == "user" && (
                 <>
                   <button
                     type="button"

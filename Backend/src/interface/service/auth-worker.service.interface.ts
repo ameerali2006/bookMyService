@@ -8,10 +8,10 @@ export interface IAuthWorkerService {
   registerWorker(data: WorkerRegisterDTO): Promise<IWorker>;
   generateOtp(email: string): Promise<IOtp>;
   verifyOtp(otpData: Omit<IOtp, "expireAt">): Promise<void>;
-//   login(workerCredential: LoginDto): Promise<{
-//     accessToken: string;
-//     refreshToken: string;
-//     workerData: WorkerDataDTO;
-//   }>;
+  login(workerCredential: LoginDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    workerData: IWorker;
+  }>;
   
 }
