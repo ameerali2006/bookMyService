@@ -7,7 +7,7 @@ import {MESSAGES} from '../../config/constants/message'
 import {STATUS_CODES} from '../../config/constants/status-code'
 import { IUserRepository } from "../../interface/repository/user.repository.interface";
 import { CustomError } from "../../utils/custom-error";
-import { IPasswordService } from "../../interface/helpers/password-hash.interface";
+import { IHashService } from "../../interface/helpers/hash.interface";
 import { IUser } from "../../model/user.model";
 import { IOtp } from "../../model/otp.model";
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
@@ -23,7 +23,7 @@ export class AuthUserService implements IAuthUserService {
 
     constructor(
         @inject(TYPES.AuthUserRepository) private _authUserRepo:IUserRepository,
-        @inject(TYPES.PasswordService) private _passwordHash:IPasswordService,
+        @inject(TYPES.PasswordService) private _passwordHash:IHashService,
         @inject(TYPES.EmailService) private _emailService:IEmailService,
         @inject(TYPES.OtpRepository) private _otpRepo:IOtpRepository,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,
@@ -40,7 +40,7 @@ export class AuthUserService implements IAuthUserService {
             if (!userData.password) {
                 throw new CustomError(MESSAGES.INVALID_CREDENTIALS,STATUS_CODES.UNAUTHORIZED);
             }
-            userData.password=await this._passwordHash.hashPassword(userData.password)
+            userData.password=await this._passwordHash.hash(userData.password)
             return await this._authUserRepo.create(userData)
 
         } catch (error) {
@@ -53,12 +53,14 @@ export class AuthUserService implements IAuthUserService {
     
     }
     async generateOtp(email: string): Promise<IOtp> {
-        const otp: number = Math.floor(1000 + Math.random() * 9000);
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const expireAt: Date = new Date(Date.now() + 2 * 60 * 1000);
         console.log("otp",otp)
+        const hashedOtp = await this._passwordHash.hash(String(otp));
+
         const otpdata: Partial<IOtp> = {
         email,
-        otp: String(otp),
+        otp: hashedOtp, // store hashed OTP
         expireAt,
         };
         const content: string = this._emailService.generateOtpEmailContent(otp);
@@ -73,30 +75,35 @@ export class AuthUserService implements IAuthUserService {
     async verifyOtp(otpData: Omit<IOtp, "expireAt">): Promise<void> {
         try {
             const data: IOtp | null = await this._otpRepo.findOtp(otpData.email);
-
             if (!data) {
                 throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.UNAUTHORIZED);
             }
+
             const currentTime = new Date();
             const otpExpiryTime = new Date(data.expireAt);
 
-            const user: IUser | null = await this._authUserRepo.findByEmail( otpData.email);
+            const user: IUser | null = await this._authUserRepo.findByEmail(otpData.email);
             if (user) {
                 throw new CustomError("Email already exists", STATUS_CODES.CONFLICT);
             }
-            if (data.otp !== String(otpData.otp)) {
-                throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.UNAUTHORIZED);
+
+            const isValid = await this._passwordHash.compare(
+            String(otpData.otp),
+            data.otp
+            );
+            if (!isValid) {
+            throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.UNAUTHORIZED);
             }
+
             if (currentTime > otpExpiryTime) {
-                throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.UNAUTHORIZED);
+            throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.UNAUTHORIZED);
             }
         } catch (error) {
-            console.error('verify otp :',error)
+            console.error("verify otp :", error);
             throw new CustomError(MESSAGES.OTP_INVALID, STATUS_CODES.BAD_REQUEST);
-            
         }
-        
-    }
+        }
+
     async login(userCredential: LoginDto): Promise<{ accessToken: string; refreshToken: string;userData:UserDataDTO}> {
         try {
             const userData: IUser | null = await this._authUserRepo.findByEmail(userCredential.email);
@@ -115,7 +122,7 @@ export class AuthUserService implements IAuthUserService {
             }
 
             const isPasswordValid: boolean =
-            await this._passwordHash.comparePassword(
+            await this._passwordHash.compare(
                 userCredential.password,
                 userData.password
             );

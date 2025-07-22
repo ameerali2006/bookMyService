@@ -12,7 +12,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { AxiosError } from "axios";
+import { AxiosError, type AxiosResponse } from "axios";
 import { ErrorToast } from "../shared/Toaster";
 import { authService } from "@/api/AuthService";
 
@@ -21,6 +21,8 @@ type OtpModalProps = {
   onFinalSubmit: () => void;
   onClose: () => void;
   email?: string;
+  generateOtp?: (email: string) => Promise<AxiosResponse<any>>
+  verifyOtp?: (otp: string, email: string) => Promise<any>;
 };
 
 export default function OtpModal({
@@ -28,6 +30,8 @@ export default function OtpModal({
   onFinalSubmit,
   onClose,
   email = "",
+  generateOtp,
+  verifyOtp,
 }: OtpModalProps) {
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,7 +60,6 @@ export default function OtpModal({
     }, 1000);
 
     intervalRef.current = countdown;
-
     return countdown;
   };
 
@@ -79,23 +82,28 @@ export default function OtpModal({
     setOtp(value);
     setError("");
   };
-  const verifyOtp = async () => {
+
+  const verifyOtpHandler = async () => {
     if (otp.length !== 4) {
       setError("Please enter a valid 4-digit OTP.");
       return;
     }
+
     setLoading(true);
     try {
-          const response = await authService.verifyOtp(otp, email);
+      console.log('here it is')
+      const response = verifyOtp
+        ? await verifyOtp(otp, email)
+        : await authService.verifyOtp(otp, email);
 
-      if (response.data.success) {
+      if (response?.data?.success) {
         onFinalSubmit();
       }
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         if (err.response?.status === 409) {
           onClose();
-          ErrorToast('user alredy exist')
+          ErrorToast("User already exists");
         } else {
           setError(
             err.response?.data?.message || "Invalid OTP. Please try again."
@@ -107,18 +115,17 @@ export default function OtpModal({
     }
   };
 
-  const resendOtp = async () => {
-    // setLoading(true);
+  const resendOtpHandler = async () => {
     try {
-         await authService.generateOtp(email);
-
-      // Start the timer again
+      if (generateOtp) {
+        await generateOtp(email);
+      } else {
+        await authService.generateOtp(email);
+      }
       startTimer();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setError("Failed to resend OTP. Please try again.");
-    } finally {
-      // setLoading(false);
     }
   };
 
@@ -141,6 +148,7 @@ export default function OtpModal({
             {email || "your email"}.
           </DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-6 py-6">
           <div className="flex justify-center">
             <InputOTP maxLength={4} value={otp} onChange={handleOtpChange}>
@@ -152,26 +160,29 @@ export default function OtpModal({
               </InputOTPGroup>
             </InputOTP>
           </div>
+
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <div className="text-center">
             {!showResend ? (
-              <p className="text-center text-gray-600">
+              <p className="text-gray-600">
                 Resend OTP in <strong>{formatTime(timer)}</strong>
               </p>
             ) : (
               <button
                 className="text-blue-500 hover:underline text-sm"
-                onClick={resendOtp}
+                onClick={resendOtpHandler}
                 disabled={loading}
               >
                 Resend OTP
               </button>
             )}
           </div>
+
           <Button
             type="button"
             className="w-full"
-            onClick={verifyOtp}
+            onClick={verifyOtpHandler}
             disabled={loading}
           >
             {loading ? "Verifying..." : "Verify OTP"}

@@ -10,7 +10,9 @@ export const TYPES = {
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
 
 
-
+  WorkerRepository: Symbol.for("WorkerRepository"),
+  AuthWorkerService:Symbol.for("AuthWorkerService"),
+  CloudinaryService:Symbol.for("CloudinaryService"),
 
 
 

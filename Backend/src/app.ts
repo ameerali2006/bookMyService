@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { UserRoute } from "./routes/user.route";
 import {AdminRoute} from "./routes/admin.route"
 import {ENV} from './config/env/env'
+import { WorkerRoute } from "./routes/worker.route";
 const app=express()
 
 app.use(
@@ -20,9 +21,10 @@ app.use(cookieParser());
 
 
 
-
+ 
 app.use('/',new UserRoute().router)
 app.use('/admin',new AdminRoute().router)
+app.use('/worker',new WorkerRoute().router)
 
  
 export default app

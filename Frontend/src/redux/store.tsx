@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userTokenSlice from "./slice/userTokenSlice";
 import adminTokenSlice from "./slice/adminTokenSlice";
-import workerTokenSlice from "./slice/workerTockenSlice";
+import workerTokenSlice from "./slice/workerTokenSlice";
 const store=configureStore({
   reducer:{
     userTokenSlice:userTokenSlice,

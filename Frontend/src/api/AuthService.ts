@@ -1,5 +1,7 @@
 import userAxios from "@/config/axiosSevice/UserAxios";
 import adminAxios from "@/config/axiosSevice/AdminAxios"; 
+import workerAxios from "@/config/axiosSevice/WorkerAxios"; 
+import type { WorkerRegistrationData } from "@/protected/validation/worker/registerZod";
 
 
 interface RegisterPayload{
@@ -12,7 +14,7 @@ interface RegisterPayload{
 
 export const authService={
     generateOtp:async (email:string)=>{
-        console.log('otp-g',email)
+        
         return await userAxios.post('/generate-otp',{email})
 
     },
@@ -28,10 +30,37 @@ export const authService={
     login: async (credentials: { email: string; password: string }) => {
         return await userAxios.post("/login", credentials);
     },
+   
+    logout: async ()=>{
+        return await userAxios.post('/logout')
+    },
+
+
+
+
+
+    workerVerifyOtp:async (otp:string,email:string)=>{
+        return await workerAxios.post('/verify-otp',{otp,email})
+    },
+    workerGenerateOtp:async (email:string)=>{
+        
+        return await workerAxios.post('/generate-otp',{email})
+
+    },
+    workerCloudinory:async ()=>{
+        return await workerAxios.post('/cloudinary-signature')
+    },
+    workerRegister: async (data: WorkerRegistrationData) => {
+    return await workerAxios.post("/register", data); 
+  },
+
+
+
+
+
+
+
     adminLogin: async (credentials: { email: string; password: string }) => {
         return await adminAxios.post("/login", credentials);
     },
-    logout: async ()=>{
-        return await userAxios.post('/logout')
-    }
 }

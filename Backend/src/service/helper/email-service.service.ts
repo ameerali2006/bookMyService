@@ -30,7 +30,7 @@ export class EmailService implements IEmailService {
       
      }
   }
-  generateOtpEmailContent(otp: number): string {
+  generateOtpEmailContent(otp: string): string {
     return `
             <body style="margin: 0; padding: 0; background-color: #fff; font-family: 'Arial', sans-serif; color: #000;">
         <table width="100%" cellspacing="0" cellpadding="0" style="background-color: #fff; padding: 20px 0;">

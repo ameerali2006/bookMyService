@@ -1,5 +1,5 @@
 import { CustomError } from "../../utils/custom-error";
-import { IPasswordService } from "../../interface/helpers/password-hash.interface";
+import { IHashService } from "../../interface/helpers/hash.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
 import { IJwtService } from "../../interface/helpers/jwt-service.service.interface";
 import { IAuthAdminService } from "../../interface/service/auth-admin.service.interface";
@@ -13,7 +13,7 @@ import { TYPES } from "../../config/constants/types";
 export class AuthAdminService implements IAuthAdminService {
   constructor(
     @inject(TYPES.AdminRepository) private _adminrepository: IAdminRepository,
-    @inject(TYPES.PasswordService) private _passwordService: IPasswordService,
+    @inject(TYPES.PasswordService) private _passwordService: IHashService,
     @inject(TYPES.JwtService) private _jwtService: IJwtService
   ) {}
   async login(
@@ -39,7 +39,7 @@ export class AuthAdminService implements IAuthAdminService {
     }
 
     const isPasswordValid: boolean =
-      await this._passwordService.comparePassword(
+      await this._passwordService.compare(
         adminCredential.password,
         adminData.password
       );

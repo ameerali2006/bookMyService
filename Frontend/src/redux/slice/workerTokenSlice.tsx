@@ -13,16 +13,16 @@ const workerTokenSlice = createSlice({
   name: "workerTokenSlice",
   initialState,
   reducers: {
-    addWorkerToken: (state, action: PayloadAction<string>) => {
+    addWorker: (state, action: PayloadAction<string>) => {
       state.WorkerToken = action.payload;
       localStorage.setItem("workerAccessToken", JSON.stringify(action.payload));
     },
-    removeWorkerToken: (state) => {
+    removeWorker: (state) => {
       state.WorkerToken = null;
       localStorage.removeItem("workerAccessToken");
     },
   },
 });
 
-export const { addWorkerToken, removeWorkerToken } = workerTokenSlice.actions;
+export const { addWorker, removeWorker } = workerTokenSlice.actions;
 export default workerTokenSlice.reducer;

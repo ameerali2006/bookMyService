@@ -8,8 +8,19 @@ import { IAuthController } from "../../interface/controller/auth-user.controller
 import {AuthAdminController} from "../../controller/admin/auth-admin.js"
 import {IAdminController} from "../../interface/controller/auth-admin.controller.interface.js"
 
+
+
+import { IWorkerAuthController } from "../../interface/controller/auth-worker.controller.interface.js";
+import {AuthWorkerController} from "../../controller/worker/auth-worker.js"
+import { CloudinaryController } from "../../controller/worker/helper-worker.controller.js";
+import { ICloudinaryController } from "../../interface/controller/helper-worker.controller.interface.js";
+
 DependencyInjection.registerAll();
 
 export const authController = container.resolve<IAuthController>(AuthUserController);
 export const authAdminController=container.resolve<IAdminController>(AuthAdminController)
+export const authWorkerController=container.resolve<IWorkerAuthController>(AuthWorkerController)
+export const cloudinaryController = container.resolve<ICloudinaryController>(CloudinaryController);
 
+
+ 

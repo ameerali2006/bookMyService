@@ -25,6 +25,17 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import type {WorkerRegistrationData} from "@/protected/validation/worker/registerZod";
+import {Step1Schema,Step2Schema,Step3Schema,} from "@/protected/validation/worker/registerZod"
+import OtpModal from "@/components/shared/OtpModal"; // adjust path as needed
+import {authService} from "@/api/AuthService";
+import axios from "axios"
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
+import { useNavigate } from "react-router-dom"
+
+
 
 const workCategories = [
   { value: "plumber", label: "Plumber", icon: Droplets, color: "text-blue-500" },
@@ -36,12 +47,13 @@ const workCategories = [
 ]
 
 export default function WorkerRegistration() {
+  const [isOtpOpen, setIsOtpOpen] = useState(false)
+  const [workerEmail, setWorkerEmail] = useState("")
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+  const [formData, setFormData] = useState<WorkerRegistrationData>({
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -49,11 +61,12 @@ export default function WorkerRegistration() {
     category: "",
     experience: "",
     documents: null as File | null,
-    latitude: "40.7128",
-    longitude: "-74.0060",
+    latitude: "10.5009",
+    longitude: " 76.5874",
     zone: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const navigate=useNavigate()
 
   const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100
@@ -87,84 +100,204 @@ export default function WorkerRegistration() {
     }
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({ ...prev, documents: file }))
-    }
+  const handleFileUpload = async(event: React.ChangeEvent<HTMLInputElement>) => {  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    // 1. Get secure signature from backend
+    const { data } = await authService.workerCloudinory();
+
+    // 2. Prepare form data for Cloudinary upload
+    const formDataPayload = new FormData();
+    formDataPayload.append("file", file);
+    formDataPayload.append("api_key", data.apiKey);
+    formDataPayload.append("timestamp", data.timestamp.toString());
+    formDataPayload.append("signature", data.signature);
+    formDataPayload.append("folder", data.folder);
+
+    // 3. Upload to Cloudinary
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${data.cloudName}/auto/upload`;
+
+    const uploadRes = await axios.post(cloudinaryUrl, formDataPayload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    const uploadedUrl = uploadRes.data.secure_url;
+    console.log("url",uploadedUrl)
+
+    setFormData((prev) => ({
+      ...prev,
+      documents: uploadedUrl,
+    }));
+  } catch (err) {
+    console.error("Cloudinary upload failed", err);
+    // Optionally show toast or error message
+  }
   }
 
-  const validateStep = (step: number) => {
-    const newErrors: Record<string, string> = {}
+  const validateStep = (step: number, formData: WorkerRegistrationData, setErrors: Function) => {
+  let result
 
-    if (step === 1) {
-      if (!formData.firstName) newErrors.firstName = "First name is required"
-      if (!formData.lastName) newErrors.lastName = "Last name is required"
-      if (!formData.email) newErrors.email = "Email is required"
-      if (!formData.phone) newErrors.phone = "Phone number is required"
-      if (!formData.password) newErrors.password = "Password is required"
-      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
-    }
-
-    if (step === 2) {
-      if (!formData.category) newErrors.category = "Work category is required"
-      if (!formData.experience) newErrors.experience = "Experience is required"
-    }
-
-    if (step === 3) {
-      if (!formData.zone) newErrors.zone = "Zone is required"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  if (step === 1) {
+    result = Step1Schema.safeParse(formData)
+  } else if (step === 2) {
+    result = Step2Schema.safeParse(formData)
+  } else if (step === 3) {
+    result = Step3Schema.safeParse(formData)
   }
 
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
+  if (result?.success === false) {
+    const fieldErrors: Record<string, string> = {}
+    result.error.errors.forEach((error) => {
+      if (error.path[0]) fieldErrors[error.path[0] as string] = error.message
+    })
+    setErrors(fieldErrors)
+    return false
+  }
+
+  setErrors({})
+  return true
+}
+
+  const nextStep = (
+    currentStep: number,
+    setCurrentStep: (cb: (prev: number) => number) => void,
+    totalSteps: number,
+    formData: WorkerRegistrationData,
+    setErrors: Function
+  ) => {
+    if (validateStep(currentStep, formData, setErrors)) {
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps))
     }
   }
 
-  const prevStep = () => {
+  const prevStep = (
+    setCurrentStep: (cb: (prev: number) => number) => void
+  ) => {
     setCurrentStep((prev) => Math.max(prev - 1, 1))
   }
 
-  const handleSubmit = () => {
-    if (validateStep(currentStep)) {
-      console.log("Form submitted:", formData)
-      // Handle form submission
+  const handleSubmit = async (
+    currentStep: number,
+    formData: WorkerRegistrationData,
+    setErrors: Function
+  ) => {
+    if (validateStep(currentStep, formData, setErrors)) {
+      try {
+        // optional: Send register data to server (or wait until after OTP)
+        await authService.workerGenerateOtp(formData.email)
+        setWorkerEmail(formData.email)
+        setIsOtpOpen(true)
+      } catch (error) {
+        console.error("OTP generation failed", error)
+        // Optionally show toast or error
+      }
     }
   }
+  const handleLocation=async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          );
+          const data = await response.json();
+          console.log(data)
+          const city =
+            data?.address?.city || data?.address?.town || data?.address?.village || "";
+
+          setFormData((prev) => ({
+            ...prev,
+            latitude: latitude.toFixed(6),
+            longitude: longitude.toFixed(6),
+            zone: city || "", // Auto-fill zone
+          }));
+        } catch (error) {
+          console.error("Reverse geocoding failed", error);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert("Failed to get location. Please allow location access.");
+      }
+    );
+  }
+  type Props = {
+  setFormData: React.Dispatch<React.SetStateAction<WorkerRegistrationData>>;
+};
+
+function LocationSelector({ setFormData }: Props) {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+
+      setFormData((prev) => ({
+        ...prev,
+        latitude: lat.toFixed(6),
+        longitude: lng.toFixed(6),
+      }));
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+        .then((res) => res.json())
+        .then((data) => {
+          const city = data?.address?.city || data?.address?.town || data?.address?.village || "";
+          setFormData((prev) => ({
+            ...prev,
+            zone: city,
+          }));
+        })
+        .catch((err) => console.error("Reverse geocoding error:", err));
+    },
+  });
+
+  return null;
+}
+
+
+
+  const handleWorkerVerified = async () => {
+  try {
+    console.log("Final submit: ", formData)
+    setIsOtpOpen(false)
+    const response = await authService.workerRegister(formData)
+    SuccessToast("Worker registered successfully!")
+
+    
+    navigate("/worker/login")
+  } catch (error: any) {
+    console.error("Worker registration failed", error)
+
+    ErrorToast(
+      error?.response?.data?.message || "Registration failed. Please try again."
+    )
+  }
+}
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="Enter your first name"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className={`rounded-xl ${errors.firstName ? "border-red-500" : ""}`}
-                />
-                {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Enter your last name"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className={`rounded-xl ${errors.lastName ? "border-red-500" : ""}`}
-                />
-                {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
-              </div>
-            </div>
+            <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className={`rounded-xl ${errors.name ? "border-red-500" : ""}`}
+            />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
@@ -304,7 +437,7 @@ export default function WorkerRegistration() {
                         Drag and drop your documents here, or{" "}
                         <label
                           htmlFor="file-upload"
-                          className="text-blue-600 hover:text-blue-500 cursor-pointer font-medium"
+                          className="text-[#051F54] hover:text-blue-500 cursor-pointer font-medium"
                         >
                           click to browse
                         </label>
@@ -362,29 +495,28 @@ export default function WorkerRegistration() {
             <Card className="rounded-xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <MapPin className="w-5 h-5 text-blue-600" />
+                  <MapPin className="w-5 h-5 text-[#051F54]" />
                   <span className="font-medium">Current Location</span>
                 </div>
-                <div className="bg-gray-100 rounded-lg h-32 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <MapIcon className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm">Map preview will appear here</p>
-                  </div>
-                </div>
+                <MapContainer
+                  center={[Number(formData.latitude), Number(formData.longitude)]}
+                  zoom={13}
+                  style={{ height: "200px", borderRadius: "0.75rem" }}
+                >
+                  <TileLayer
+                    attribution='&copy; OpenStreetMap contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <LocationSelector setFormData={setFormData} />
+                  <Marker position={[Number(formData.latitude), Number(formData.longitude)]} />
+                </MapContainer>
               </CardContent>
             </Card>
 
             <Button
               variant="outline"
-              className="w-full rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 bg-transparent"
-              onClick={() => {
-                // Simulate getting current location
-                setFormData((prev) => ({
-                  ...prev,
-                  latitude: (40.7128 + Math.random() * 0.01).toFixed(6),
-                  longitude: (-74.006 + Math.random() * 0.01).toFixed(6),
-                }))
-              }}
+              className="w-full rounded-xl border-blue-200 text-[#051F54] hover:bg-blue-50 bg-transparent"
+              onClick={() => handleLocation()}
             >
               <MapPin className="w-4 h-4 mr-2" />
               Get Current Location
@@ -411,23 +543,29 @@ export default function WorkerRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:flex">
+    <div className="min-h-screen lg:flex " >
       {/* Left side - Image (Desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20" />
-        <img
-          src="https://res.cloudinary.com/dp1sx1dx2/image/upload/v1750684879/login-workers-img_jaf3eo.webp"
-          alt="Professional technicians"
-          className="w-2/3 h-auto object-cover"
-        />
-        <div className="absolute bottom-8 left-8 text-white">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden ">
+        <div className="absolute inset-0" />
+        
+        {/* Centered Image */}
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+          <img
+            src="https://res.cloudinary.com/dp1sx1dx2/image/upload/v1750684879/login-workers-img_jaf3eo.webp"
+            alt="Professional technicians"
+            className="w-2/3 h-auto object-contain"
+          />
+        </div>
+
+        {/* Bottom-left Text */}
+        <div className="absolute bottom-8 left-8 text-white z-20">
           <h2 className="text-3xl font-bold mb-2">Join Our Professional Network</h2>
           <p className="text-lg opacity-90">Connect with customers and grow your business</p>
         </div>
       </div>
 
       {/* Right side - Form */}
-      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 lg:p-8 ">
         <Card className="w-full max-w-md shadow-xl rounded-2xl border-0">
           <CardContent className="p-8">
             {/* Header */}
@@ -468,32 +606,54 @@ export default function WorkerRegistration() {
               {currentStep < totalSteps ? (
                 <div className="flex gap-4">
                   {currentStep > 1 && (
-                    <Button variant="outline" onClick={prevStep} className="flex-1 rounded-xl bg-transparent">
+                    <Button
+                      variant="outline"
+                      onClick={() => prevStep(setCurrentStep)}
+                      className="flex-1 rounded-xl bg-transparent"
+                    >
                       Previous
                     </Button>
                   )}
-                  <Button onClick={nextStep} className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl">
+                  <Button
+                    onClick={() => nextStep(currentStep, setCurrentStep, totalSteps, formData, setErrors)}
+                    className="flex-1 bg-[#051F54] hover:bg-[#0A2B7C] rounded-xl"
+                  >
                     Next Step
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="flex gap-4">
-                    <Button variant="outline" onClick={prevStep} className="flex-1 rounded-xl bg-transparent">
+                    <Button
+                      variant="outline"
+                      onClick={() => prevStep(setCurrentStep)}
+                      className="flex-1 rounded-xl bg-transparent"
+                    >
                       Previous
                     </Button>
-                    <Button onClick={handleSubmit} className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl">
+                    <Button
+                      onClick={() => handleSubmit(currentStep, formData, setErrors)}
+                      className="flex-1 bg-[#051F54] hover:bg-[#0A2B7C] rounded-xl"
+                    >
                       Complete Registration
                     </Button>
                   </div>
                 </div>
               )}
-
-              
             </div>
+
           </CardContent>
         </Card>
       </div>
+      <OtpModal
+        isOpen={isOtpOpen}
+        onClose={() => setIsOtpOpen(false)}
+        onFinalSubmit={handleWorkerVerified}
+        email={workerEmail}
+        generateOtp={authService.workerGenerateOtp}
+        verifyOtp={authService.workerVerifyOtp}
+/>
     </div>
   )
 }
+

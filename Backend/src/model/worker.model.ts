@@ -6,24 +6,18 @@ export interface IWorker extends Document {
   phone: string;
   password: string;
   profileImage?: string;
-
-  
   location: {
     lat: number;
     lng: number;
   };
-  
-
-  serviceCategory: string;
+  zone: string;
+  experience: "0-1" | "2-5" | "6-10" | "10+";
+  category: "plumber" | "electrician" | "carpenter" | "mechanic" | "driver" | "chef"|"cleaner";
   fees: number;
-  isBlocked:boolean
+  isBlocked: boolean;
   isActive: boolean;
   isVerified: boolean;
-  documents: {
-    aadhar?: string;
-    license?: string;
-  };
-
+  documents?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,25 +30,31 @@ const WorkerSchema: Schema = new Schema<IWorker>(
     password: { type: String, required: true },
     profileImage: { type: String },
 
-   
-
     location: {
       lat: { type: Number, required: true },
       lng: { type: Number, required: true },
     },
 
-    
+    zone: { type: String, required: true, trim: true },
 
-    serviceCategory: { type: String, required: true },
+    experience: {
+      type: String,
+      enum: ["0-1", "2-5", "6-10", "10+"],
+      required: true,
+    },
+
+    category: {
+      type: String,
+      enum: ["plumber", "electrician", "carpenter", "mechanic", "driver", "chef"],
+      required: true,
+    },
+
     fees: { type: Number, default: 0 },
-    isActive:{type:Boolean, default:false},
     isBlocked: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
 
-    documents: {
-      aadharImg: { type: String },
-      licenseImg: { type: String },
-    },
+    documents: { type: String },
   },
   {
     timestamps: true,

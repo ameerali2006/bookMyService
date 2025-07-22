@@ -24,5 +24,8 @@ export const envSchema=z.object({
     EMAIL_USER: z.string().email('EMAIL_USER must be a valid email'),
     EMAIL_PASS: z.string().min(1, 'EMAIL_PASS is required'),
     NODE_ENV: z.string().min(1, 'NODE_ENV required'),
+     CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
+    CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),
+    CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET is required"),
 
 })

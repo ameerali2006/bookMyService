@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { authService } from '@/api/AuthService';
 import { SuccessToast } from '@/components/shared/Toaster';
 import GoogleLoginComponent from '@/components/user/GoogleLogin';
-import OtpModal from '@/components/user/OtpModal';
+import OtpModal from '@/components/shared/OtpModal';
 
 
 const formSchema = z
