@@ -9,10 +9,13 @@ import { MESSAGES } from "../../config/constants/message";
 import { STATUS_CODES } from "../../config/constants/status-code";
 import { injectable, inject } from "tsyringe";
 import { TYPES } from "../../config/constants/types";
+import { IUser } from "../../model/user.model";
+import { IUserRepository } from "../../interface/repository/user.repository.interface";
 @injectable()
 export class AuthAdminService implements IAuthAdminService {
   constructor(
     @inject(TYPES.AdminRepository) private _adminrepository: IAdminRepository,
+    @inject(TYPES.AuthUserRepository) private _userrepository: IUserRepository,
     @inject(TYPES.PasswordService) private _passwordService: IHashService,
     @inject(TYPES.JwtService) private _jwtService: IJwtService
   ) {}
@@ -53,5 +56,8 @@ export class AuthAdminService implements IAuthAdminService {
     const refreshToken = this._jwtService.generateRefreshToken(adminData._id,"admin");
 
     return { accessToken, refreshToken };
+  }
+  async getAllUsers(): Promise<IUser[]> {
+    return await this._userrepository.findAll();
   }
 }

@@ -14,5 +14,8 @@ export class AdminRoute extends BaseRoute {
         this.router.post('/login', (req: Request, res: Response, next: NextFunction) => {
             authAdminController.login(req, res, next);
         })
+        this.router.get('/users', (req: Request, res: Response, next: NextFunction) => {
+            authAdminController.getAllUsers(req, res, next);
+        })
     }
 }
