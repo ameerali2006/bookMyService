@@ -5,6 +5,7 @@ import { STATUS_CODES } from "../../config/constants/status-code";
 import { MESSAGES } from "../../config/constants/message";
 import { TYPES } from "../../config/constants/types";
 import { injectable, inject } from "tsyringe";
+import { clearAuthCookies } from "../../utils/cookie-helper";
 @injectable()
 export class AuthAdminController {
   constructor(
@@ -28,4 +29,15 @@ export class AuthAdminController {
       next(error); 
     }
   }
+  async getAllUsers (req: Request, res: Response){
+    try {
+      console.log('getallusers')
+      const users = await this._authAdminService.getAllUsers();
+      console.log(users)
+      return res.status(200).json(users);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to get users", error });
+    }
+  }
+  
 } 

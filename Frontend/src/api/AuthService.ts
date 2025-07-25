@@ -66,4 +66,15 @@ export const authService={
     adminLogin: async (credentials: { email: string; password: string }) => {
         return await adminAxios.post("/login", credentials);
     },
+    adminLogout: async (credentials: { email: string; password: string }) => {
+        return await adminAxios.post("/logout", credentials);
+    },
+
+    getAllUsers:async () => {
+        return await adminAxios.get("/users");
+    },
+    updateUserStatus:async ( userId: string,isActive: boolean ) => {
+        return await adminAxios.patch( `/users/${userId}/status`,isActive );
+    },
+
 }

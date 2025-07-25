@@ -18,7 +18,7 @@ function LoginPage() {
 
         if (response.data.success) {
           dispatch(addAdmin(response.data.accessToken));
-          navigate("/admin");
+          navigate("/admin/dashboard");
         } else {
           throw new Error("Invalid credentials");
         }
