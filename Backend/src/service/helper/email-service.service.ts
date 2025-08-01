@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
 
 import { injectable } from "tsyringe";
-import { IUser } from "../../model/user.model";
+
 import {ENV} from '../../config/env/env'
 
 

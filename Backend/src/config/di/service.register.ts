@@ -20,6 +20,8 @@ import { IAuthWorkerService } from "../../interface/service/auth-worker.service.
 import { AuthWorkerService } from "../../service/worker/auth-worker.service";
 import { ICloudinaryService } from "../../interface/helpers/cloudinary.service.interface";
 import { CloudinaryService } from "../../service/helper/cloudinary.service";
+import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
+import {GoogleAuthService} from '../../service/shared/googleAuth.service'
  
 
 
@@ -37,6 +39,7 @@ export class ServiceRegistery{
         container.register<ITokenservice>(TYPES.TokenService,{useClass:TokenService})
         container.register<IAuthWorkerService>(TYPES.AuthWorkerService,{useClass:AuthWorkerService})
         container.register<ICloudinaryService>(TYPES.CloudinaryService,{useClass:CloudinaryService})
+        container.register<IGoogleAuthService>(TYPES.GoogleAuthService,{useClass:GoogleAuthService})
 
 
         

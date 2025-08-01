@@ -1,7 +1,8 @@
 import { IUserRepository } from "../../interface/repository/user.repository.interface";
-import { UserModel, IUser, } from "../../model/user.model";
+import { UserModel,  } from "../../model/user.model";
 import {  injectable } from "inversify";
 import { BaseRepository } from "../../repository/shared/base.repository";
+import { IUser } from "../../interface/model/user.model.interface";
 @injectable()
 export class UserRepository 
   extends BaseRepository<IUser>

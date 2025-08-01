@@ -34,6 +34,9 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import { useNavigate } from "react-router-dom"
+import Step3 from "@/components/worker/Register/StepThree"
+import Step2 from "@/components/worker/Register/StepTwo"
+import Step1 from "@/components/worker/Register/StepOne"
 
 
 
@@ -235,34 +238,7 @@ export default function WorkerRegistration() {
   setFormData: React.Dispatch<React.SetStateAction<WorkerRegistrationData>>;
 };
 
-function LocationSelector({ setFormData }: Props) {
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-
-      setFormData((prev) => ({
-        ...prev,
-        latitude: lat.toFixed(6),
-        longitude: lng.toFixed(6),
-      }));
-
-      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`)
-        .then((res) => res.json())
-        .then((data) => {
-          const city = data?.address?.city || data?.address?.town || data?.address?.village || "";
-          setFormData((prev) => ({
-            ...prev,
-            zone: city,
-          }));
-        })
-        .catch((err) => console.error("Reverse geocoding error:", err));
-    },
-  });
-
-  return null;
-}
-
-
+  
 
   const handleWorkerVerified = async () => {
   try {
@@ -283,251 +259,47 @@ function LocationSelector({ setFormData }: Props) {
 }
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className={`rounded-xl ${errors.name ? "border-red-500" : ""}`}
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-          </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email address"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className={`rounded-xl ${errors.email ? "border-red-500" : ""}`}
-              />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="Enter your phone number"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                className={`rounded-xl ${errors.phone ? "border-red-500" : ""}`}
-              />
-              {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
-                  className={`rounded-xl pr-10 ${errors.password ? "border-red-500" : ""}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {formData.password && (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${getStrengthColor(passwordStrength)}`}
-                        style={{ width: `${passwordStrength}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600">{getStrengthText(passwordStrength)}</span>
-                  </div>
-                </div>
-              )}
-              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                  className={`rounded-xl pr-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
-            </div>
-          </div>
-        )
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="category">Work Category</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger className={`rounded-xl ${errors.category ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Select your work category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {workCategories.map((category) => {
-                    const IconComponent = category.icon
-                    return (
-                      <SelectItem key={category.value} value={category.value}>
-                        <div className="flex items-center gap-2">
-                          <IconComponent className={`w-4 h-4 ${category.color}`} />
-                          <span>{category.label}</span>
-                        </div>
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-              {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="experience">Years of Experience</Label>
-              <Select value={formData.experience} onValueChange={(value) => handleInputChange("experience", value)}>
-                <SelectTrigger className={`rounded-xl ${errors.experience ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Select your experience level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0-1">0-1 years</SelectItem>
-                  <SelectItem value="2-5">2-5 years</SelectItem>
-                  <SelectItem value="6-10">6-10 years</SelectItem>
-                  <SelectItem value="10+">10+ years</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.experience && <p className="text-red-500 text-sm">{errors.experience}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Upload Documents</Label>
-              <Card className="border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 transition-colors">
-                <CardContent className="p-6">
-                  <div className="text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
-                        Drag and drop your documents here, or{" "}
-                        <label
-                          htmlFor="file-upload"
-                          className="text-[#051F54] hover:text-blue-500 cursor-pointer font-medium"
-                        >
-                          click to browse
-                        </label>
-                      </p>
-                      <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                    </div>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={handleFileUpload}
-                    />
-                  </div>
-                  {formData.documents && (
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-green-600" />
-                        <span className="text-sm text-green-800">{formData.documents.name}</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input id="latitude" value={formData.latitude} readOnly className="rounded-xl bg-gray-50" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input id="longitude" value={formData.longitude} readOnly className="rounded-xl bg-gray-50" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="zone">Service Zone</Label>
-              <Input
-                id="zone"
-                placeholder="Enter your service zone (e.g., Downtown, North Side)"
-                value={formData.zone}
-                onChange={(e) => handleInputChange("zone", e.target.value)}
-                className={`rounded-xl ${errors.zone ? "border-red-500" : ""}`}
-              />
-              {errors.zone && <p className="text-red-500 text-sm">{errors.zone}</p>}
-            </div>
-
-            <Card className="rounded-xl">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <MapPin className="w-5 h-5 text-[#051F54]" />
-                  <span className="font-medium">Current Location</span>
-                </div>
-                <MapContainer
-                  center={[Number(formData.latitude), Number(formData.longitude)]}
-                  zoom={13}
-                  style={{ height: "200px", borderRadius: "0.75rem" }}
-                >
-                  <TileLayer
-                    attribution='&copy; OpenStreetMap contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <LocationSelector setFormData={setFormData} />
-                  <Marker position={[Number(formData.latitude), Number(formData.longitude)]} />
-                </MapContainer>
-              </CardContent>
-            </Card>
-
-            <Button
-              variant="outline"
-              className="w-full rounded-xl border-blue-200 text-[#051F54] hover:bg-blue-50 bg-transparent"
-              onClick={() => handleLocation()}
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              Get Current Location
-            </Button>
-          </div>
-        )
-
-      default:
-        return null
-    }
+  switch (currentStep) {
+    case 1:
+      return (
+        <Step1
+          formData={formData}
+          errors={errors}
+          showPassword={showPassword}
+          showConfirmPassword={showConfirmPassword}
+          setShowPassword={setShowPassword}
+          setShowConfirmPassword={setShowConfirmPassword}
+          handleInputChange={handleInputChange}
+          passwordStrength={passwordStrength}
+          getStrengthColor={getStrengthColor}
+          getStrengthText={getStrengthText}
+        />
+      )
+    case 2:
+      return (
+        <Step2
+          formData={formData}
+          errors={errors}
+          handleInputChange={handleInputChange}
+          handleFileUpload={handleFileUpload}
+          workCategories={workCategories}
+        />
+      )
+    case 3:
+      return (
+        <Step3
+          formData={formData}
+          errors={errors}
+          handleInputChange={handleInputChange}
+          handleLocation={handleLocation}
+          setFormData={setFormData}
+        />
+      )
+    default:
+      return null
   }
+}
+
 
   const getStepIcon = (step: number) => {
     switch (step) {

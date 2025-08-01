@@ -10,13 +10,17 @@ import { CustomRequest } from "../../middleware/auth.middleware.js";
 import { IWorkerAuthController } from "../../interface/controller/auth-worker.controller.interface.js";
 import { IAuthWorkerService } from "../../interface/service/auth-worker.service.interface.js";
 import { WorkerRegisterSchema } from "../validation/worker-register.zod.js";
+import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface.js";
+import { IGoogleInfo } from "../../types/auth.types.js";
+import { IWorkerRepository } from "../../interface/repository/worker.repository.interface.js";
 
 @injectable()
 export class AuthWorkerController implements IWorkerAuthController {
   constructor(
     @inject(TYPES.AuthWorkerService) private _authWorkerService:IAuthWorkerService,
-    
+    @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService,
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
+    @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository
     
   ) {}
 
@@ -67,6 +71,22 @@ export class AuthWorkerController implements IWorkerAuthController {
           console.error(error)
             
         }
+    }
+    async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+      try {
+        const {token}:{token:string} = req.body
+        const ticket:IGoogleInfo=await this._googleAuth.verifyToken(token)
+        const { email, name, sub: googleId, picture } = ticket;
+
+        const existingWorker = await this._workerRepo.findByEmail(email);
+
+        if(existingWorker){
+          
+        }
+
+      } catch (error) {
+        
+      }
     }
     async login(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {

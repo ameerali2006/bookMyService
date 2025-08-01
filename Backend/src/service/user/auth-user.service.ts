@@ -8,8 +8,6 @@ import {STATUS_CODES} from '../../config/constants/status-code'
 import { IUserRepository } from "../../interface/repository/user.repository.interface";
 import { CustomError } from "../../utils/custom-error";
 import { IHashService } from "../../interface/helpers/hash.interface";
-import { IUser } from "../../model/user.model";
-import { IOtp } from "../../model/otp.model";
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
 import { IOtpRepository } from "../../interface/repository/otp.repository.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
@@ -17,6 +15,10 @@ import { IJwtService } from "../../interface/helpers/jwt-service.service.interfa
 import { OAuth2Client } from "google-auth-library";
 import {UserMapper} from "../../utils/mapper/user-mapper"
 import { ENV } from "../../config/env/env";
+import { IUser } from "../../interface/model/user.model.interface";
+import { IOtp } from "../../interface/model/otp.model.interface";
+import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
+import { IGoogleInfo } from "../../types/auth.types";
 
 @injectable()
 export class AuthUserService implements IAuthUserService {
@@ -27,6 +29,7 @@ export class AuthUserService implements IAuthUserService {
         @inject(TYPES.EmailService) private _emailService:IEmailService,
         @inject(TYPES.OtpRepository) private _otpRepo:IOtpRepository,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,
+        @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService
 
 
     ){}
@@ -153,13 +156,9 @@ export class AuthUserService implements IAuthUserService {
     }
     async googleLogin(googleToken: string): Promise<{ accessToken: string; refreshToken: string; userData:UserDataDTO}> {
         try {
-            console.log(ENV.GOOGLE_CLIENT_ID)
-            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-            const ticket = await client.verifyIdToken({
-                idToken: googleToken,
-                audience: ENV.GOOGLE_CLIENT_ID,
-            });
-            const payload = ticket.getPayload();
+            
+            
+            const payload:IGoogleInfo = await this._googleAuth.verifyToken(googleToken)
             if (!payload || !payload.email || !payload.name) {
                 console.log(payload)
                 throw new CustomError("Invalid Google Token", 400);

@@ -13,7 +13,10 @@ import { ENV } from "@/config/env/env";
 const clientId = ENV.VITE_GOOGLE_CLIENT_ID;
 console.log("Google Client ID:", clientId);
   
-
+interface GoogleLoginComponentProps {
+  userType: "worker" | "user"; 
+  onGoogleSuccess?: () => void;
+}
 const GoogleLoginComponent = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();

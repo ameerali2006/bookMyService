@@ -7,12 +7,13 @@ import { STATUS_CODES } from "../../config/constants/status-code";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface";
 import { CustomError } from "../../utils/custom-error";
 import { IHashService } from "../../interface/helpers/hash.interface";
-import { IWorker } from "../../model/worker.model";
-import { IOtp } from "../../model/otp.model";
+
 import { IEmailService } from "../../interface/helpers/email-service.service.interface";
 import { IOtpRepository } from "../../interface/repository/otp.repository.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
 import { IJwtService } from "../../interface/helpers/jwt-service.service.interface";
+import { IOtp } from "../../interface/model/otp.model.interface";
+import { IWorker } from "../../interface/model/worker.model.interface";
 
 @injectable()
 export class AuthWorkerService implements IAuthWorkerService {

@@ -1,7 +1,7 @@
 
 
 
-import { IRefreshTokenEntity } from "../../model/refresh-token.model";
+import { IRefreshTokenEntity } from "../../interface/model/refresh-token.model.interface";
 import { IBaseRepository } from "./base.repository.interface";
 
 export interface IRefreshTokenRepository

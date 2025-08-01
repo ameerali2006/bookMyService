@@ -1,7 +1,8 @@
 import { IWorkerRepository} from "../../interface/repository/worker.repository.interface";
-import { WorkerModel, IWorker } from "../../model/worker.model";
+import { WorkerModel} from "../../model/worker.model";
 import { injectable } from "inversify";
 import { BaseRepository } from "../../repository/shared/base.repository";
+import { IWorker } from "../../interface/model/worker.model.interface";
 
 @injectable()
 export class WorkerRepository 

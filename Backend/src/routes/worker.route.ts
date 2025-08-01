@@ -20,6 +20,11 @@ export class WorkerRoute extends BaseRoute{
            cloudinaryController.getSignature(req ,res ,next )
             }
         );
+        this.router.post("/google-auth", (req: Request, res: Response, next: NextFunction) =>
+        
+            authWorkerController.googleAuth(req, res, next)
+                    
+        );
         this.router.post("/register", (req: Request, res: Response, next: NextFunction) =>
         
             authWorkerController.register(req, res, next)

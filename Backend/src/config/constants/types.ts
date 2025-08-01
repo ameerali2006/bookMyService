@@ -23,7 +23,8 @@ export const TYPES = {
   OtpRepository:Symbol.for('OtpRepository'),
   AdminRepository:Symbol.for('AdminRepository'),
   AuthAdminService:Symbol.for('AuthAdminService'),
-  TokenService:Symbol.for('TokenService')
+  TokenService:Symbol.for('TokenService'),
+  GoogleAuthService:Symbol.for('GoogleAuthService')
 
   
 

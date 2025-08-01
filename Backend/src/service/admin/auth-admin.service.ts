@@ -3,14 +3,16 @@ import { IHashService } from "../../interface/helpers/hash.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
 import { IJwtService } from "../../interface/helpers/jwt-service.service.interface";
 import { IAuthAdminService } from "../../interface/service/auth-admin.service.interface";
-import { IAdmin } from "../../model/admin.model";
+
 import { IAdminRepository } from "../../interface/repository/admin.repository.interface";
 import { MESSAGES } from "../../config/constants/message";
 import { STATUS_CODES } from "../../config/constants/status-code";
 import { injectable, inject } from "tsyringe";
 import { TYPES } from "../../config/constants/types";
-import { IUser } from "../../model/user.model";
+
 import { IUserRepository } from "../../interface/repository/user.repository.interface";
+import { IAdmin } from "../../interface/model/admin.model.interface";
+import { IUser } from "../../interface/model/user.model.interface";
 @injectable()
 export class AuthAdminService implements IAuthAdminService {
   constructor(

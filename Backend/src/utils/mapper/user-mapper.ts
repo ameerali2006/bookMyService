@@ -1,5 +1,6 @@
-import { IUser } from "../../model/user.model";
+
 import { UserRegisterDTO } from "../../dto/user/auth/user-register.dto";
+import { IUser } from "../../interface/model/user.model.interface";
 
 
 export class UserMapper {

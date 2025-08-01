@@ -1,21 +1,7 @@
 import {Schema,model,ObjectId,Document} from 'mongoose';
+import { IRefreshTokenModel } from '../interface/model/refresh-token.model.interface';
 
-export interface IRefreshTokenEntity {
-   id?: string;
-   token: string;
-   user: ObjectId;
-   userType: "admin"|"user"|"worker";
-   expiresAt: Date;
-   createdAt?: Date;
-   updatedAt?: Date;
-}
 
-export interface IRefreshTokenModel
-	extends Omit<IRefreshTokenEntity, "id" | "user">,
-		Document {
-	_id: ObjectId;
-	user: ObjectId;
-}
 
 
 export const refreshTokenSchema = new Schema<IRefreshTokenModel>({

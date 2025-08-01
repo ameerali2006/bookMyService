@@ -1,11 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IOtp } from "../interface/model/otp.model.interface";
 
-export interface IOtp extends Document {
-  email: string;
-  otp: string;
-  expireAt: Date;
-  createdAt?: Date;
-}
+
 
 const OtpSchema = new Schema<IOtp>(
   {

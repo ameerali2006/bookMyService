@@ -1,6 +1,6 @@
-import { IWorker } from "../../model/worker.model";
+import { IWorker } from "../../interface/model/worker.model.interface";
 import { WorkerRegisterDTO } from "../../dto/worker/auth/worker-register.dto";
-import { IOtp } from "../../model/otp.model";
+import { IOtp } from "../../interface/model/otp.model.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
 // import { WorkerDataDTO } from "../../dto/worker/auth/workerData.dto";
 

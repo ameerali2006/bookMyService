@@ -7,11 +7,11 @@ interface Props {
 }
 
 function IsLogout({ children }: Props) {
-  const userTocken = useSelector(
+  const userToken = useSelector(
     (state: RootState) => state.userTokenSlice.user
   );
 
-  if (userTocken) {
+  if (userToken) {
     return <Navigate to="/" />;
   }
 

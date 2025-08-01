@@ -1,6 +1,6 @@
-import { IUser } from "../../model/user.model";
+import { IUser } from "../../interface/model/user.model.interface";
 import { UserRegisterDTO } from "../../dto/user/auth/user-register.dto";
-import { IOtp } from "../../model/otp.model";
+import { IOtp } from "../../interface/model/otp.model.interface";
 import { LoginDto } from "../../dto/shared/login.dto";
 import { UserDataDTO } from "../../dto/user/auth/userData.dto";
 export interface IAuthUserService {
