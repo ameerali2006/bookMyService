@@ -53,6 +53,9 @@ export const authService={
     workerRegister: async (data: WorkerRegistrationData) => {
         return await workerAxios.post("/register", data); 
     },
+    googleWorkerLogin:async (token:string)=>{
+        return await workerAxios.post('/google-auth',{token})
+    },
     workerLogin:async (data:{email:string,password:string}) => {
         return await workerAxios.post("/login", data); 
     },
@@ -70,11 +73,5 @@ export const authService={
         return await adminAxios.post("/logout", credentials);
     },
 
-    getAllUsers:async () => {
-        return await adminAxios.get("/users");
-    },
-    updateUserStatus:async ( userId: string,isActive: boolean ) => {
-        return await adminAxios.patch( `/users/${userId}/status`,isActive );
-    },
-
+    
 }

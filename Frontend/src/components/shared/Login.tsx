@@ -141,7 +141,7 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
               />
 
               {/* Show "Forgot Password" and "Google Login" only for users */}
-              {role == "user" && (
+              {(role == "user"||role=="worker") && (
                 <>
                   <button
                     type="button"
@@ -150,7 +150,7 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
                   >
                     Forgot Password?
                   </button>
-                  <GoogleLoginComponent />
+                  <GoogleLoginComponent userType={`${role}`} />
                 </>
               )}
 
@@ -178,7 +178,7 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <button
-                onClick={() => navigate("/register")}
+                onClick={() => navigate(role=="user"?"/register":"/worker/register" )}
                 className="text-primary hover:underline"
               >
                 Register

@@ -10,6 +10,7 @@ type Props = {
   formData: WorkerRegistrationData
   errors: Record<string, string>
   showPassword: boolean
+  isGoogleUser:boolean
   showConfirmPassword: boolean
   setShowPassword: React.Dispatch<React.SetStateAction<boolean>>
   setShowConfirmPassword: React.Dispatch<React.SetStateAction<boolean>>
@@ -23,6 +24,7 @@ export default function Step1({
   formData,
   errors,
   showPassword,
+  isGoogleUser,
   showConfirmPassword,
   setShowPassword,
   setShowConfirmPassword,
@@ -41,6 +43,7 @@ export default function Step1({
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className={`rounded-xl ${errors.name ? "border-red-500" : ""}`}
+                    readOnly={isGoogleUser}
                   />
                   {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
@@ -54,6 +57,7 @@ export default function Step1({
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       className={`rounded-xl ${errors.email ? "border-red-500" : ""}`}
+                      readOnly={isGoogleUser}
                     />
                     {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                   </div>
@@ -71,7 +75,9 @@ export default function Step1({
                     {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                   </div>
       
-                  <div className="space-y-2">
+                  {!isGoogleUser && (
+                    <>
+                    <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
                       <Input
@@ -81,6 +87,7 @@ export default function Step1({
                         value={formData.password}
                         onChange={(e) => handleInputChange("password", e.target.value)}
                         className={`rounded-xl pr-10 ${errors.password ? "border-red-500" : ""}`}
+                        
                       />
                       <button
                         type="button"
@@ -116,6 +123,7 @@ export default function Step1({
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                         className={`rounded-xl pr-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
+                        
                       />
                       <button
                         type="button"
@@ -127,6 +135,8 @@ export default function Step1({
                     </div>
                     {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
                   </div>
+                    </>
+                  )}
     </div>
   )
 }

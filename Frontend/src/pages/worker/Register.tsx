@@ -4,11 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import {
-  Eye,
-  EyeOff,
-  Upload,
-  MapPin,
-  Check,
+  
   User,
   Briefcase,
   MapIcon,
@@ -20,9 +16,7 @@ import {
   Utensils,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import type {WorkerRegistrationData} from "@/protected/validation/worker/registerZod";
@@ -30,13 +24,16 @@ import {Step1Schema,Step2Schema,Step3Schema,} from "@/protected/validation/worke
 import OtpModal from "@/components/shared/OtpModal"; // adjust path as needed
 import {authService} from "@/api/AuthService";
 import axios from "axios"
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+
 import "leaflet/dist/leaflet.css";
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import { useNavigate } from "react-router-dom"
 import Step3 from "@/components/worker/Register/StepThree"
 import Step2 from "@/components/worker/Register/StepTwo"
 import Step1 from "@/components/worker/Register/StepOne"
+import GoogleLoginComponent from "@/components/user/GoogleLogin"
+import { addWorker } from "@/redux/slice/workerTokenSlice"
+import { useDispatch } from "react-redux"
 
 
 
@@ -55,6 +52,7 @@ export default function WorkerRegistration() {
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isGoogleAuth, setIsGoogleAuth] = useState(false)
   const [formData, setFormData] = useState<WorkerRegistrationData>({
     name: "",
     email: "",
@@ -67,9 +65,11 @@ export default function WorkerRegistration() {
     latitude: "10.5009",
     longitude: " 76.5874",
     zone: "",
+    
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const navigate=useNavigate()
+  const dispatch=useDispatch()
 
   const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100
@@ -189,10 +189,17 @@ export default function WorkerRegistration() {
   ) => {
     if (validateStep(currentStep, formData, setErrors)) {
       try {
-        // optional: Send register data to server (or wait until after OTP)
-        await authService.workerGenerateOtp(formData.email)
-        setWorkerEmail(formData.email)
-        setIsOtpOpen(true)
+
+        if(isGoogleAuth){
+           handleWorkerVerified()
+
+        }else{
+          // optional: Send register data to server (or wait until after OTP)
+          await authService.workerGenerateOtp(formData.email)
+          setWorkerEmail(formData.email)
+          setIsOtpOpen(true)
+        }
+        
       } catch (error) {
         console.error("OTP generation failed", error)
         // Optionally show toast or error
@@ -235,28 +242,32 @@ export default function WorkerRegistration() {
     );
   }
   type Props = {
-  setFormData: React.Dispatch<React.SetStateAction<WorkerRegistrationData>>;
-};
+    setFormData: React.Dispatch<React.SetStateAction<WorkerRegistrationData>>;
+  };
 
   
 
   const handleWorkerVerified = async () => {
-  try {
-    console.log("Final submit: ", formData)
-    setIsOtpOpen(false)
-    const response = await authService.workerRegister(formData)
-    SuccessToast("Worker registered successfully!")
+    try {
+      console.log("Final submit: ", formData)
+      setIsOtpOpen(false)
+      const response = await authService.workerRegister(formData)
+      if(response.data.success){
+        SuccessToast("Worker registered successfully!")
+        console.log("hello worker register ayyiiii")
+        dispatch(addWorker(response.data.worker))
+        navigate("/worker/dashboard")
+      }else{
+        ErrorToast("Worker registeration is failed, try again")
+      }
+    } catch (error: any) {
+      console.error("Worker registration failed", error)
 
-    
-    navigate("/worker/login")
-  } catch (error: any) {
-    console.error("Worker registration failed", error)
-
-    ErrorToast(
-      error?.response?.data?.message || "Registration failed. Please try again."
-    )
+      ErrorToast(
+        error?.response?.data?.message || "Registration failed. Please try again."
+      )
+    }
   }
-}
 
   const renderStepContent = () => {
   switch (currentStep) {
@@ -266,6 +277,7 @@ export default function WorkerRegistration() {
           formData={formData}
           errors={errors}
           showPassword={showPassword}
+          isGoogleUser={isGoogleAuth}
           showConfirmPassword={showConfirmPassword}
           setShowPassword={setShowPassword}
           setShowConfirmPassword={setShowConfirmPassword}
@@ -372,6 +384,7 @@ export default function WorkerRegistration() {
 
             {/* Step Content */}
             <div className="mb-8">{renderStepContent()}</div>
+            
 
             {/* Navigation Buttons */}
             <div className="space-y-4">
@@ -411,8 +424,32 @@ export default function WorkerRegistration() {
                     </Button>
                   </div>
                 </div>
+                
               )}
             </div>
+            {currentStep === 1 && !isGoogleAuth && (
+              <div className="mb-6">
+                <div className="text-center text-gray-500 mt-2 text-sm">or</div>
+                
+                <GoogleLoginComponent
+                  userType="worker"
+                  onGoogleSuccess={(email: string, name: string) => {
+                    setIsGoogleAuth(true);
+                    setFormData((prev) => ({
+                      ...prev,
+                      email,
+                      name,
+                      password: "123qwe123",
+                      confirmPassword: "123qwe123",
+                     
+                    }));
+                    
+                  }}
+                />
+                
+              </div>
+            )}
+
 
           </CardContent>
         </Card>
@@ -424,7 +461,7 @@ export default function WorkerRegistration() {
         email={workerEmail}
         generateOtp={authService.workerGenerateOtp}
         verifyOtp={authService.workerVerifyOtp}
-/>
+      />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { IAuthWorkerService } from "../../interface/service/auth-worker.service.interface";
-import { WorkerRegisterDTO } from "../../dto/worker/auth/worker-register.dto";
+import { GoogleLoginResponseDTO, responseDto, WorkerRegisterDTO } from "../../dto/worker/auth/worker-register.dto";
 import { TYPES } from "../../config/constants/types";
 import { MESSAGES } from "../../config/constants/message";
 import { STATUS_CODES } from "../../config/constants/status-code";
@@ -14,6 +14,10 @@ import { LoginDto } from "../../dto/shared/login.dto";
 import { IJwtService } from "../../interface/helpers/jwt-service.service.interface";
 import { IOtp } from "../../interface/model/otp.model.interface";
 import { IWorker } from "../../interface/model/worker.model.interface";
+import { IGoogleInfo } from "../../types/auth.types";
+import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
+import { WorkerMapper } from "../../utils/mapper/worker-mapper";
+
 
 @injectable()
 export class AuthWorkerService implements IAuthWorkerService {
@@ -22,7 +26,8 @@ export class AuthWorkerService implements IAuthWorkerService {
         @inject(TYPES.PasswordService) private _passwordHash: IHashService,
         @inject(TYPES.EmailService) private _emailService: IEmailService,
         @inject(TYPES.OtpRepository) private _otpRepo: IOtpRepository,
-        @inject(TYPES.JwtService) private _jwtService: IJwtService
+        @inject(TYPES.JwtService) private _jwtService: IJwtService,
+        @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService
 
     ) {}
 
@@ -63,7 +68,7 @@ export class AuthWorkerService implements IAuthWorkerService {
         }
     }
 
-    async registerWorker(workerData: WorkerRegisterDTO): Promise<IWorker> {
+    async registerWorker(workerData: WorkerRegisterDTO): Promise<{accessToken:string; refreshToken:string; workerDto:responseDto}> {
         console.log('registerWorker')
         const existing = await this._authWorkerRepo.findByEmail(workerData.email);
         if (existing) {
@@ -96,11 +101,22 @@ export class AuthWorkerService implements IAuthWorkerService {
 
             
         };
-        console.log(dbWorker)
+        const workerDbData=await this._authWorkerRepo.create(dbWorker);
+        const accessToken = this._jwtService.generateAccessToken(workerDbData._id,"worker");
+        const refreshToken = this._jwtService.generateRefreshToken(workerDbData._id,"worker");
 
-        return await this._authWorkerRepo.create(dbWorker);
+        const workerDto=WorkerMapper.responseWorkerDto(workerDbData)
+
+
+        
+
+        return  {
+            accessToken,
+            refreshToken,
+            workerDto
+        }
     }
-    async login(workerCredential: LoginDto): Promise<{ accessToken: string; refreshToken: string; workerData: IWorker; }> {
+    async login(workerCredential: LoginDto): Promise<{ accessToken: string; refreshToken: string; workerDto: responseDto; }> {
         try {
             const workerData: IWorker | null = await this._authWorkerRepo.findByEmail(workerCredential.email);
             console.log(workerData)
@@ -134,7 +150,10 @@ export class AuthWorkerService implements IAuthWorkerService {
             const accessToken = this._jwtService.generateAccessToken(workerData._id,"worker");
             const refreshToken = this._jwtService.generateRefreshToken(workerData._id,"worker");
 
-            return { accessToken, refreshToken,workerData };            
+            const workerDto=WorkerMapper.responseWorkerDto(workerData)
+
+
+            return { accessToken, refreshToken,workerDto };            
             
         } catch (error) {
             console.error("Login error:", error);
@@ -147,6 +166,61 @@ export class AuthWorkerService implements IAuthWorkerService {
                 MESSAGES.UNAUTHORIZED_ACCESS,
                 STATUS_CODES.INTERNAL_SERVER_ERROR
             );
+            
+        }
+    }
+    async googleAuth(token: string): Promise<GoogleLoginResponseDTO> {
+        try {
+            const ticket:IGoogleInfo=await this._googleAuth.verifyToken(token)
+            const { email, name, sub: googleId, picture } = ticket;
+
+            const existingWorker=await this._authWorkerRepo.findByEmail(email)
+            if(existingWorker){
+                const accessToken=this._jwtService.generateAccessToken(existingWorker._id,"worker")
+                const refreshToken= this._jwtService.generateRefreshToken(existingWorker._id,"worker")
+
+                return {
+                    success: true,
+                    message: "Login success",
+                    accessToken,
+                    refreshToken,
+                    user: {
+                        _id: existingWorker._id,
+                        email: existingWorker.email,
+                        name: existingWorker.name,
+                        googleId,
+                        profileImage: existingWorker.profileImage || null,
+                    },
+                    isNew: false,
+                };
+                
+            }
+            return {
+                success: true,
+                message: "Google user verified",
+                accessToken:null,
+                refreshToken:null,
+                user: {
+                    email,
+                    name,
+                    googleId,
+                    profileImage: picture || null,
+                },
+                isNew: true,
+            };
+        } catch (error) {
+           
+            console.error("Google Auth Error:", error);
+
+            return {
+                success: false,
+                message: "Google authentication failed",
+                accessToken: null,
+                refreshToken: null,
+                user: null,
+                isNew: false,
+            };
+
             
         }
     }

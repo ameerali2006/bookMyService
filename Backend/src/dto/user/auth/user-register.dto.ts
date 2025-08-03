@@ -6,3 +6,8 @@ export interface UserRegisterDTO {
   googleId?:string
   
 }
+export interface userResponse{
+  name:string;
+  email:string;
+  image?:string;
+}

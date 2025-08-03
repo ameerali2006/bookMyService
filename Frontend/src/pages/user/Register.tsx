@@ -22,6 +22,8 @@ import { authService } from '@/api/AuthService';
 import { SuccessToast } from '@/components/shared/Toaster';
 import GoogleLoginComponent from '@/components/user/GoogleLogin';
 import OtpModal from '@/components/shared/OtpModal';
+import { useDispatch } from 'react-redux';
+import { addUser } from '@/redux/slice/userTokenSlice';
 
 
 const formSchema = z
@@ -67,6 +69,7 @@ const register = () => {
     null
   );
   const navigate=useNavigate()
+  const dispatch=useDispatch()
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "", email: "",phone:"", password: "", confirmPassword: "" },
@@ -92,11 +95,14 @@ const register = () => {
     }
   };
   const onFinalSubmit = async () => {
-   await authService.register(storedFormValues as FormValues);
-     SuccessToast("successfully registered now login!!");
-       navigate("/login");
+   ;
     try {
-      console.log();
+      const response=await authService.register(storedFormValues as FormValues);
+      if(response.data.success){
+        SuccessToast("successfully registered !!");
+        dispatch(addUser(response.data.userData))
+        navigate("/")
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -233,7 +239,7 @@ const register = () => {
                     </FormItem>
                   )}
                 />
-                <GoogleLoginComponent/>
+                <GoogleLoginComponent userType='user' />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (

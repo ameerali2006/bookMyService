@@ -2,47 +2,69 @@ import {
   GoogleOAuthProvider,
   GoogleLogin,
   type CredentialResponse,
- 
 } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "@/redux/slice/userTokenSlice";
 import { authService } from "@/api/AuthService";
 import { ENV } from "@/config/env/env";
+import { addWorker } from "@/redux/slice/workerTokenSlice";
 
 const clientId = ENV.VITE_GOOGLE_CLIENT_ID;
-console.log("Google Client ID:", clientId);
-  
+
 interface GoogleLoginComponentProps {
   userType: "worker" | "user"; 
-  onGoogleSuccess?: () => void;
+  onGoogleSuccess?: (email: string, name: string) => void; 
 }
-const GoogleLoginComponent = () => {
+
+const GoogleLoginComponent = ({ userType, onGoogleSuccess }: GoogleLoginComponentProps) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       if (!credentialResponse.credential) {
         throw new Error("Google credential is missing");
       }
+
       const token: string = credentialResponse.credential;
 
-      const response = await authService.googleLogin(token);
+      // Call the correct service method based on userType
+      const response =
+        userType === "worker"
+          ? await authService.googleWorkerLogin(token)
+          : await authService.googleLogin(token);
 
       if (response.data.success) {
-        dispatch(addUser(response.data.user));
-        navigate("/");
+        const {name,email}=response.data.user
+        
+        if(userType=="user"){
+          dispatch(addUser(response.data.user));
+          navigate("/user/")
+        }
+
+        if(userType=="worker"&&response.data.isNew){
+          
+          if (onGoogleSuccess) onGoogleSuccess(email,name); 
+          
+        }else{
+          dispatch(addWorker(response.data.user));
+          navigate("/worker/dashboard")
+        }
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Google login failed:", error);
     }
   };
+
   return (
     <GoogleOAuthProvider clientId={clientId}>
+      <div className="rounded-xl  overflow-hidden  border border-gray-300">
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={() => console.log("Login Failed")}
       />
+      </div>
     </GoogleOAuthProvider>
   );
 };

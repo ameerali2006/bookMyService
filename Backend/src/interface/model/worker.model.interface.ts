@@ -4,7 +4,7 @@ export interface IWorker extends Document {
   _id: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   password: string;
   profileImage?: string;
   googleId?: string;

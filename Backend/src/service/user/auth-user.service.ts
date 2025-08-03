@@ -33,7 +33,7 @@ export class AuthUserService implements IAuthUserService {
 
 
     ){}
-    async registerUser(userData: UserRegisterDTO): Promise<IUser> {
+    async registerUser(userData: UserRegisterDTO):  Promise<{ accessToken: string; refreshToken: string; userData:UserDataDTO}>{
         try {
             console.log(userData)
             const existingUser=await this._authUserRepo.findByEmail(userData.email)
@@ -44,7 +44,18 @@ export class AuthUserService implements IAuthUserService {
                 throw new CustomError(MESSAGES.INVALID_CREDENTIALS,STATUS_CODES.UNAUTHORIZED);
             }
             userData.password=await this._passwordHash.hash(userData.password)
-            return await this._authUserRepo.create(userData)
+            const userDbData= await this._authUserRepo.create(userData)
+            const userDto =UserMapper.resposeWorkerDto(userDbData)
+
+            const accessToken = this._jwtService.generateAccessToken(userDbData._id,"user");
+            const refreshToken = this._jwtService.generateRefreshToken(userDbData._id,"user");
+
+
+            return {
+                accessToken,
+                refreshToken,
+                userData:userDto
+            }
 
         } catch (error) {
              throw error instanceof CustomError

@@ -15,3 +15,22 @@ export interface WorkerRegisterDTO {
 
   documents?: string; // Will be the file path or URL after upload
 }
+export interface responseDto{
+  name:string,
+  email:string,
+  image?:string
+}
+export interface GoogleLoginResponseDTO {
+  success: boolean;
+  message: string;
+  accessToken:string|null;
+  refreshToken:string|null;
+  user: {
+    _id?: string;
+    name: string;
+    email: string;
+    googleId: string;
+    profileImage: string | null;
+  }|null;
+  isNew: boolean;
+}

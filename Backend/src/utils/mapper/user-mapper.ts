@@ -1,5 +1,5 @@
 
-import { UserRegisterDTO } from "../../dto/user/auth/user-register.dto";
+import { UserRegisterDTO, userResponse } from "../../dto/user/auth/user-register.dto";
 import { IUser } from "../../interface/model/user.model.interface";
 
 
@@ -12,5 +12,12 @@ export class UserMapper {
       email: userDto.email,
       password: userDto.password,
     };
+  }
+  static resposeWorkerDto(user:IUser):userResponse{
+    return {
+      name:user.name,
+      email:user.email,
+      image:user?.image
+    }
   }
 }

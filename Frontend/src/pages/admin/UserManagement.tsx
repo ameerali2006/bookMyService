@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { Search, Filter, Download, Phone, Mail, User } from 'lucide-react'
 import { useNavigate } from "react-router-dom"
 import { authService} from "@/api/AuthService"
+import { adminManagement } from "@/api/AdminManagement"
 
 
 interface User {
@@ -58,7 +59,7 @@ const UserManagement: React.FC = () => {
     setLoading(true)
     try {
         console.log('something thappen')
-      const response = await authService.getAllUsers()
+      const response = await adminManagement.getAllUsers()
       if (response.status==200&& response.data) {
         setUsers(response.data)
       } else {
@@ -75,8 +76,8 @@ const UserManagement: React.FC = () => {
     setUpdateLoading(userId)
     try {
       const newStatus = !currentStatus
-      const response = await authService.updateUserStatus(userId, newStatus)
-
+      const response = await adminManagement.updateUserStatus(userId, newStatus)
+    
       if (response.status==200) {
         setUsers(prevUsers =>
           prevUsers.map(user =>
@@ -216,7 +217,7 @@ const UserManagement: React.FC = () => {
       sortable: true,
       render: (_value, record) => (
         <Badge className={record.isBlocked ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-          {record.isBlocked ? 'Active' : 'Blocked'}
+          {record.isBlocked ? 'Blocked':'Active'}
         </Badge>
       ),
     },

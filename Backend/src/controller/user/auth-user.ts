@@ -10,6 +10,7 @@ import {clearAuthCookies, setAuthCookies, updateCookieWithAccessToken} from "../
 import { ITokenservice } from "../../interface/service/token.service.interface.js";
 import { CustomRequest } from "../../middleware/auth.middleware.js";
 
+
 @injectable()
 export class AuthUserController implements IAuthController {
   constructor(
@@ -20,9 +21,19 @@ export class AuthUserController implements IAuthController {
 
   async register(req: Request, res: Response,next:NextFunction) {
     try {
-      const userData = req.body;
-      await this._authUserService.registerUser(userData);
-      res.status(STATUS_CODES.CREATED).json({ message:MESSAGES.REGISTRATION_SUCCESS  });
+      const UserData = req.body;
+      const {accessToken,refreshToken,userData}=await this._authUserService.registerUser(UserData);
+      const accessTokenName = "user_access_token";
+      const refreshTokenName = "user_refresh_token";
+      setAuthCookies(
+        res,
+        accessToken,
+        refreshToken,
+        accessTokenName,
+        refreshTokenName
+      )
+      
+      res.status(STATUS_CODES.CREATED).json({success:true, message:MESSAGES.REGISTRATION_SUCCESS ,userData });
     } catch (error) {
       next(error)
       

@@ -14,6 +14,7 @@ import { IGoogleAuthService } from "../../interface/service/googleAuth.service.i
 import { IGoogleInfo } from "../../types/auth.types.js";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface.js";
 
+
 @injectable()
 export class AuthWorkerController implements IWorkerAuthController {
   constructor(
@@ -62,10 +63,23 @@ export class AuthWorkerController implements IWorkerAuthController {
 
             const validatedData = schema.parse(data)
             console.log('after validation')
-            await this._authWorkerService.registerWorker(validatedData)
+            const Data = await this._authWorkerService.registerWorker(validatedData)
+            if(Data.accessToken&&Data.refreshToken){
+              const accessTokenName = "worker_access_token";
+              const refreshTokenName = "worker_refresh_token";
+              setAuthCookies(
+                res,
+                Data.accessToken,
+                Data.refreshToken,
+                accessTokenName,
+                refreshTokenName
+              )
+
+            }
             res.status(STATUS_CODES.CREATED).json({
                 success: true,
                 message: MESSAGES.REGISTRATION_SUCCESS,
+                worker:Data.workerDto
             });
         } catch (error) {
           console.error(error)
@@ -74,53 +88,63 @@ export class AuthWorkerController implements IWorkerAuthController {
     }
     async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
-        const {token}:{token:string} = req.body
-        const ticket:IGoogleInfo=await this._googleAuth.verifyToken(token)
-        const { email, name, sub: googleId, picture } = ticket;
-
-        const existingWorker = await this._workerRepo.findByEmail(email);
-
-        if(existingWorker){
-          
+        const {token} =req.body
+        const result=await this._authWorkerService.googleAuth(token)
+        if(!result.success){
+          res.status(STATUS_CODES.BAD_REQUEST).json(result)
         }
+        if(!result.isNew&&result.accessToken&&result.refreshToken){
+          const accessTokenName = "worker_access_token";
+          const refreshTokenName = "worker_refresh_token";
+          setAuthCookies(
+            res,
+            result.accessToken,
+            result.refreshToken,
+            accessTokenName,
+            refreshTokenName
+          )
+
+        }
+        const { accessToken, refreshToken, ...cleanedData } = result;
+        res.status(STATUS_CODES.OK).json(cleanedData);
+
 
       } catch (error) {
+        console.error("Google Auth Controller Error:", error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: "Something went wrong during Google authentication",
+        });
         
       }
     }
     async login(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
          const loginCredential: LoginDto = req.body;
-        const { refreshToken, accessToken,workerData } = await this._authWorkerService.login(
-        loginCredential
-      );
+          const { refreshToken, accessToken,workerDto } = await this._authWorkerService.login(
+          loginCredential
+        );
 
-      const accessTokenName = "worker_access_token";
-      const refreshTokenName = "worker_refresh_token";
-      setAuthCookies(
-        res,
-        accessToken,
-        refreshToken,
-        accessTokenName,
-        refreshTokenName
-      )
+        const accessTokenName = "worker_access_token";
+        const refreshTokenName = "worker_refresh_token";
+        setAuthCookies(
+          res,
+          accessToken,
+          refreshToken,
+          accessTokenName,
+          refreshTokenName
+        )
 
-      res 
-        .status(STATUS_CODES.OK)
-        .json({ 
-          success: true,
-          message: MESSAGES.LOGIN_SUCCESS,
-          worker: {
-            name:workerData.name,
-            email:workerData.email,
-            image:workerData?.profileImage
-
-
-          }
-        });
-    } catch (error) {
-      next(error);
-    }
+        res 
+          .status(STATUS_CODES.OK)
+          .json({ 
+            success: true,
+            message: MESSAGES.LOGIN_SUCCESS,
+            worker: workerDto
+          });
+      } catch (error) {
+        next(error);
+      }
     }
   
   handleTokenRefresh(req: Request, res: Response): void {
