@@ -14,6 +14,8 @@ import { IWorkerAuthController } from "../../interface/controller/auth-worker.co
 import {AuthWorkerController} from "../../controller/worker/auth-worker.js"
 import { CloudinaryController } from "../../controller/worker/helper-worker.controller.js";
 import { ICloudinaryController } from "../../interface/controller/helper-worker.controller.interface.js";
+import { IAdminManagementController } from "../../interface/controller/management-admin.controller.interface.js";
+import { ManagementAdmin } from "../../controller/admin/management-admin.js";
 
 DependencyInjection.registerAll();
 
@@ -21,6 +23,7 @@ export const authController = container.resolve<IAuthController>(AuthUserControl
 export const authAdminController=container.resolve<IAdminController>(AuthAdminController)
 export const authWorkerController=container.resolve<IWorkerAuthController>(AuthWorkerController)
 export const cloudinaryController = container.resolve<ICloudinaryController>(CloudinaryController);
+export const managementAdminController=container.resolve<IAdminManagementController>(ManagementAdmin)
 
 
- 
+  

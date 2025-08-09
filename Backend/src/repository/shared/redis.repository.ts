@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { redisClient } from "../../config/redis";
 import { IRedisTokenRepository } from "../../interface/repository/redis/redis.repository.interface";
+import { CustomError } from "../../utils/custom-error";
 
 @injectable()
 export class RedisTokenRepository implements IRedisTokenRepository {
@@ -20,13 +21,21 @@ export class RedisTokenRepository implements IRedisTokenRepository {
 
   // Reset token
   async storeResetToken(userId: string, token: string): Promise<void> {
-    const key = `reset_token:${userId}`;
-    await redisClient.setEx(key, 300, token);
+  const key = `reset_token:${userId}`;
+  try {
+    const res=await redisClient.setEx(key, 300, token);
+    console.log("Reset token stored in Redis.",res);
+  } catch (err) {
+    console.error("Redis setEx failed:", err);
+    throw new CustomError("Failed to store token in Redis", 500); // real reason
   }
+}
 
   async verifyResetToken(userId: string, token: string): Promise<boolean> {
     const key = `reset_token:${userId}`;
     const storedToken = await redisClient.get(key);
+    console.log("🔍 Stored token from Redis:", storedToken);
+    console.log("🔐 Token from URL:", token);
     return storedToken === token;
   }
 

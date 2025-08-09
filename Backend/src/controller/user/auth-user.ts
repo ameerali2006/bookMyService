@@ -9,6 +9,7 @@ import {LoginDto} from "../../dto/shared/login.dto.js"
 import {clearAuthCookies, setAuthCookies, updateCookieWithAccessToken} from "../../utils/cookie-helper.js"
 import { ITokenservice } from "../../interface/service/token.service.interface.js";
 import { CustomRequest } from "../../middleware/auth.middleware.js";
+import { IResetPassword } from "../../interface/service/resetPassword.service.interface.js";
 
 
 @injectable()
@@ -16,7 +17,8 @@ export class AuthUserController implements IAuthController {
   constructor(
     @inject(TYPES.AuthUserService) private _authUserService: IAuthUserService,
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
-    
+    @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
+
   ) {}
 
   async register(req: Request, res: Response,next:NextFunction) {
@@ -101,6 +103,7 @@ export class AuthUserController implements IAuthController {
     }
   }
   async googleLogin(req: Request, res: Response, next: NextFunction) {
+    console.log("google login - user")
     try {
       const googleToken: string = req.body.token;
       const { refreshToken, accessToken ,userData} =
@@ -162,10 +165,52 @@ export class AuthUserController implements IAuthController {
     }
     
   }
-  handleTokenRefresh(req: Request, res: Response): void {
+  async forgotPassword(req: Request, res: Response,next :NextFunction): Promise<void> {
+    try {
+      const {email}=req.body
+			if (!email) {
+				res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+				
+			}
+      await this._resetPassword.forgotPassword(email,"user");
+
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.EMAIL_VERIFICATION_SENT,
+			});
+      
+    } catch (error) {
+      next(error)
+    }
+  }
+  async resetPassword(req: Request, res: Response,next :NextFunction): Promise<void> {
+    try {
+      console.log("resetPassword-controller")
+      const {token,password,} =req.body
+      if (!token||!password) {
+				res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+			}
+
+			await this._resetPassword.resetPassword(token,password,"user");
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.PASSWORD_RESET_SUCCESS,
+			});
+    } catch (error) {
+      next(error)
+    }
+    
+  }
+  async handleTokenRefresh(req: Request, res: Response):Promise<void> {
 		try {
 			const refreshToken = (req as CustomRequest).user.refresh_token;
-			const newTokens = this._tokenService.refreshToken(refreshToken);
+			const newTokens = await this._tokenService.refreshToken(refreshToken);
 			const accessTokenName = `${newTokens.role}_access_token`;
 			updateCookieWithAccessToken(
 				res,

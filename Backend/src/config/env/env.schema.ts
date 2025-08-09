@@ -16,6 +16,9 @@ export const envSchema=z.object({
     REFRESH_TOKEN_SECRET: z.string().min(1, 'REFRESH_TOKEN_SECRET is required'),
     REFRESH_TOKEN_EXPIRY: z.string().min(1, 'REFRESH_TOKEN_EXPIRY is required'),
 
+    RESET_SECRET_KEY: z.string().min(1, 'RESET_SECRET_KEY is required'),
+    RESET_EXPIRES_IN: z.string().min(1, 'RESET_EXPIRES_IN is required'),
+
     BCRYPT_SALT_ROUNDS: z.string().regex(/^\d+$/, 'BCRYPT_SALT_ROUNDS must be a number'),
 
     GOOGLE_CLIENT_ID: z.string().min(10, "Client ID is too short").regex(/^[0-9a-z-]+\.apps\.googleusercontent\.com$/,"Invalid Google Client ID format"),

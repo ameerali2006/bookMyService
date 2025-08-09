@@ -30,7 +30,12 @@ export const authService={
     login: async (credentials: { email: string; password: string }) => {
         return await userAxios.post("/login", credentials);
     },
-   
+    userResetLink:async (email:string)=>{
+        return await userAxios.post('/forgot-password',{email})
+    },
+    userResetPassword:async (data:{token:string,password: string,confirmPassword:string})=>{
+        return await userAxios.post('/reset-password',data)
+    },
     logout: async ()=>{
         return await userAxios.post('/logout')
     },
@@ -59,6 +64,16 @@ export const authService={
     workerLogin:async (data:{email:string,password:string}) => {
         return await workerAxios.post("/login", data); 
     },
+    workerLogout: async ()=>{
+        return await workerAxios.post('/logout')
+    },
+
+    workerResetLink:async (email:string)=>{
+        return await workerAxios.post('/forgot-password',{email})
+    },
+    workerResetPassword:async (data:{token:string,password: string,confirmPassword:string})=>{
+        return await workerAxios.post('/reset-password',data)
+    },
 
 
 
@@ -69,8 +84,8 @@ export const authService={
     adminLogin: async (credentials: { email: string; password: string }) => {
         return await adminAxios.post("/login", credentials);
     },
-    adminLogout: async (credentials: { email: string; password: string }) => {
-        return await adminAxios.post("/logout", credentials);
+    adminLogout: async () => {
+        return await adminAxios.post("/logout");
     },
 
     

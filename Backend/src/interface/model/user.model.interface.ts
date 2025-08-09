@@ -10,6 +10,7 @@ export interface IUser extends Document{
     googleId:string;
     address:Types.ObjectId[];
     isBlocked:boolean;
+    createdAt: Date;
     
 
 

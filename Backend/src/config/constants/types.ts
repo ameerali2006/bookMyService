@@ -24,7 +24,9 @@ export const TYPES = {
   AdminRepository:Symbol.for('AdminRepository'),
   AuthAdminService:Symbol.for('AuthAdminService'),
   TokenService:Symbol.for('TokenService'),
-  GoogleAuthService:Symbol.for('GoogleAuthService')
+  GoogleAuthService:Symbol.for('GoogleAuthService'),
+  ManagementAdminService:Symbol.for('ManagementAdminService'),
+  ResetPassword:Symbol.for('ResetPassword'),
 
   
 

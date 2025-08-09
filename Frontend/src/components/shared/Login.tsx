@@ -145,7 +145,7 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
                 <>
                   <button
                     type="button"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() => navigate(role=="user"?"/forgot-password":"/worker/forgot-password")}
                     className="text-primary text-sm hover:underline"
                   >
                     Forgot Password?

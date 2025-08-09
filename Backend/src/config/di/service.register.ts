@@ -22,6 +22,10 @@ import { ICloudinaryService } from "../../interface/helpers/cloudinary.service.i
 import { CloudinaryService } from "../../service/helper/cloudinary.service";
 import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
 import {GoogleAuthService} from '../../service/shared/googleAuth.service'
+import { IManagementAdminService } from "../../interface/service/managementAdmin.service.interface";
+import { ManagementAdminService } from "../../service/admin/managementAdmin.service";
+import { IResetPassword } from "../../interface/service/resetPassword.service.interface";
+import { ResetPassword } from "../../service/shared/resetPassword.service";
  
 
 
@@ -40,6 +44,8 @@ export class ServiceRegistery{
         container.register<IAuthWorkerService>(TYPES.AuthWorkerService,{useClass:AuthWorkerService})
         container.register<ICloudinaryService>(TYPES.CloudinaryService,{useClass:CloudinaryService})
         container.register<IGoogleAuthService>(TYPES.GoogleAuthService,{useClass:GoogleAuthService})
+        container.register<IManagementAdminService>(TYPES.ManagementAdminService,{useClass:ManagementAdminService})
+        container.register<IResetPassword>(TYPES.ResetPassword,{useClass:ResetPassword})
 
 
         

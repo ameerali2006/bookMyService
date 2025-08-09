@@ -16,6 +16,7 @@ import { Search, Filter, Download, Phone, Mail, User } from 'lucide-react'
 import { useNavigate } from "react-router-dom"
 import { authService} from "@/api/AuthService"
 import { adminManagement } from "@/api/AdminManagement"
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 
 
 interface User {
@@ -61,7 +62,8 @@ const UserManagement: React.FC = () => {
         console.log('something thappen')
       const response = await adminManagement.getAllUsers()
       if (response.status==200&& response.data) {
-        setUsers(response.data)
+        console.log("users",response.data)
+        setUsers(response.data.users)
       } else {
         console.error('Failed to fetch users:')
       }
@@ -73,8 +75,10 @@ const UserManagement: React.FC = () => {
   }
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean): Promise<void> => {
+    console.log('helloo toggle')
     setUpdateLoading(userId)
     try {
+      console.log("id",userId)
       const newStatus = !currentStatus
       const response = await adminManagement.updateUserStatus(userId, newStatus)
     
@@ -86,11 +90,14 @@ const UserManagement: React.FC = () => {
               : user
           )
         )
+        SuccessToast(`User ${newStatus ? 'activated' : 'blocked'} successfully`)
         console.log(`User ${newStatus ? 'activated' : 'blocked'} successfully`)
       } else {
+        ErrorToast('Failed to update user status!')
         console.error('Failed to update user status:')
       }
     } catch (error) {
+      ErrorToast('Failed to update user status!')
       console.error('Error updating user status:', error)
     } finally {
       setUpdateLoading(null)
@@ -216,7 +223,7 @@ const UserManagement: React.FC = () => {
       dataIndex: "isBlocked",
       sortable: true,
       render: (_value, record) => (
-        <Badge className={record.isBlocked ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+        <Badge className={record.isBlocked ?   "bg-red-100 text-red-800":"bg-green-100 text-green-800"}>
           {record.isBlocked ? 'Blocked':'Active'}
         </Badge>
       ),
@@ -247,8 +254,8 @@ const UserManagement: React.FC = () => {
 
   const stats: UserStats = useMemo(() => ({
     totalUsers: users.length,
-    activeUsers: users.filter(u => u.isBlocked).length,
-    blockedUsers: users.filter(u => !u.isBlocked).length,
+    activeUsers: users.filter(u => !u.isBlocked).length,
+    blockedUsers: users.filter(u => u.isBlocked).length,
     googleUsers: users.filter(u => u.isGoogleUser).length,
   }), [users])
 

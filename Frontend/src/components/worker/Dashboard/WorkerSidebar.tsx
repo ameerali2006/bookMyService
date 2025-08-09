@@ -8,6 +8,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {removeWorker  } from "@/redux/slice/workerTokenSlice";
+import { authService } from "@/api/AuthService";
 
 const navItems = [
   { label: "Dashboard", icon: <LayoutDashboard />, path: "/worker/dashboard" },
@@ -18,6 +19,16 @@ const navItems = [
 
 export const WorkerSidebar = () => {
   const dispatch = useDispatch();
+
+  const handleLogout=async()=>{
+    try {
+      await authService.workerLogout()
+      dispatch(removeWorker())
+    } catch (error) {
+      console.error(error)
+    }
+   
+  }
 
   return (
     <aside className="w-64 bg-white shadow-md h-full flex flex-col justify-between">
@@ -42,11 +53,11 @@ export const WorkerSidebar = () => {
       </div>
       <div className="p-6 border-t">
         <button
-          onClick={() => dispatch(removeWorker())}
+          onClick={() => handleLogout() }
           className="flex items-center gap-3 text-red-600 hover:text-red-800 font-medium"
         >
           <LogOut className="w-4 h-4" />
-          Logout
+          Logout 
         </button>
       </div>
     </aside>

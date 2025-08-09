@@ -13,6 +13,7 @@ import { TYPES } from "../../config/constants/types";
 import { IUserRepository } from "../../interface/repository/user.repository.interface";
 import { IAdmin } from "../../interface/model/admin.model.interface";
 import { IUser } from "../../interface/model/user.model.interface";
+
 @injectable()
 export class AuthAdminService implements IAuthAdminService {
   constructor(
@@ -23,7 +24,7 @@ export class AuthAdminService implements IAuthAdminService {
   ) {}
   async login(
     adminCredential: LoginDto
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string ,admin:{name:string,email:string}}> {
     console.log(adminCredential)
     const adminData: IAdmin | null = await this._adminrepository.findByEmail(
       adminCredential.email
@@ -56,10 +57,9 @@ export class AuthAdminService implements IAuthAdminService {
     }
     const accessToken = this._jwtService.generateAccessToken(adminData._id,"admin");
     const refreshToken = this._jwtService.generateRefreshToken(adminData._id,"admin");
+    const admin={name:adminData.name,email:adminData.email}
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken ,admin};
   }
-  async getAllUsers(): Promise<IUser[]> {
-    return await this._userrepository.findAll();
-  }
+  
 }

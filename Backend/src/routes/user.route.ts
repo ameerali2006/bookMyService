@@ -25,12 +25,23 @@ import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
             authController.login(req, res, next)
             
         );
-        this.router.post("/google-login", (req: Request, res: Response, next: NextFunction) =>
+         this.router.post("/google-login", (req: Request, res: Response, next: NextFunction) =>
             authController.googleLogin(req, res, next)
             
         );
+        
+
+        
         this.router.post('/logout',verifyAuth,authorizeRole(["user"]),(req:Request,res:Response,next:NextFunction)=>{
             authController.logout(req,res,next)
-        })
+        });
+        this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) =>
+            authController.forgotPassword(req, res, next)
+            
+        );
+        this.router.post("/reset-password", (req: Request, res: Response, next: NextFunction) =>
+            authController.resetPassword(req, res, next)
+            
+        );
     }
  } 

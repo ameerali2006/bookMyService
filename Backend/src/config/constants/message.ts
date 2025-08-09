@@ -45,6 +45,9 @@ CREATED:'Created Successfully',
    TOKEN_EXPIRED: "Session expired login again",
   TOKEN_BLACKLISTED: "Session is no longer valid",
     INVALID_TOKEN: "Invalid session please login again",
+    SAME_CURR_NEW_PASSWORD:
+    "New password must be different from current password",
+    
 
 
 }

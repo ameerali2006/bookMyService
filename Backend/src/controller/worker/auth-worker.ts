@@ -13,6 +13,7 @@ import { WorkerRegisterSchema } from "../validation/worker-register.zod.js";
 import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface.js";
 import { IGoogleInfo } from "../../types/auth.types.js";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface.js";
+import { IResetPassword } from "../../interface/service/resetPassword.service.interface.js";
 
 
 @injectable()
@@ -21,7 +22,9 @@ export class AuthWorkerController implements IWorkerAuthController {
     @inject(TYPES.AuthWorkerService) private _authWorkerService:IAuthWorkerService,
     @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService,
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
-    @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository
+    @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
+    @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
+    
     
   ) {}
 
@@ -146,11 +149,53 @@ export class AuthWorkerController implements IWorkerAuthController {
         next(error);
       }
     }
-  
-  handleTokenRefresh(req: Request, res: Response): void {
+  async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {email}=req.body
+			if (!email) {
+				res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+				
+			}
+      await this._resetPassword.forgotPassword(email,"worker");
+
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.EMAIL_VERIFICATION_SENT,
+			});
+    } catch (error) {
+      next(error)
+    }
+    
+  }
+  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      console.log("resetPassword-controller")
+      const {token,password,} =req.body
+      if (!token||!password) {
+				res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+			}
+
+			await this._resetPassword.resetPassword(token,password,"worker");
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.PASSWORD_RESET_SUCCESS,
+			});
+    } catch (error) {
+      next(error)
+    }
+    
+  }
+
+  async handleTokenRefresh(req: Request, res: Response):Promise <void >{
 		try {
 			const refreshToken = (req as CustomRequest).user.refresh_token;
-			const newTokens = this._tokenService.refreshToken(refreshToken);
+			const newTokens = await this._tokenService.refreshToken(refreshToken);
 			const accessTokenName = `${newTokens.role}_access_token`;
 			updateCookieWithAccessToken(
 				res,
@@ -171,6 +216,36 @@ export class AuthWorkerController implements IWorkerAuthController {
 				message: MESSAGES.INVALID_TOKEN,
 			});
 		}
-	}
+	} 
+  async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+
+    try {
+      console.log('log out')
+      
+			await this._tokenService.blacklistToken(
+				(req as CustomRequest).user.access_token
+			);
+      console.log('1')
+
+			await this._tokenService.revokeRefreshToken(
+				(req as CustomRequest).user.refresh_token
+			);
+      console.log('12')
+      const user = (req as CustomRequest).user;
+			const accessTokenName = `worker_access_token`;
+			const refreshTokenName = `worker_refresh_token`;
+			clearAuthCookies(res, accessTokenName, refreshTokenName);
+      console.log('13')
+			res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.LOGOUT_SUCCESS,
+			});
+
+    } catch (error) {
+      console.error(error)
+      
+    }
+    
+  }
   
 }

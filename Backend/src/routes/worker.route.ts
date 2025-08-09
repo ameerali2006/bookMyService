@@ -35,5 +35,18 @@ export class WorkerRoute extends BaseRoute{
             authWorkerController.login(req, res, next)
                     
         );
+        this.router.post("/logout", (req: Request, res: Response, next: NextFunction) =>
+        
+            authWorkerController.logout(req, res, next)
+                    
+        );
+        this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) =>
+            authWorkerController.forgotPassword(req, res, next)
+                    
+        );
+        this.router.post("/reset-password", (req: Request, res: Response, next: NextFunction) =>
+            authWorkerController.resetPassword(req, res, next)
+                    
+        );
     }
 }

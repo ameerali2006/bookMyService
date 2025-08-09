@@ -6,4 +6,5 @@ export interface IBaseRepository<T> {
   deleteById(id: string): Promise<T | null>;
   findAll(): Promise<T[]>;
   find(query: any): Promise<T[]>;
+  update(filter: any, updateData: Partial<T> | any): Promise<T | null>;
 }
