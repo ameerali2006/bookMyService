@@ -27,6 +27,8 @@ export const TYPES = {
   GoogleAuthService:Symbol.for('GoogleAuthService'),
   ManagementAdminService:Symbol.for('ManagementAdminService'),
   ResetPassword:Symbol.for('ResetPassword'),
+  ServiceRepository:Symbol.for('ServiceRepository'),
+  WorkerHelperService:Symbol.for('WorkerHelperService'),
 
   
 

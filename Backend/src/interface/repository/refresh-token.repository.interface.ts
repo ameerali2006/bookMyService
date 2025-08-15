@@ -8,4 +8,3 @@ export interface IRefreshTokenRepository
 	extends IBaseRepository<IRefreshTokenEntity> {
 	revokeRefreshToken(token: string): Promise<void>;
 }
- 

@@ -89,4 +89,9 @@ export const authService={
     },
 
     
+
+
+    getServiceNames:async ()=>{
+        return await workerAxios.get('/getserviceNames')
+    },
 }

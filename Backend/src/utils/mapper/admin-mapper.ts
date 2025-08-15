@@ -16,13 +16,13 @@ export class AdminMapper {
   }
     static resWorkersDetails(workers: IWorker[]): workerManageDto[] {
         return workers.map((w) => ({
-            _id: w._id,
+            _id: w._id.toString(),
             name: w.name,
             email: w.email,
             phone: w.phone,
             isBlocked: w.isBlocked,
             isVerified: w.isVerified,
-            category: w.category,
+            category: w.category.toString(),
             experience: w.experience,
             profileImage: w?.profileImage||undefined,
             createdAt: w.createdAt

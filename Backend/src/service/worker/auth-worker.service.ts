@@ -17,6 +17,8 @@ import { IWorker } from "../../interface/model/worker.model.interface";
 import { IGoogleInfo } from "../../types/auth.types";
 import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
 import { WorkerMapper } from "../../utils/mapper/worker-mapper";
+import { Types } from "mongoose";
+import { WorkerModel } from "../../model/worker.model";
 
 
 @injectable()
@@ -102,8 +104,8 @@ export class AuthWorkerService implements IAuthWorkerService {
             
         };
         const workerDbData=await this._authWorkerRepo.create(dbWorker);
-        const accessToken = this._jwtService.generateAccessToken(workerDbData._id,"worker");
-        const refreshToken = this._jwtService.generateRefreshToken(workerDbData._id,"worker");
+        const accessToken = this._jwtService.generateAccessToken(workerDbData._id.toString(),"worker");
+        const refreshToken = this._jwtService.generateRefreshToken(workerDbData._id.toString(),"worker");
 
         const workerDto=WorkerMapper.responseWorkerDto(workerDbData)
 
@@ -147,8 +149,8 @@ export class AuthWorkerService implements IAuthWorkerService {
                 );
             }
 
-            const accessToken = this._jwtService.generateAccessToken(workerData._id,"worker");
-            const refreshToken = this._jwtService.generateRefreshToken(workerData._id,"worker");
+            const accessToken = this._jwtService.generateAccessToken(workerData._id.toString(),"worker");
+            const refreshToken = this._jwtService.generateRefreshToken(workerData._id.toString(),"worker");
 
             const workerDto=WorkerMapper.responseWorkerDto(workerData)
 
@@ -169,6 +171,7 @@ export class AuthWorkerService implements IAuthWorkerService {
             
         }
     }
+    
     async googleAuth(token: string): Promise<GoogleLoginResponseDTO> {
         try {
             const ticket:IGoogleInfo=await this._googleAuth.verifyToken(token)
@@ -176,8 +179,8 @@ export class AuthWorkerService implements IAuthWorkerService {
 
             const existingWorker=await this._authWorkerRepo.findByEmail(email)
             if(existingWorker){
-                const accessToken=this._jwtService.generateAccessToken(existingWorker._id,"worker")
-                const refreshToken= this._jwtService.generateRefreshToken(existingWorker._id,"worker")
+                const accessToken=this._jwtService.generateAccessToken(existingWorker._id.toString(),"worker")
+                const refreshToken= this._jwtService.generateRefreshToken(existingWorker._id.toString(),"worker")
 
                 return {
                     success: true,
@@ -185,7 +188,7 @@ export class AuthWorkerService implements IAuthWorkerService {
                     accessToken,
                     refreshToken,
                     user: {
-                        _id: existingWorker._id,
+                        _id: existingWorker._id.toString(),
                         email: existingWorker.email,
                         name: existingWorker.name,
                         googleId,

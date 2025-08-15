@@ -16,13 +16,13 @@ export interface CustomJwtPayload extends JwtPayload{
 export interface CustomRequest extends Request {
 	user: CustomJwtPayload;
 }
-export const verifyAuth = async (
+export const verifyAuth =(role:"user"|"worker"|"admin") => async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
 	try {
-		const token = extractToken(req);
+		const token = extractToken(req,role);
 		console.log('**token',token)
 		if (!token || !token.access_token || !token.refresh_token) {
 			console.log('in verifyToken');
@@ -91,10 +91,11 @@ export const verifyAuth = async (
 
 
 const extractToken = (
-  req: Request
+  req: Request,
+  userType:"user"|"worker"|"admin"
 ): { access_token: string; refresh_token: string } | null => {
 	console.log(req.cookies)
-  const userType = 'user'
+  
 	
   if (!userType) return null;
   
@@ -150,13 +151,13 @@ export const authorizeRole = (allowedRoles: string[]) => {
 //* ─────────────────────────────────────────────────────────────
 //*                 🛠️ Decode Token Middleware
 //* ─────────────────────────────────────────────────────────────
-export const decodeToken = async (
+export const decodeToken =(role:"user"|"worker"|"admin") => async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
 	try {
-		const token = extractToken(req);
+		const token = extractToken(req,role);
 
 		if (!token) {
 			res.status(STATUS_CODES.UNAUTHORIZED).json({

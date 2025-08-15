@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 
 export interface WorkerRegisterDTO {
   name: string;
@@ -6,7 +7,7 @@ export interface WorkerRegisterDTO {
   password: string;
   confirmPassword: string;
 
-  category: "plumber" | "electrician" | "carpenter" | "mechanic" | "driver" | "chef"|"cleaner";
+  category: Types.ObjectId;
   experience: "0-1" | "2-5" | "6-10" | "10+";
 
   zone: string;

@@ -13,6 +13,8 @@ import {RefreshTokenRepository} from "../../repository/shared/refresh-token.repo
 import {IRefreshTokenRepository} from "../../interface/repository/refresh-token.repository.interface"
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface";
 import { WorkerRepository } from "../../repository/worker/worker.repository";
+import { IServiceRepository } from "../../interface/repository/service.repository.interface";
+import { ServiceRepository } from "../../repository/helper/service.repository";
 // Make sure this class is decorated with @injectable()
 
 
@@ -25,7 +27,7 @@ export class RepositoryRegistery{
         container.register<IWorkerRepository>(TYPES.WorkerRepository,{ useClass: WorkerRepository });
         container.register<IRedisTokenRepository>(TYPES.RedisTokenRepository,{useClass:RedisTokenRepository})
         container.register<IRefreshTokenRepository>(TYPES.RefreshTokenRepository,{useClass:RefreshTokenRepository})
-
+        container.register<IServiceRepository>(TYPES.ServiceRepository,{useClass:ServiceRepository})
 
         
 

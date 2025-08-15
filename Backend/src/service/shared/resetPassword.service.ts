@@ -113,7 +113,7 @@ export class ResetPassword implements IResetPassword{
             }
             console.log(user._id+"***************"+token)
             const tokenValid = await this._redisRepo.verifyResetToken(
-                user._id ?? "",
+                user._id.toString() ?? "",
                 token
             );
             console.log(tokenValid)
@@ -139,7 +139,7 @@ export class ResetPassword implements IResetPassword{
 
             await repository.update({ email }, { password: hashedPassword });
 
-            await this._redisRepo.deleteResetToken(user._id ?? "");
+            await this._redisRepo.deleteResetToken(user._id.toString() ?? "");
             
         } catch (error) {
             

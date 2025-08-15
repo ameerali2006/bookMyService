@@ -10,6 +10,7 @@ function IsWorkerLogin({ children }: Props) {
   const workerToken = useSelector(
     (state: RootState) => state.workerTokenSlice.worker
   );
+  console.log("workerToken"+workerToken?.email,)
 
   if (!workerToken) {
     return <Navigate to="/worker/login" />; // Or your actual worker login route

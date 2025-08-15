@@ -7,7 +7,7 @@ export const WorkerRegisterSchema = z
     phone: z.string().min(1, "Phone is required"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
-    category: z.enum(["plumber", "electrician", "mechanic", "cleaner", "carpenter", "chef"]),
+    category: z.string().min(1, "Category is required") ,
     experience: z.enum(["0-1", "2-5", "6-10", "10+"]),
     documents: z.string().url("Document must be a valid URL"),
     latitude: z.string(),

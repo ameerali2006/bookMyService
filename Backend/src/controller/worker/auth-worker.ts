@@ -14,6 +14,7 @@ import { IGoogleAuthService } from "../../interface/service/googleAuth.service.i
 import { IGoogleInfo } from "../../types/auth.types.js";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface.js";
 import { IResetPassword } from "../../interface/service/resetPassword.service.interface.js";
+import { Types } from "mongoose";
 
 
 @injectable()
@@ -66,7 +67,7 @@ export class AuthWorkerController implements IWorkerAuthController {
 
             const validatedData = schema.parse(data)
             console.log('after validation')
-            const Data = await this._authWorkerService.registerWorker(validatedData)
+            const Data = await this._authWorkerService.registerWorker({...validatedData,category:new Types.ObjectId(validatedData.category)})
             if(Data.accessToken&&Data.refreshToken){
               const accessTokenName = "worker_access_token";
               const refreshTokenName = "worker_refresh_token";
@@ -221,6 +222,8 @@ export class AuthWorkerController implements IWorkerAuthController {
 
     try {
       console.log('log out')
+
+      console.log('helooo log out')
       
 			await this._tokenService.blacklistToken(
 				(req as CustomRequest).user.access_token

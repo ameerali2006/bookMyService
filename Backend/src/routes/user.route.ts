@@ -32,7 +32,7 @@ import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
         
 
         
-        this.router.post('/logout',verifyAuth,authorizeRole(["user"]),(req:Request,res:Response,next:NextFunction)=>{
+        this.router.post('/logout',verifyAuth("user"),authorizeRole(["user"]),(req:Request,res:Response,next:NextFunction)=>{
             authController.logout(req,res,next)
         });
         this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) =>

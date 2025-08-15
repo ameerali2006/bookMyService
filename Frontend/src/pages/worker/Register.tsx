@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import {
   
   User,
@@ -37,15 +37,11 @@ import { useDispatch } from "react-redux"
 
 
 
-const workCategories = [
-  { value: "plumber", label: "Plumber", icon: Droplets, color: "text-blue-500" },
-  { value: "electrician", label: "Electrician", icon: Zap, color: "text-yellow-500" },
-  { value: "carpenter", label: "Carpenter", icon: Hammer, color: "text-amber-600" },
-  { value: "mechanic", label: "Mechanic", icon: Wrench, color: "text-gray-600" },
-  { value: "driver", label: "Driver", icon: Car, color: "text-green-500" },
-  { value: "chef", label: "Chef", icon: Utensils, color: "text-red-500" },
-]
 
+type categoryData={
+  label:string,
+  value:string
+}
 export default function WorkerRegistration() {
   const [isOtpOpen, setIsOtpOpen] = useState(false)
   const [workerEmail, setWorkerEmail] = useState("")
@@ -67,9 +63,39 @@ export default function WorkerRegistration() {
     zone: "",
     
   })
+  const [workCategories, setWorkCategories] = useState<
+  { value: string; label: string; icon: typeof Briefcase; color: string }[]
+>([]);
   const [errors, setErrors] = useState<Record<string, string>>({})
   const navigate=useNavigate()
   const dispatch=useDispatch()
+  useEffect(()=>{
+    const fetchData=async()=>{
+      try {
+        const response = await authService.getServiceNames()
+        if(!response.data.success){
+          ErrorToast("service name is not found")
+          return
+        }
+        const data=response.data.data
+        const colors=["text-blue-500","text-yellow-500","text-amber-600","text-gray-600", "text-green-500","text-red-500"]
+        setWorkCategories(
+          (data as categoryData[]).map((dat, i) => ({
+            value: dat.value,
+            label: dat.label.charAt(0).toUpperCase() + dat.label.slice(1),
+            icon: Briefcase,
+            color: colors[i % colors.length],
+          }))
+        );
+
+
+
+      } catch (error) {
+        
+      }
+    }
+    fetchData()
+  },[] )
 
   const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100

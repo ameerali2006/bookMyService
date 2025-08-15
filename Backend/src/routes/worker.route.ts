@@ -1,6 +1,7 @@
 import { Response,Request,NextFunction } from "express";
 import { BaseRoute } from "./base.route.js";
 import { authWorkerController ,cloudinaryController} from "../config/di/resolver.js";
+import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
 
 
 export class WorkerRoute extends BaseRoute{
@@ -35,7 +36,7 @@ export class WorkerRoute extends BaseRoute{
             authWorkerController.login(req, res, next)
                     
         );
-        this.router.post("/logout", (req: Request, res: Response, next: NextFunction) =>
+        this.router.post("/logout",verifyAuth("worker"),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
         
             authWorkerController.logout(req, res, next)
                     
@@ -46,6 +47,10 @@ export class WorkerRoute extends BaseRoute{
         );
         this.router.post("/reset-password", (req: Request, res: Response, next: NextFunction) =>
             authWorkerController.resetPassword(req, res, next)
+                    
+        );
+        this.router.get("/getserviceNames", (req: Request, res: Response, next: NextFunction) =>
+            cloudinaryController.getServiceNames(req, res, next)
                     
         );
     }

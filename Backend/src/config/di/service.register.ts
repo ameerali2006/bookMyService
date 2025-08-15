@@ -26,6 +26,8 @@ import { IManagementAdminService } from "../../interface/service/managementAdmin
 import { ManagementAdminService } from "../../service/admin/managementAdmin.service";
 import { IResetPassword } from "../../interface/service/resetPassword.service.interface";
 import { ResetPassword } from "../../service/shared/resetPassword.service";
+import {  IWorkerHelperService } from "../../interface/service/helper-service.service.interface";
+import { WorkerHelperService } from "../../service/worker/helper.service";
  
 
 
@@ -46,7 +48,7 @@ export class ServiceRegistery{
         container.register<IGoogleAuthService>(TYPES.GoogleAuthService,{useClass:GoogleAuthService})
         container.register<IManagementAdminService>(TYPES.ManagementAdminService,{useClass:ManagementAdminService})
         container.register<IResetPassword>(TYPES.ResetPassword,{useClass:ResetPassword})
-
+        container.register<IWorkerHelperService>(TYPES.WorkerHelperService,{useClass:WorkerHelperService})
 
         
 

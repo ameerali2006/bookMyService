@@ -33,6 +33,6 @@ export class AdminRoute extends BaseRoute {
             managementAdminController.verifyWorker(req,res,next)
 
         })
-
+        
     }
 }

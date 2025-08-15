@@ -1,8 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import {IWorker} from "../interface/model/worker.model.interface"
 
 
-const WorkerSchema: Schema = new Schema<IWorker>(
+export const WorkerSchema: Schema = new Schema<IWorker>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -24,8 +24,8 @@ const WorkerSchema: Schema = new Schema<IWorker>(
     },
 
     category: {
-      type: String,
-      enum: ["plumber", "electrician", "carpenter", "mechanic", "driver", "chef"],
+      type: Schema.Types.ObjectId,
+      ref: "Service", 
       required: true,
     },
 
@@ -41,4 +41,4 @@ const WorkerSchema: Schema = new Schema<IWorker>(
   }
 );
 
-export const WorkerModel = mongoose.model<IWorker>('Worker', WorkerSchema);
+export const WorkerModel = mongoose.model<IWorker>("Worker",WorkerSchema);

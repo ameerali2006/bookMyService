@@ -21,11 +21,11 @@ const workerTokenSlice = createSlice({
   reducers: {
     addWorker: (state, action: PayloadAction<WorkerData>) => {
       state.worker = action.payload;
-      localStorage.setItem("workerAccessToken", JSON.stringify(action.payload));
+      localStorage.setItem("WorkerData", JSON.stringify(action.payload));
     },
     removeWorker: (state) => {
       state.worker = null;
-      localStorage.removeItem("workerAccessToken");
+      localStorage.removeItem("WorkerData");
     },
   },
 });

@@ -1,7 +1,8 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
+import { IService } from "./service.model.interface";
 
-export interface IWorker extends Document {
-  _id: string;
+export interface IWorker  extends Document{
+  _id: Types.ObjectId;
   name: string;
   email: string;
   phone?: string;
@@ -14,7 +15,7 @@ export interface IWorker extends Document {
   };
   zone: string;
   experience: "0-1" | "2-5" | "6-10" | "10+";
-  category: "plumber" | "electrician" | "carpenter" | "mechanic" | "driver" | "chef" | "cleaner";
+  category: Types.ObjectId
   fees: number;
   isBlocked: boolean;
   isActive: boolean;
