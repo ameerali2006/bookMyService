@@ -20,17 +20,33 @@ export class ManagementAdminService implements IManagementAdminService{
     ) {
         
     }
-    async getAllUsers<T extends "user"|"worker">(role:T): Promise<userManageDto[]|workerManageDto[]> {
+    
+    async getAllUsers(role: 'worker' | 'user', page: number, limit: number, search: string, sortBy: string, sortOrder: string): Promise<{ users: userManageDto[] | workerManageDto[]; currentPage: number; totalPages: number; totalItems: number; }>{
         
         try {
-            const users= role=="user"? await this._userRepo.findAll():await this._workerRepo.findAll()
+             const filter: any = {};
+
+            if (search) {
+                filter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                { phone: { $regex: search, $options: "i" } },
+                ];
+            }
+  
+            const skip = (page - 1) * limit;
+            const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+            const { items, total } =
+                role === "user"
+                ? await this._userRepo.findAll(filter, skip, limit, sort)
+                : await this._workerRepo.findAll(filter, skip, limit, sort);
             let userDataDto
             if (role === "user") {
-                userDataDto = AdminMapper.resUserDetails(users as IUser[]); 
+                userDataDto = AdminMapper.resUserDetails(items as IUser[]); 
             } else {
-                userDataDto = AdminMapper.resWorkersDetails(users as IWorker[]);
+                userDataDto = AdminMapper.resWorkersDetails(items as IWorker[]);
             }
-            return userDataDto
+            return {users:userDataDto,currentPage:page,totalPages:Math.ceil(total/limit),totalItems:total}
         } catch (error) {
             console.log(error)
             throw error instanceof CustomError ? error : new CustomError(

@@ -37,6 +37,8 @@ export function Table<T = any>({
   onSort,
   emptyText = "No data available",
 }: TableProps<T>) {
+
+  console.log(data)
   const getRowKey = (record: T, index: number): string => {
     if (typeof rowKey === "function") {
       return rowKey(record)
@@ -117,6 +119,7 @@ export function Table<T = any>({
               </tr>
             ) : (
               data.map((record, index) => (
+                
                 <tr
                   key={getRowKey(record, index)}
                   className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${

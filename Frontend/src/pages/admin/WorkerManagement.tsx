@@ -40,27 +40,32 @@ const WorkerManagement: React.FC = () => {
   const [pageSize, setPageSize] = useState(10)
   const [sortBy, setSortBy] = useState<string>("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
-
+  const [total, setTotal] = useState(0)
   useEffect(() => {
-    fetchWorkers()
-  }, [])
+  fetchWorkers(currentPage, pageSize, sortBy, sortOrder, searchTerm)
+}, [currentPage, pageSize, sortBy, sortOrder, searchTerm])
 
-  const fetchWorkers = async () => {
-    setLoading(true)
-    try {
-      const response = await adminManagement.getAllWorkers()
-      if (response.status === 200) {
-        console.log(response.data)
-        setWorkers(response.data.users)
-      } else {
-        ErrorToast("Failed to fetch workers.")
-      }
-    } catch (err) {
-      ErrorToast("Something went wrong.")
-    } finally {
-      setLoading(false)
+
+
+
+const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" | "desc" = "asc", search = "") => {
+  setLoading(true)
+  try {
+    const response = await adminManagement.getAllWorkers( page, limit, sortBy, sortOrder, search )
+    if (response.status === 200) {
+      console.log(response)
+      setWorkers(response.data.users) // backend should return { items, total }
+      setTotal(response.data.totalItems)
+      setCurrentPage(response.data.currentPage)
+    } else {
+      ErrorToast("Failed to fetch workers.")
     }
+  } catch (err) {
+    ErrorToast("Something went wrong.")
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleToggleWorkerStatus = async (id: string, currentStatus: boolean) => {
     setUpdateLoading(id)
@@ -84,6 +89,7 @@ const WorkerManagement: React.FC = () => {
   }
 
   const filteredAndSorted = useMemo(() => {
+    console.log("workers"+workers)
     const filtered = workers.filter(w =>
       w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,11 +114,7 @@ const WorkerManagement: React.FC = () => {
     return filtered
   }, [workers, searchTerm, sortBy, sortOrder])
 
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * pageSize
-    return filteredAndSorted.slice(start, start + pageSize)
-  }, [filteredAndSorted, currentPage, pageSize])
-
+  
   const columns: TableColumn<Worker>[] = [
     {
       key: "name",
@@ -225,7 +227,7 @@ const WorkerManagement: React.FC = () => {
 
           <Table
             columns={columns}
-            data={paginated}
+            data={workers}
             loading={loading}
             sortBy={sortBy}
             sortOrder={sortOrder}
@@ -237,7 +239,7 @@ const WorkerManagement: React.FC = () => {
 
           <Pagination
             current={currentPage}
-            total={filteredAndSorted.length}
+            total={total}
             pageSize={pageSize}
             onChange={(page, newSize) => {
               setCurrentPage(page)
@@ -245,8 +247,8 @@ const WorkerManagement: React.FC = () => {
             }}
             showSizeChanger
             showQuickJumper
-            showTotal={(total, range) => (
-              <span>Showing {range[0]} to {range[1]} of {total} workers</span>
+            showTotal={(t, range) => (
+              <span>Showing {range[0]} to {range[1]} of {t} workers</span>
             )}
           />
         </div>

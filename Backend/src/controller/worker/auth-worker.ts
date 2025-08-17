@@ -23,7 +23,6 @@ export class AuthWorkerController implements IWorkerAuthController {
     @inject(TYPES.AuthWorkerService) private _authWorkerService:IAuthWorkerService,
     @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService,
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
-    @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
     @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
     
     

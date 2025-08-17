@@ -51,27 +51,29 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [updateLoading, setUpdateLoading] = useState<string | null>(null)
+  const [totalUsers, setTotalUsers] = useState(0)
 
   useEffect(() => {
+    console.log("useEffect is workeing")
     fetchUsers()
-  }, [])
+  },[currentPage, pageSize, searchTerm, sortBy, sortOrder])
 
   const fetchUsers = async (): Promise<void> => {
     setLoading(true)
     try {
-        console.log('something thappen')
-      const response = await adminManagement.getAllUsers()
-      if (response.status==200&& response.data) {
-        console.log("users",response.data)
+      console.log(currentPage, pageSize, searchTerm, sortBy, sortOrder)
+      const response = await adminManagement.getAllUsers(currentPage, pageSize, searchTerm, sortBy, sortOrder)
+      console.log(response)
+      if (response.status === 200 && response.data) {
         setUsers(response.data.users)
-      } else {
-        console.error('Failed to fetch users:')
+        setTotalUsers(response.data.totalItems)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
+      console.error("Error fetching users:", error)
     } finally {
       setLoading(false)
     }
+     
   }
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean): Promise<void> => {
@@ -132,14 +134,12 @@ const UserManagement: React.FC = () => {
         return 0
       })
     }
+    console.log("filter"+[...filtered])
 
     return filtered
   }, [users, searchTerm, sortBy, sortOrder])
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
-    return filteredAndSortedData.slice(startIndex, startIndex + pageSize)
-  }, [filteredAndSortedData, currentPage, pageSize])
+  
 
   const handleMenuItemClick = (item: string): void => {
     setActiveMenuItem(item)
@@ -162,10 +162,14 @@ const UserManagement: React.FC = () => {
   }
 
   const handlePageChange = (page: number, newPageSize?: number): void => {
-    setCurrentPage(page)
+    
     if (newPageSize) {
+      
       setPageSize(newPageSize)
       setCurrentPage(1)
+    }else{
+      setCurrentPage(page)
+      console.log(page,currentPage)
     }
   }
 
@@ -300,7 +304,7 @@ const UserManagement: React.FC = () => {
 
           <Table
             columns={columns}
-            data={paginatedData}
+            data={filteredAndSortedData}
             loading={loading}
             sortBy={sortBy}
             sortOrder={sortOrder}
@@ -309,7 +313,7 @@ const UserManagement: React.FC = () => {
 
           <Pagination
             current={currentPage}
-            total={filteredAndSortedData.length}
+            total={totalUsers}
             pageSize={pageSize}
             onChange={handlePageChange}
             showSizeChanger

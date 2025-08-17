@@ -19,9 +19,15 @@ export class ManagementAdmin implements IAdminManagementController{
     }
     async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = (req.query.search as string) || "";
+            const sortBy = (req.query.sortBy as string) || "createdAt";
+            const sortOrder = (req.query.sortOrder as string) === "asc" ? "asc" : "desc";
             
-            const users = await this._adminManagement.getAllUsers("user");
-            res.status(STATUS_CODES.OK).json({success:true,users})
+            const data = await this._adminManagement.getAllUsers("user",page,limit,search,sortBy,sortOrder);
+            console.log(data)
+            res.status(STATUS_CODES.OK).json({success:true,...data})
            
             
         } catch (error) {
@@ -59,13 +65,18 @@ export class ManagementAdmin implements IAdminManagementController{
             next(error);
             
         }
-        
     }
     async getAllWorkers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = (req.query.search as string) || "";
+            const sortBy = (req.query.sortBy as string) || "createdAt";
+            const sortOrder = (req.query.sortOrder as string) === "asc" ? "asc" : "desc";
             
-            const users = await this._adminManagement.getAllUsers("worker");
-            res.status(STATUS_CODES.OK).json({success:true,users})
+            const data = await this._adminManagement.getAllUsers("worker",page,limit,search,sortBy,sortOrder);
+            console.log(data)
+            res.status(STATUS_CODES.OK).json({success:true,...data})
            
             
         } catch (error) {

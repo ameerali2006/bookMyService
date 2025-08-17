@@ -35,7 +35,7 @@ export function Pagination({
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== current && !disabled) {
-      onChange(page, pageSize)
+      onChange(page)
     }
   }
 

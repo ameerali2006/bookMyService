@@ -17,9 +17,13 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.model.findById(id);
   }
 
-  async findAll(): Promise<T[]> {
-    return await this.model.find();
-  }
+ async findAll(filter: FilterQuery<T> = {}, skip = 0, limit = 10, sort: Record<string, 1 | -1> = {}) {
+    const [items, total] = await Promise.all([
+      this.model.find(filter).sort(sort).skip(skip).limit(limit).lean() as Promise<T[]>,
+      this.model.countDocuments(filter),
+    ]);
+    return { items, total };
+    }
 
   async updateById(id: string, data: Partial<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
@@ -40,4 +44,13 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
       .findOneAndUpdate(filter, updateData, { new: true })
       .lean() as Promise<T>;
   }
+  async findWithPopulate<TReturn = T>(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<TReturn[]> {
+    let query = this.model.find(filter);
+
+    for (const { path, select } of populateFields) {
+      query = query.populate(path, select);
+    }
+
+    return query.lean() as Promise<TReturn[]>;
+  } 
 }
