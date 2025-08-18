@@ -19,7 +19,7 @@ export interface IWorker  extends Document{
   fees: number;
   isBlocked: boolean;
   isActive: boolean;
-  isVerified: boolean;
+  isVerified: "pending"|"approved"| "rejected";
   documents?: string;
   createdAt: Date;
   updatedAt: Date;

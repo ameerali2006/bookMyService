@@ -15,6 +15,10 @@ import {
   
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { authService } from "@/api/AuthService";
+import { removeAdmin } from "@/redux/slice/adminTokenSlice";
+import { useDispatch } from "react-redux";
+import { ErrorToast, SuccessToast } from "../shared/Toaster";
 
 interface SidebarProps {
   activeItem?: string;
@@ -25,9 +29,10 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch=useDispatch()
 
   const menuItems = [
-    { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/admin/" },
+    { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
     { id: "BookingList", label: "Bookings", icon: Calendar, path: "/admin/booking-list" },
     { id: "ServicesDetail", label: "Service Details", icon: Settings, path: "/admin/services-detail" },
     { id: "Workers", label: "Workers", icon: Users, path: "/admin/workers" },
@@ -43,8 +48,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick, onLogout }) 
     navigate(path);
   };
 
-  const handleLogout = () => {
-    onLogout?.();
+  const handleLogout = async () => {
+    try {
+      console.log('logout')
+      const res=await authService.adminLogout()
+      if(res.data.success){
+        dispatch(removeAdmin())
+        navigate("/admin/login")
+        SuccessToast("LogOut Successfully")
+      }else{
+        ErrorToast("LogOut failed, Try Again")
+      }
+    } catch (error) {
+      console.error(error)
+    }
   };
 
   return (

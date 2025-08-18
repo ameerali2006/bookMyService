@@ -19,5 +19,6 @@ export interface IAuthWorkerService {
     workerDto: responseDto;
   }>;
   googleAuth(token:string):Promise<GoogleLoginResponseDTO>
+  isVerified(email:string):Promise<{_id:string|null,status:string|null}>
   
 }

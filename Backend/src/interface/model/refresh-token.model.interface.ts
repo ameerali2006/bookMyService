@@ -1,7 +1,8 @@
-import { ObjectId, Document } from "mongoose";
+import { ObjectId, Document, HydratedDocument } from "mongoose";
 
-export interface IRefreshTokenEntity {
-  id?: string;
+
+
+export interface IRefreshTokenDocument extends Document {
   token: string;
   user: ObjectId;
   userType: "admin" | "user" | "worker";
@@ -10,9 +11,10 @@ export interface IRefreshTokenEntity {
   updatedAt?: Date;
 }
 
-export interface IRefreshTokenModel
-  extends Omit<IRefreshTokenEntity, "id" | "user">,
-    Document {
-  _id: ObjectId;
-  user: ObjectId;
-}
+// export type RefreshTokenDocument = HydratedDocument<IRefreshTokenEntity>;
+// export interface IRefreshTokenModel
+//   extends Omit<IRefreshTokenEntity, "id" | "user">,
+//     Document {
+//   _id: ObjectId;
+//   user: ObjectId;
+// }

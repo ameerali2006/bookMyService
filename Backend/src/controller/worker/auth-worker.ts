@@ -249,5 +249,37 @@ export class AuthWorkerController implements IWorkerAuthController {
     }
     
   }
+  async isVerified(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const email = req.query.email
+      if(!email){
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+      }
+      const data=await this._authWorkerService.isVerified(String(email))
+      if(!data._id||!data.status){
+      
+				res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+			
+      }
+      res.status(STATUS_CODES.OK).json({
+				success: true,
+				message: MESSAGES.LOGOUT_SUCCESS,
+        ...data
+			});
+      
+    } catch (error) {
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+					success: false,
+					message: MESSAGES.VALIDATION_ERROR,
+				});
+    }
+    
+  }
   
 }

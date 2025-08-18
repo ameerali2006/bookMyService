@@ -40,10 +40,8 @@ export const authService={
         return await userAxios.post('/logout')
     },
 
-
-
-
-
+    
+    
     workerVerifyOtp:async (otp:string,email:string)=>{
         return await workerAxios.post('/verify-otp',{otp,email})
     },
@@ -74,13 +72,12 @@ export const authService={
     workerResetPassword:async (data:{token:string,password: string,confirmPassword:string})=>{
         return await workerAxios.post('/reset-password',data)
     },
+    workerIsVerified:async(email:string)=>{
+        return await workerAxios.get("/isVerified",{params:{email}})
+    },
 
 
-
-
-
-
-
+    
     adminLogin: async (credentials: { email: string; password: string }) => {
         return await adminAxios.post("/login", credentials);
     },

@@ -14,7 +14,7 @@ export interface workerManageDto {
   email: string
   phone?: string
   isBlocked: boolean
-  isVerified: boolean
+  isVerified: string
   category: string
   experience: string
   profileImage?: string

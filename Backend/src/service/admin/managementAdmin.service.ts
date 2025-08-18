@@ -93,26 +93,56 @@ export class ManagementAdminService implements IManagementAdminService{
         }
         
     }
-    async verifyWorker(userId: string, isVerified: boolean): Promise<IWorker | null> {
+    async getUnverifiedWorkers(page: number, pageSize: number, status: string): Promise<{ workers: IWorker[] | null; total: number; currentPage: number; totalPages: number; }> {
         try {
-            if(!userId||typeof isVerified != "boolean"){
-                throw new CustomError(
-                MESSAGES.INVALID_CREDENTIALS || 'User ID is required or status is needed',
+            const query: any = {};
+            if (status) {
+                query.isVerified = status; 
+            }
+            const {data,total}=await this._workerRepo.findWithPopulate(query,[{path:"category",select:"category"}],(page-1)*pageSize,pageSize)
+            console.log({
+                workers:data,
+                total,
+                currentPage:page,
+                totalPages:Math.ceil(total/pageSize)
+            })
+            return {
+                workers:data,
+                total,
+                currentPage:page,
+                totalPages:Math.ceil(total/pageSize)
+            }
+        
+        } catch (error) {
+            console.error(error)
+            throw error instanceof CustomError ? error : new CustomError(
+                'data error',
+                STATUS_CODES.BAD_REQUEST
+            );
+            
+        }
+    } 
+    async verifyWorker(userId: string, status:"approved"|"rejected"): Promise<{status:"approved"|"rejected"}> {
+        try {
+            if(!userId){
+                 throw new CustomError(
+                MESSAGES.USER_NOT_FOUND || 'User ID not found',
                 STATUS_CODES.BAD_REQUEST
                 );
             }
-            const verifiedWorker=await this._workerRepo.updateById(userId,{isVerified})
+            const verifiedWorker=await this._workerRepo.updateById(userId,{isVerified:status})
+            console.log(verifiedWorker)
             if(!verifiedWorker){
                 throw new CustomError(
                 MESSAGES.USER_NOT_FOUND || 'User ID not found',
                 STATUS_CODES.BAD_REQUEST
                 );
             }
-            return verifiedWorker
+            return {status:verifiedWorker.isVerified as "approved" | "rejected"}
         } catch (error) {
             
             throw error instanceof CustomError ? error : new CustomError(
-                'Failed toverify worker status',
+                'Failed to verify worker status',
                 STATUS_CODES.INTERNAL_SERVER_ERROR
             );
         }

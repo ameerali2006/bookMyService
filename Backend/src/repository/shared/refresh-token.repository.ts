@@ -4,12 +4,13 @@ import {
 	
 	RefreshTokenModel,
 } from "../../model/refresh-token.model";
+import { IRefreshTokenDocument } from "../../interface/model/refresh-token.model.interface";
 
 import { IRefreshTokenRepository } from '../../interface/repository/refresh-token.repository.interface';
-import { IRefreshTokenModel } from '../../interface/model/refresh-token.model.interface';
+
 
 @injectable() 
-export class RefreshTokenRepository extends BaseRepository<IRefreshTokenModel> implements IRefreshTokenRepository{
+export class RefreshTokenRepository extends BaseRepository<IRefreshTokenDocument> implements IRefreshTokenRepository{
     constructor(){
         super(RefreshTokenModel)
     }

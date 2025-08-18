@@ -115,32 +115,35 @@ export class ManagementAdmin implements IAdminManagementController{
             
         }
     }
+    async unVerifiedWorkers(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log("unverified controller")
+            const {page=1, pageSize=10} = req.query
+            const data = await this._adminManagement.getUnverifiedWorkers(Number(page),Number(pageSize),"pending")
+            
+            res.status(STATUS_CODES.OK).json({success:true,...data})
+            
+        } catch (error) {
+            throw error instanceof CustomError ? error : new CustomError(
+                'Failed to unverified workers',
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
     async verifyWorker(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const {userId}=req.params
-            const {isVerified} =req.body
+            console.log(req.params)
+            const { workerId } = req.params;
+            const { status } = req.body;
+            console.log({ workerId })
 
-            if(!userId||!isVerified){
-                res.status(STATUS_CODES.BAD_REQUEST || 400).json({
-                    success: false,
-                    
-                    message: MESSAGES.INVALID_CREDENTIALS,
-                });
+            if (!["approved", "rejected"].includes(status)) {
+            res.status(400).json({ success: false, message: "Invalid status" });
             }
-            const verifiedWorker=await this._adminManagement.verifyWorker(userId,isVerified)
-            if(!verifiedWorker){
-                res.status(STATUS_CODES.BAD_REQUEST || 400).json({
-                    success: false,
-                    
-                    message: MESSAGES.INVALID_CREDENTIALS,
-                });
-            }
-            res.status(STATUS_CODES.OK || 200).json({
-                success: true,
-                
-                message: `User verification updated successfully`,
-            });
+            console.log("kjhdk")
+            const worker = await this._adminManagement.verifyWorker(workerId, status as "approved" | "rejected");
 
+            res.json({ success: true, status: worker.status });
 
         } catch (error) {
             next(error)

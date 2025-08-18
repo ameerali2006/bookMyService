@@ -15,14 +15,87 @@ import {
   Clock,
   Users,
   Activity,
+  ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 
 import { Navbar } from '@/components/worker/Dashboard/WorkerNavbar';
 import type { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { authService } from '@/api/AuthService';
+import { ErrorToast } from '@/components/shared/Toaster';
 
 export default function WorkerDashboard() {
+  const [data, setData] = useState<any>(null);
+
+
   const worker = useSelector((state: RootState) => state.workerTokenSlice.worker);
+
+  useEffect(()=>{
+    fetchWorker()
+  },[])
+
+  const fetchWorker=async()=>{
+    try {
+       const res = await  authService.workerIsVerified(String(worker?.email))
+       console.log(res)
+       if(res.status==400){
+        ErrorToast(res.data.message)
+        return 
+       }
+        setData(res.data);
+    } catch (error) {
+      ErrorToast("Something Went Wrong")
+    }
+  }
+  if (!data) {
+    return (
+      
+        <div className="flex items-center justify-center h-screen bg-gray-50">
+          <p className="text-gray-600 font-medium">Loading your profile...</p>
+        </div>
+     
+    );
+  }
+  if (data.status === "pending") {
+  return (
+    <>
+      <Navbar />
+      <div className="flex items-center justify-center h-screen bg-green-50">
+        <div className="text-center p-10 rounded-2xl shadow-lg bg-white">
+          <ShieldCheck className="w-16 h-16 text-green-600 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-green-700">Profile Under Review</h1>
+          <p className="mt-2 text-green-600">
+            Your profile has been submitted and is awaiting admin approval. 🚀
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+if (data.status === "rejected") {
+  return (<>
+    <Navbar />
+      <div className="flex items-center justify-center h-screen bg-red-50">
+        <div className="text-center p-10 rounded-2xl shadow-lg bg-white">
+          <ShieldAlert className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-red-700">Profile Rejected</h1>
+          <p className="mt-2 text-red-600">
+            Sorry, your profile was rejected by admin. Please contact support or update your details.
+          </p>
+          <Button
+            className="mt-4 bg-red-600 text-white hover:bg-red-700"
+            onClick={() => (window.location.href = "/worker/profile/edit")}
+          >
+            Update Profile
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
 
   return (
     <WorkerLayout>

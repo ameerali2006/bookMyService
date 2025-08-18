@@ -54,7 +54,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
     const response = await adminManagement.getAllWorkers( page, limit, sortBy, sortOrder, search )
     if (response.status === 200) {
       console.log(response)
-      setWorkers(response.data.users) // backend should return { items, total }
+      setWorkers(response.data.users)
       setTotal(response.data.totalItems)
       setCurrentPage(response.data.currentPage)
     } else {
@@ -227,7 +227,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
 
           <Table
             columns={columns}
-            data={workers}
+            data={filteredAndSorted}
             loading={loading}
             sortBy={sortBy}
             sortOrder={sortOrder}

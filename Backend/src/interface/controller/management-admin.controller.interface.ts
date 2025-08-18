@@ -7,5 +7,7 @@ export interface IAdminManagementController {
     getAllWorkers(req: Request, res: Response, next: NextFunction): Promise<void>
     updateWorkerStatus(req: Request, res: Response, next: NextFunction): Promise<void>
     verifyWorker(req: Request, res: Response, next: NextFunction): Promise<void>
+    unVerifiedWorkers(req: Request, res: Response, next: NextFunction): Promise<void>
+
 
 }

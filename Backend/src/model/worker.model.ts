@@ -32,7 +32,11 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
     fees: { type: Number, default: 0 },
     isBlocked: { type: Boolean, default: true },
     isActive: { type: Boolean, default: false },
-    isVerified: { type: Boolean, default: false },
+    isVerified: { 
+      type: String, 
+      enum: ["pending", "approved", "rejected"], 
+      default: "pending" 
+    },
 
     documents: { type: String },
   },

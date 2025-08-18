@@ -227,5 +227,26 @@ export class AuthWorkerService implements IAuthWorkerService {
             
         }
     }
+    async isVerified(email:string): Promise<{ _id: string|null; status: string|null }> {
+        try {
+            const data =await this._authWorkerRepo.findByEmail(email)
+            if(!data){
+                return {
+                    _id:null,
+                    status:null
+                }
+            }
+            return {
+                _id:data._id.toString(),
+                status:data.isVerified
+            }
+        } catch (error) {
+            console.error("isverified:", error);
+            return {
+                    _id:null,
+                    status:null
+            }
+        }
+    }
 
 }

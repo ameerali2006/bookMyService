@@ -44,13 +44,18 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
       .findOneAndUpdate(filter, updateData, { new: true })
       .lean() as Promise<T>;
   }
-  async findWithPopulate<TReturn = T>(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<TReturn[]> {
-    let query = this.model.find(filter);
-
-    for (const { path, select } of populateFields) {
-      query = query.populate(path, select);
+  async findWithPopulate<TReturn = T>(
+    filter: FilterQuery<T>,
+    populateFields: { path: string; select?: string; match?: any }[],
+    skip: number = 0,
+    limit: number = 10
+  ): Promise<{ data: TReturn[]; total: number }> {
+    const total = await this.model.countDocuments(filter);
+    let query = this.model.find(filter).skip(skip).limit(limit);
+    for (const { path, select, match } of populateFields) {
+      query = query.populate(path, select, match);
     }
-
-    return query.lean() as Promise<TReturn[]>;
-  } 
+    const data = (await query.lean()) as TReturn[];
+    return { data, total };
+  }
 }

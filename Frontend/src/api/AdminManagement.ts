@@ -13,7 +13,15 @@ export const  adminManagement= {
     },
     updateWorkerStatus:async ( workerId: string,isActive: boolean )=>{
         return await adminAxios.patch(`/workers/${workerId}/status`,{isActive} )
-    }
+    },
+    getUnverifiedWorkers: async (page: number, pageSize: number) => {
+        
+        return await adminAxios.get("/workers/unverified",{params:{page, pageSize }})
+    },
+    verifyWorker:async ( workerId: string,status:"approved"|"rejected")=>{
+        return await adminAxios.patch(`/workers/${workerId}/unverified`,{status} )
+    },
+
 
 
 

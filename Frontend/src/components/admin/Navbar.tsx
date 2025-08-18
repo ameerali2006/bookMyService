@@ -6,7 +6,7 @@ import { Search, Bell, ChevronDown } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {removeAdmin} from "@/redux/slice/adminTokenSlice";
-// import { logoutAdmin } from "@/api/AuthService";
+
 
 interface NavbarProps {
   userName?: string;

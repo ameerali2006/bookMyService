@@ -53,5 +53,9 @@ export class WorkerRoute extends BaseRoute{
             cloudinaryController.getServiceNames(req, res, next)
                     
         );
+        this.router.get("/isVerified", (req: Request, res: Response, next: NextFunction) =>
+            authWorkerController.isVerified(req, res, next)
+                    
+        );
     }
 }
