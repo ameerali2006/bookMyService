@@ -21,7 +21,18 @@ export const  adminManagement= {
     verifyWorker:async ( workerId: string,status:"approved"|"rejected")=>{
         return await adminAxios.patch(`/workers/${workerId}/unverified`,{status} )
     },
-
+    getAllSerivces:async (search:string,sort:string,page:number,limit:number) =>{
+        return await adminAxios.get("/services",{params:{search,sort ,page, limit}});
+    },
+    getCloudinarySignature:async ()=>{
+        return await adminAxios.get("/cloudinary-signature")
+    },
+    createService:async (data:{category:string,description:string,price:number,priceUnit: "per job"|"per hour"|"per item",duration:number,image:string})=>{
+        return await adminAxios.post("/services/create",data)
+    },
+    updateServiceStatus: async (id: string, status: "active" | "inactive") =>{
+     return await adminAxios.patch(`/services/${id}/status`, { status });
+    }
 
 
 

@@ -3,20 +3,23 @@ import { IManagementAdminService } from '../../interface/service/managementAdmin
 import { IUser } from '../../interface/model/user.model.interface';
 import { TYPES } from '../../config/constants/types';
 import { IUserRepository } from '../../interface/repository/user.repository.interface';
-import { userManageDto, workerManageDto } from '../../dto/admin/management.dto';
+import { serviceCreateDto, serviceManageDto, userManageDto, workerManageDto } from '../../dto/admin/management.dto';
 import { AdminMapper } from '../../utils/mapper/admin-mapper';
 import { CustomError } from '../../utils/custom-error';
 import { MESSAGES } from '../../config/constants/message';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
+import { IServiceRepository } from '../../interface/repository/service.repository.interface';
 
 
 @injectable()
 export class ManagementAdminService implements IManagementAdminService{
     constructor(
         @inject(TYPES.AuthUserRepository) private _userRepo:IUserRepository,
-        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository
+        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
+        @inject(TYPES.ServiceRepository) private _serviceRepo:IServiceRepository,
+
     ) {
         
     }
@@ -146,6 +149,99 @@ export class ManagementAdminService implements IManagementAdminService{
                 STATUS_CODES.INTERNAL_SERVER_ERROR
             );
         }
+    }
+    async getAllServices(search: string, sort: string, page: number, limit: number): Promise<{ services: serviceManageDto[]; currentPage: number; totalPages: number; totalItems: number; }> {
+        try {
+            const query:any={}
+            if(search){
+                query.category={$regex:search,$options:"i"}
+            }
+            let sortOption: any = { createdAt: -1 };
+            if(sort=="lowPrice")sortOption={price:1}
+            if(sort=="highPrice")sortOption={price:-1}
+
+            const pageNumber = parseInt(String(page), 10) || 1;
+            const pageSize = parseInt(String(limit), 10) || 6;
+            const skip = (pageNumber - 1) * pageSize;
+
+            const {items,total}=await this._serviceRepo.findAll(query,skip,limit,{...sortOption})
+
+            const services=AdminMapper.resServiceDetails(items)
+            console.log(services)
+            return {
+                services,
+                currentPage:page,
+                totalPages:Math.ceil(total/limit),
+                totalItems:total
+            }
+        } catch (error) {
+            console.log(error)
+            throw error instanceof CustomError ? error : new CustomError(
+                MESSAGES.USER_NOT_FOUND || 'Failed to fetch users',
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+    async serviceRegister(data: serviceCreateDto): Promise<{ data?: serviceManageDto; message: string; }> {
+        try {
+
+            const existing=await this._serviceRepo.findOne({category:data.category})
+
+            if(existing){
+                return { message: "Service already exists" };
+            }
+            
+            const newService=await this._serviceRepo.create(data)
+            const mappedData=AdminMapper.resServiceDetails([newService])
+            return {
+                data:mappedData[0],
+                message:"Service created successfully"
+            }
+        } catch (error) {
+            console.log(error)
+            throw error instanceof CustomError ? error : new CustomError(
+                MESSAGES.USER_NOT_FOUND || 'Failed to fetch users',
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+            
+        }
+    }
+    async updateServiceStatus(serviceId: string, status:'inactive' | 'active' ): Promise<{ success: boolean; status: 'inactive' | 'active'; }> {
+        try {
+            if (!serviceId) {
+                throw new CustomError(
+                    MESSAGES.INVALID_CREDENTIALS || 'User ID is required',
+                    STATUS_CODES.BAD_REQUEST
+                );     
+            }
+            
+           
+
+            const updated = await this._serviceRepo.updateById(serviceId, {
+                status,
+            });
+            console.log(updated)
+
+            if (!updated) {
+                throw new CustomError(
+                MESSAGES.ACCOUNT_NOT_VERIFIED || "Service not found",
+                STATUS_CODES.NOT_FOUND
+                );
+            }
+
+            return { success: true, status: updated.status };
+        } catch (error) {
+
+            console.log(error)
+            throw error instanceof CustomError ? error : new CustomError(
+                MESSAGES.USER_NOT_FOUND || 'Failed to fetch users',
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+        }
+
+
+
+            
     }
 
 }

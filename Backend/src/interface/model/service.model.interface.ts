@@ -6,8 +6,8 @@ export interface IService extends Document {
   price: number;
   priceUnit: "per hour"| "per job"| "per item"; 
   duration: number; 
-  images: string[];
-  icon: string; 
+  image: string;
+  
   status: "active" | "inactive";
   createdAt: Date;
   updatedAt: Date;

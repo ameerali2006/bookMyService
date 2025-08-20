@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick, onLogout }) 
   const menuItems = [
     { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
     { id: "BookingList", label: "Bookings", icon: Calendar, path: "/admin/booking-list" },
-    { id: "ServicesDetail", label: "Service Details", icon: Settings, path: "/admin/services-detail" },
+    { id: "ServicesDetail", label: "Service Details", icon: Settings, path: "/admin/services" },
     { id: "Workers", label: "Workers", icon: Users, path: "/admin/workers" },
     { id: "Reviews", label: "Reviews", icon: Star, path: "/admin/reviews" },
     { id: "Verification", label: "Worker Verification", icon: Shield, path: "/admin/unverified" },

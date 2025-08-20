@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseRoute } from "../routes/base.route";
-import { authAdminController,managementAdminController} from "../config/di/resolver";
+import { authAdminController,cloudinaryController,managementAdminController} from "../config/di/resolver";
 import { authorizeRole, verifyAuth } from "../middleware/auth.middleware";
 
 
@@ -32,13 +32,22 @@ export class AdminRoute extends BaseRoute {
         })
         this.router.patch("/workers/:workerId/unverified",(req:Request,res:Response,next:NextFunction)=>{
             managementAdminController.verifyWorker(req,res,next)
-
         })
         this.router.get("/workers/unverified",(req:Request,res:Response,next:NextFunction)=>{
-            
             managementAdminController.unVerifiedWorkers(req,res,next)
-
         })
-        
+        this.router.get("/services",(req:Request,res:Response,next:NextFunction)=>{
+            managementAdminController.getAllServices(req,res,next)
+        })
+        this.router.get("/cloudinary-signature",(req:Request,res:Response,next:NextFunction)=>{
+            cloudinaryController.getSignature(req,res,next)
+        })
+        this.router.post("/services/create",(req:Request,res:Response,next:NextFunction)=>{
+            console.log("/services/create")
+            managementAdminController.serviceRegister(req,res,next)
+        })
+        this.router.patch("/services/:id/status",(req: Request, res: Response, next: NextFunction)=>{
+            managementAdminController.updateServiceStatus(req,res,next)
+        })
     }
 }

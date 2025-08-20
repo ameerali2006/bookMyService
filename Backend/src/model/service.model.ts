@@ -10,8 +10,8 @@ const serviceSchema = new Schema  <IService>(
     price: { type: Number, required: true },
     priceUnit: { type: String,  enum: ["per hour", "per job", "per item"], required: true },
     duration: { type: Number, required: true },
-    images: [{ type: String, required: true }],
-    icon: { type: String, required: true },
+    image: [{ type: String, required: true }],
+    
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     
   },
@@ -19,6 +19,4 @@ const serviceSchema = new Schema  <IService>(
     timestamps: true 
   }
 );
-
-
 export const ServiceModel = model<IService>("Service", serviceSchema);

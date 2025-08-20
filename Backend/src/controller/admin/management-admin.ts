@@ -7,6 +7,7 @@ import { TYPES } from "../../config/constants/types";
 import { inject, injectable } from "tsyringe";
 import { IManagementAdminService } from "../../interface/service/managementAdmin.service.interface";
 import { CustomError } from "../../utils/custom-error";
+import { serviceRegistrationSchema } from "../validation/serviceCreate";
 
 
 
@@ -147,6 +148,60 @@ export class ManagementAdmin implements IAdminManagementController{
 
         } catch (error) {
             next(error)
+        }
+    }
+    async getAllServices(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const {search="",sort="latest",page="1",limit="6"}=req.query as {
+            search?: string;
+            sort?: string;
+            page?: string;
+            limit?: string;
+            };
+            const data=await this._adminManagement.getAllServices(String(search),sort,Number(page),Number(limit))
+             res.status(STATUS_CODES.OK).json({ success: true, ...data});
+
+        } catch (error) {
+            next(error)
+        }
+    }
+    async serviceRegister(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const data=req.body
+            console.log(req)
+            const validatedData=serviceRegistrationSchema.parse(data)
+            const result=await this._adminManagement.serviceRegister(validatedData)
+            if(result.data){
+                res.status(STATUS_CODES.OK).json(result)
+            }else{
+                res.status(STATUS_CODES.NOT_FOUND).json(result)
+            }
+        } catch (error) {
+            console.error(error)
+            next(error)
+        }
+    }
+    async  updateServiceStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log(req.params,req.body)
+            const serviceId=req.params.id
+            const status=req.body.status as "active" | "inactive"
+            console.log(serviceId,status)
+            const updated=await this._adminManagement.updateServiceStatus(serviceId,status)
+            if(!updated){
+                res.status(STATUS_CODES.BAD_REQUEST || 400).json({
+                    success: false,
+                    
+                    message: `User updation failed`,
+                });
+            }
+            res.status(STATUS_CODES.OK || 200).json({
+                success: true,
+                status:updated.status,
+                message: `User ${updated?.status? "inactive" : "active"} successfully`,
+            });
+        } catch (error) {
+            
         }
     }
 

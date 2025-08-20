@@ -1,4 +1,5 @@
-import { userManageDto, workerManageDto } from "../../dto/admin/management.dto";
+import { serviceManageDto, userManageDto, workerManageDto } from "../../dto/admin/management.dto";
+import { IService } from "../../interface/model/service.model.interface";
 import { IUser } from "../../interface/model/user.model.interface";
 import { IWorker } from "../../interface/model/worker.model.interface";
 
@@ -25,6 +26,20 @@ export class AdminMapper {
             category: w.category.toString(),
             experience: w.experience,
             profileImage: w?.profileImage||undefined,
+            createdAt: w.createdAt
+        }));
+    }
+    static resServiceDetails(services: IService[]): serviceManageDto[] {
+        return services.map((w) => ({
+            _id:String(w._id),
+            category:w.category,
+            description: w.description,
+            price: w.price,
+            priceUnit: w.priceUnit,
+            duration: w.duration,
+            image: w.image,
+            
+            status:w.status,
             createdAt: w.createdAt
         }));
     }

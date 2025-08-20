@@ -7,6 +7,7 @@ import IsAdminLogout from "./protected/AdminIsLogout";
 import UserManagement from "./pages/admin/UserManagement";
 import WorkerManagement from "./pages/admin/WorkerManagement";
 import WorkerVerification from "./pages/admin/WorkerVerification";
+import ServiceManagement from "./pages/admin/ServiceManagement";
 
 
 const LoginPage = lazy(()=>import("./pages/admin/LoginPage"));
@@ -21,6 +22,8 @@ const Admin = () => {
           <Route path="/users" element={<IsAdminLogin><UserManagement/></IsAdminLogin>} ></Route>
           <Route path="/workers" element={<IsAdminLogin><WorkerManagement/></IsAdminLogin>} ></Route>
           <Route path="/unVerified" element={<IsAdminLogin><WorkerVerification/></IsAdminLogin>} ></Route>
+          <Route path="/services" element={<IsAdminLogin><ServiceManagement/></IsAdminLogin>} ></Route>
+
           </Routes>
     </Suspense></>
   )
