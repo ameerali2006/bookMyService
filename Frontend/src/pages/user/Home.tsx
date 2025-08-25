@@ -1,7 +1,7 @@
 import Footer from "@/components/user/shared/Footer"
 import Header from "@/components/user/shared/Header"
 import { Search, User, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
-
+import {ServiceCategories} from "@/components/user/Dashboard/ServiceCategories"
 export default function Homepage() {
   return (
     <>
@@ -39,9 +39,11 @@ export default function Homepage() {
           </div>
         </div>
       </section>
+            
 
       {/* Service Categories Section */}
-      <section className="py-12 bg-white">
+      <ServiceCategories/>
+      {/* <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
             {[
@@ -64,7 +66,7 @@ export default function Homepage() {
                 className="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
               >
                 <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                  {/* Placeholder for service icons */}
+                  
                   <div className="w-6 h-6 bg-gray-400 rounded"></div>
                 </div>
                 <span className="text-xs text-center font-medium text-gray-700">{service}</span>
@@ -72,7 +74,7 @@ export default function Homepage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Why bookMyService Section */}
       <section className="bg-gray-100 py-12">

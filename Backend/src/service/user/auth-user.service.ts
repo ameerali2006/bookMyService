@@ -19,6 +19,8 @@ import { IUser } from "../../interface/model/user.model.interface";
 import { IOtp } from "../../interface/model/otp.model.interface";
 import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
 import { IGoogleInfo } from "../../types/auth.types";
+import { serviceCreateDto, serviceManageDto } from "../../dto/admin/management.dto";
+import { IServiceRepository } from "../../interface/repository/service.repository.interface";
 
 @injectable()
 export class AuthUserService implements IAuthUserService {
@@ -29,7 +31,8 @@ export class AuthUserService implements IAuthUserService {
         @inject(TYPES.EmailService) private _emailService:IEmailService,
         @inject(TYPES.OtpRepository) private _otpRepo:IOtpRepository,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,
-        @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService
+        @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService,
+        @inject(TYPES.ServiceRepository) private _serviceRepo:IServiceRepository
 
 
     ){}
@@ -212,4 +215,25 @@ export class AuthUserService implements IAuthUserService {
             
         }
     }
+    async getAllServices(): Promise<{ services: serviceCreateDto[]; }> {
+        try {
+            const {items,total} =await this._serviceRepo.findAll({status:"active"})
+            return {
+                services:items
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+
+            
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError(
+                MESSAGES.UNAUTHORIZED_ACCESS,
+                STATUS_CODES.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+    
 }
+ 

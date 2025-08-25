@@ -43,5 +43,10 @@ import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
             authController.resetPassword(req, res, next)
             
         );
+        this.router.get("/getService", (req: Request, res: Response, next: NextFunction) =>
+            authController.getServices(req, res, next)
+            
+        );
+
     }
  } 

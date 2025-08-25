@@ -19,6 +19,7 @@ export class AuthUserController implements IAuthController {
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
     @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
 
+
   ) {}
 
   async register(req: Request, res: Response,next:NextFunction) {
@@ -232,5 +233,18 @@ export class AuthUserController implements IAuthController {
 			});
 		}
 	}
+  async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await this._authUserService.getAllServices(); // call service layer
+
+      res.status(200).json({
+        success: true,
+        data: result.services,   // only send services
+        message: "Fetched active services successfully",
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
   
 }

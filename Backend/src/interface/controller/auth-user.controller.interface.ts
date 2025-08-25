@@ -10,6 +10,7 @@ export interface IAuthController {
 	forgotPassword(req: Request, res: Response,next :NextFunction): Promise<void>;
 	resetPassword(req: Request, res: Response,next :NextFunction): Promise<void>;
 	handleTokenRefresh(req: Request, res: Response): void;
+	getServices(req: Request, res: Response, next:NextFunction): Promise<void>;
 
 
 }
