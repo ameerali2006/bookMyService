@@ -5,7 +5,11 @@ import LoginForm from "../../components/shared/Login"
 import { useDispatch } from "react-redux"
 import { addWorker } from "@/redux/slice/workerTokenSlice" 
 import { authService } from "@/api/AuthService"
-
+import { ErrorToast } from "@/components/shared/Toaster"
+type SubmitResult = {
+  success: boolean;
+  message: string;
+};
 function WorkerLogin() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -13,9 +17,9 @@ function WorkerLogin() {
   const handleWorkerLogin = async (values: {
     email: string
     password: string
-  }) => {
+  }):Promise<SubmitResult> => {
     try {
-      const response = await authService.workerLogin(values) // Assuming you have a workerLogin method
+      const response = await authService.workerLogin({...values,role:"worker"}) // Assuming you have a workerLogin method
       console.log("Worker login working....")
       console.log(response.data.success)
 
@@ -23,8 +27,10 @@ function WorkerLogin() {
         console.log("worker for redux", response.data.worker)
         dispatch(addWorker(response.data.worker))
         navigate("/worker/dashboard") 
+        return {message:response.data.message,success:response.data.success}
       } else {
-        throw new Error("Invalid worker credentials")
+        ErrorToast(response.data.message||"Invalid credentials")
+        return {message:response.data.message,success:response.data.success}
       }
     } catch (error) {
       console.error("Worker login failed:", error)

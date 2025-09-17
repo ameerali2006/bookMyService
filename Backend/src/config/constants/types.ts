@@ -8,16 +8,19 @@ export const TYPES = {
   JwtService:Symbol.for('JwtService'),
   RedisTokenRepository:Symbol.for("RedisTokenRepository"),
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
-
+  WorkingDetailsRepository: Symbol.for("WorkingDetailsRepository"),
 
   WorkerRepository: Symbol.for("WorkerRepository"),
   AuthWorkerService:Symbol.for("AuthWorkerService"),
   CloudinaryService:Symbol.for("CloudinaryService"),
+  GetWorkingDetails:Symbol.for("GetWorkingDetails"),
 
-
-
-
-
+  LoginService:Symbol.for("LoginService"),
+  RegisterService:Symbol.for("RegisterService"),
+  OtpService:Symbol.for("OtpService"),
+  GoogleService:Symbol.for("GoogleService"),
+  GetService:Symbol.for("GetService"),
+  IsVerified:Symbol.for("IsVerified"),
 
   AuthUserRepository: Symbol.for("AuthUserRepository"),
   OtpRepository:Symbol.for('OtpRepository'),

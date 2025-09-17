@@ -1,6 +1,6 @@
 import { Response,Request,NextFunction } from "express";
 import { BaseRoute } from "./base.route.js";
-import { authWorkerController ,cloudinaryController} from "../config/di/resolver.js";
+import { authWorkerController ,cloudinaryController, tokenController, workingDetailsController} from "../config/di/resolver.js";
 import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
 
 
@@ -36,7 +36,7 @@ export class WorkerRoute extends BaseRoute{
             authWorkerController.login(req, res, next)
                     
         );
-        this.router.post("/logout",verifyAuth("worker"),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
+        this.router.post("/logout",verifyAuth(),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
         
             authWorkerController.logout(req, res, next)
                     
@@ -55,6 +55,14 @@ export class WorkerRoute extends BaseRoute{
         );
         this.router.get("/isVerified", (req: Request, res: Response, next: NextFunction) =>
             authWorkerController.isVerified(req, res, next)
+                    
+        );
+        this.router.post("/refresh-token", (req: Request, res: Response, next: NextFunction) =>
+            tokenController.handleTokenRefresh(req, res)
+                            
+        );
+        this.router.get("/profile/slot", (req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.getWorkingDetails(req, res, next)
                     
         );
     }

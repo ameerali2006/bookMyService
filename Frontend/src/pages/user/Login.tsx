@@ -4,7 +4,11 @@ import LoginForm from '../../components/shared/Login'
 import { useDispatch } from 'react-redux';
 import { addUser } from '@/redux/slice/userTokenSlice';
 import { authService } from '@/api/AuthService';
-
+import { ErrorToast } from '@/components/shared/Toaster';
+type SubmitResult = {
+  success: boolean;
+  message: string;
+};
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -12,8 +16,9 @@ function Login() {
   const handleUserLogin = async (values: {
     email: string;
     password: string;
-  }) => {
-  const response = await authService.login(values);
+    
+  }):Promise<SubmitResult> => {
+  const response = await authService.login({...values,role:"user"});
     console.log('working....');
     console.log(response.data.success);
     
@@ -21,8 +26,11 @@ function Login() {
       console.log( "user for redux",response.data.user)
       dispatch(addUser(response.data.user));
       navigate("/");
+      return {message:response.data.message,success:response.data.success}
     } else {
-      throw new Error("Invalid credentials");
+      ErrorToast(response.data.message||"Invalid credentials")
+      
+      return {message:response.data.message,success:response.data.success}
     }
   };
   return (

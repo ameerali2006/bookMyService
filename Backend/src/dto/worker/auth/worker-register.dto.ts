@@ -4,18 +4,22 @@ export interface WorkerRegisterDTO {
   name: string;
   email: string;
   phone: string;
-  password: string;
-  confirmPassword: string;
+  password?: string;
+  
 
   category: Types.ObjectId;
   experience: "0-1" | "2-5" | "6-10" | "10+";
 
   zone: string;
-  latitude: string;  // Note: still string from frontend
+  latitude: string;  
   longitude: string;
 
-  documents?: string; // Will be the file path or URL after upload
+  documents?: string; 
+  role:"worker"
+  
+  
 }
+
 export interface responseDto{
   name:string,
   email:string,
@@ -31,7 +35,7 @@ export interface GoogleLoginResponseDTO {
     name: string;
     email: string;
     googleId: string;
-    profileImage: string | null;
-  }|null;
+    image: string | null;
+  }|null;   
   isNew: boolean;
 }

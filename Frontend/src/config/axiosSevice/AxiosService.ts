@@ -46,18 +46,18 @@ export function createAxiosClient({
             originalRequest._retry = true;
 
             if (!isRefreshing) {
-            isRefreshing = true;
-            try {
-                await instance.post(refreshTokenEndpoint);
-                isRefreshing = false;
-                return instance(originalRequest);
-            } catch (refreshError) {
-                isRefreshing = false;
-                store.dispatch(removeAuthAction());
-                window.location.href = loginRedirect;
-                WarningToast("Please login again");
-                return Promise.reject(refreshError);
-            }
+                isRefreshing = true;
+                try {
+                    await instance.post(refreshTokenEndpoint);
+                    isRefreshing = false;
+                    return instance(originalRequest);
+                } catch (refreshError) {
+                    isRefreshing = false;
+                    store.dispatch(removeAuthAction());
+                    window.location.href = loginRedirect;
+                    WarningToast("Please login again");
+                    return Promise.reject(refreshError);
+                }
             }
         }
 
@@ -75,11 +75,11 @@ export function createAxiosClient({
 
         // Invalid token or blacklisted
         if (
-            (error.response.status === 401 &&
+            (error.response?.status === 401 &&
             error.response.data.message === "Invalid token") ||
-            (error.response.status === 403 &&
+            (error.response?.status === 403 &&
             error.response.data.message === "Token is blacklisted") ||
-            (error.response.status === 403 &&
+            (error.response?.status === 403 &&
             error.response.data.message === "Access denied: Your account has been blocked" &&
             !originalRequest._retry)
         ) {

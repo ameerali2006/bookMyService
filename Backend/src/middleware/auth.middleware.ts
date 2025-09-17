@@ -16,13 +16,13 @@ export interface CustomJwtPayload extends JwtPayload{
 export interface CustomRequest extends Request {
 	user: CustomJwtPayload;
 }
-export const verifyAuth =(role:"user"|"worker"|"admin") => async (
+export const verifyAuth =() => async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
 	try {
-		const token = extractToken(req,role);
+		const token = extractToken(req);
 		console.log('**token',token)
 		if (!token || !token.access_token || !token.refresh_token) {
 			console.log('in verifyToken');
@@ -92,16 +92,16 @@ export const verifyAuth =(role:"user"|"worker"|"admin") => async (
 
 const extractToken = (
   req: Request,
-  userType:"user"|"worker"|"admin"
+  
 ): { access_token: string; refresh_token: string } | null => {
 	console.log(req.cookies)
   
 	
-  if (!userType) return null;
+  
   
 
-  const access_token = req.cookies?.[`${userType}_access_token`];
-  const refresh_token = req.cookies?.[`${userType}_refresh_token`];
+  const access_token = req.cookies?.[`access_token`];
+  const refresh_token = req.cookies?.[`refresh_token`];
   console.log('tokens:',{access_token,refresh_token})
 
   if (!access_token || !refresh_token) return null; // ✅ Add this check
@@ -151,13 +151,13 @@ export const authorizeRole = (allowedRoles: string[]) => {
 //* ─────────────────────────────────────────────────────────────
 //*                 🛠️ Decode Token Middleware
 //* ─────────────────────────────────────────────────────────────
-export const decodeToken =(role:"user"|"worker"|"admin") => async (
+export const decodeToken =() => async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
 	try {
-		const token = extractToken(req,role);
+		const token = extractToken(req);
 
 		if (!token) {
 			res.status(STATUS_CODES.UNAUTHORIZED).json({

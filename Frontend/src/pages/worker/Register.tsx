@@ -62,6 +62,7 @@ export default function WorkerRegistration() {
     longitude: " 76.5874",
     zone: "",
     
+    
   })
   const [workCategories, setWorkCategories] = useState<
   { value: string; label: string; icon: typeof Briefcase; color: string }[]
@@ -277,7 +278,8 @@ export default function WorkerRegistration() {
     try {
       console.log("Final submit: ", formData)
       setIsOtpOpen(false)
-      const response = await authService.workerRegister(formData)
+      console.log(formData)
+      const response = await authService.workerRegister({...formData,role:"worker"})
       if(response.data.success){
         SuccessToast("Worker registered successfully!")
         console.log("hello worker register ayyiiii")
@@ -481,6 +483,7 @@ export default function WorkerRegistration() {
         </Card>
       </div>
       <OtpModal
+        role="worker"
         isOpen={isOtpOpen}
         onClose={() => setIsOtpOpen(false)}
         onFinalSubmit={handleWorkerVerified}

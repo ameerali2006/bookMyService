@@ -24,7 +24,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import GoogleLoginComponent from "@/components/user/GoogleLogin";
-
+import { ErrorToast } from "./Toaster";
+type SubmitResult = {
+  success: boolean;
+  message: string;
+};
 // Validation schema
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -36,7 +40,7 @@ const loginSchema = z.object({
 // TypeScript types
 type LoginFormValues = z.infer<typeof loginSchema>;
 interface LoginFormProps {
-  onSubmit: SubmitHandler<LoginFormValues>;
+  onSubmit: (data: LoginFormValues) => Promise<SubmitResult>;
   role: string;
 }
 
@@ -54,7 +58,10 @@ export default function LoginForm({ onSubmit, role }: LoginFormProps) {
   const handleSubmit: SubmitHandler<LoginFormValues> = async (values) => {
     setIsLoading(true);
     try {
-      await onSubmit(values);
+      let res=await onSubmit(values);
+      if(!res.success){
+        setErrormsg(res.message)
+      }
     } catch (error) {
       console.error(error);
       setErrormsg("Invalid credentials");

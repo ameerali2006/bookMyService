@@ -10,24 +10,29 @@ import { clearAuthCookies,setAuthCookies } from "../../utils/cookie-helper";
 import { IAdminController } from "../../interface/controller/auth-admin.controller.interface";
 import { CustomRequest } from "../../middleware/auth.middleware";
 import { ITokenservice } from "../../interface/service/token.service.interface";
+import { ILoginService } from "../../interface/service/auth/login.service.interface";
 @injectable()
 export class AuthAdminController implements IAdminController{
   constructor(
     @inject(TYPES.AuthAdminService) private _authAdminService: IAuthAdminService,
-    @inject(TYPES.TokenService) private  _tokenService:ITokenservice
+    @inject(TYPES.TokenService) private  _tokenService:ITokenservice,
+
+    @inject(TYPES.LoginService) private _Login:ILoginService,
   ) {}
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const loginCredential: LoginDto = req.body;
-      const { refreshToken, accessToken,admin } = await this._authAdminService.login(
+      const {message,success, refreshToken, accessToken,user:admin } = await this._Login.execute(
         loginCredential
       );
-      const accessTokenName = "admin_access_token";
-      const refreshTokenName = "admin_refresh_token";
-      setAuthCookies(res,accessToken,refreshToken,accessTokenName,refreshTokenName)
-      res
-        .status(STATUS_CODES.OK)
-        .json({ success: true, message: MESSAGES.LOGIN_SUCCESS, admin });
+      if(success&&refreshToken&& accessToken){
+        const accessTokenName = "access_token";
+        const refreshTokenName = "refresh_token";
+        setAuthCookies(res,accessToken,refreshToken,accessTokenName,refreshTokenName)
+        res
+          .status(STATUS_CODES.OK)
+          .json({ success: true, message: MESSAGES.LOGIN_SUCCESS, admin });
+      }
     } catch (error) {
       next(error); 
     }
@@ -47,8 +52,8 @@ export class AuthAdminController implements IAdminController{
         );
         console.log('12')
         const user = (req as CustomRequest).user;
-        const accessTokenName = `admin_access_token`;
-        const refreshTokenName = `admin_refresh_token`;
+        const accessTokenName = `access_token`;
+        const refreshTokenName = `refresh_token`;
         clearAuthCookies(res, accessTokenName, refreshTokenName);
         console.log('13')
         res.status(STATUS_CODES.OK).json({

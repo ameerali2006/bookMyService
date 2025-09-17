@@ -6,7 +6,7 @@ import { IWorker } from "../../interface/model/worker.model.interface";
 export class AdminMapper {
   static resUserDetails(users: IUser[]): userManageDto[] {
     return users.map((user) => ({
-        _id:user._id,
+        _id:user._id.toString(),
         name: user.name,
         email: user.email,
         phone: user.phone,

@@ -32,8 +32,8 @@ const GoogleLoginComponent = ({ userType, onGoogleSuccess }: GoogleLoginComponen
       // Call the correct service method based on userType
       const response =
         userType === "worker"
-          ? await authService.googleWorkerLogin(token)
-          : await authService.googleLogin(token);
+          ? await authService.googleWorkerLogin(token,userType)
+          : await authService.googleLogin(token,userType);
 
       if (response.data.success) {
         const {name,email}=response.data.user

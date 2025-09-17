@@ -18,6 +18,7 @@ export const ServiceCategories = () => {
     const fetchCategories = async () => {
       try {
         const res = await authService.getUserServices(); // replace with your backend
+        console.log(res)
         const data = await res.data;
         console.log(data)
         setCategories(data.data || []);

@@ -12,4 +12,4 @@ export interface IManagementAdminService{
     getAllServices(search:string,sort:string,page:number,limit:number,): Promise<{services:serviceManageDto[];currentPage: number;totalPages: number;totalItems: number}>;
     serviceRegister(data:serviceCreateDto):Promise<{data?:serviceManageDto,message:string}>
     updateServiceStatus(serviceId:string,status:"inactive" |"active"):Promise<{success:boolean,status:"inactive" |"active"}>
-}
+}  

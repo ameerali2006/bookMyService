@@ -12,7 +12,7 @@ function LoginPage() {
         email: string;
         password: string;
       }) => {
-        const response = await authService.adminLogin( values);
+        const response = await authService.adminLogin( {...values,role:'admin'});
        
         console.log(response.data.success);
 

@@ -97,7 +97,7 @@ const register = () => {
   const onFinalSubmit = async () => {
    ;
     try {
-      const response=await authService.register(storedFormValues as FormValues);
+      const response=await authService.register({...storedFormValues as FormValues,role:"user"});
       if(response.data.success){
         SuccessToast("successfully registered !!");
         dispatch(addUser(response.data.userData))
@@ -264,6 +264,7 @@ const register = () => {
           </CardFooter>
         </Card>
         <OtpModal
+          role='user'
           isOpen={isOtpModalOpen}
           onClose={() => setIsOtpModalOpen(false)}
           onFinalSubmit={onFinalSubmit}

@@ -8,22 +8,31 @@ import {clearAuthCookies, setAuthCookies, updateCookieWithAccessToken} from "../
 import { ITokenservice } from "../../interface/service/token.service.interface.js";
 import { CustomRequest } from "../../middleware/auth.middleware.js";
 import { IWorkerAuthController } from "../../interface/controller/auth-worker.controller.interface.js";
-import { IAuthWorkerService } from "../../interface/service/auth-worker.service.interface.js";
-import { WorkerRegisterSchema } from "../validation/worker-register.zod.js";
-import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface.js";
-import { IGoogleInfo } from "../../types/auth.types.js";
-import { IWorkerRepository } from "../../interface/repository/worker.repository.interface.js";
+
+
+
 import { IResetPassword } from "../../interface/service/resetPassword.service.interface.js";
 import { Types } from "mongoose";
+import { ILoginService } from "../../interface/service/auth/login.service.interface.js";
+import { schemasByRole } from "../validation/register.zod.js";
+import { IRegisterService } from "../../interface/service/auth/register.service.interface.js";
+import { IOtpService } from "../../interface/service/auth/otp.service.interface.js";
+import { IGoogleService } from "../../interface/service/auth/google.service.interface.js";
+import { IIsVerified } from "../../interface/service/auth/isVerified.service.interface.js";
 
 
 @injectable()
 export class AuthWorkerController implements IWorkerAuthController {
   constructor(
-    @inject(TYPES.AuthWorkerService) private _authWorkerService:IAuthWorkerService,
-    @inject(TYPES.GoogleAuthService) private _googleAuth:IGoogleAuthService,
+
     @inject(TYPES.TokenService) private _tokenService:ITokenservice,
     @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
+    @inject(TYPES.LoginService) private _Login:ILoginService,
+    @inject(TYPES.RegisterService) private _Register:IRegisterService,
+    @inject(TYPES.OtpService) private _Otp:IOtpService,
+    @inject(TYPES.GoogleService) private _googleLogin:IGoogleService,
+    @inject(TYPES.IsVerified) private _isVerified:IIsVerified
+
     
     
   ) {}
@@ -35,7 +44,7 @@ export class AuthWorkerController implements IWorkerAuthController {
 
         const email: string = req.body.email;
         console.log(`otp generation ${email}`)
-        await this._authWorkerService.generateOtp(email);
+        await this._Otp.generate(email);
         res
             .status(STATUS_CODES.CREATED)
             .json({ success: true, message: MESSAGES.OTP_SENT });
@@ -46,7 +55,9 @@ export class AuthWorkerController implements IWorkerAuthController {
     }
     async verifyOtp(req: Request, res: Response , next :NextFunction): Promise<void> {
         try {
-          await this._authWorkerService.verifyOtp(req.body);
+          const {otp,email,role}=req.body
+          
+          await this._Otp.verify({email,otp,role});
     
           res
             .status(STATUS_CODES.OK)
@@ -61,15 +72,15 @@ export class AuthWorkerController implements IWorkerAuthController {
             console.log('worker register')
             const data = req.body;
             console.log(data)
-            const schema = WorkerRegisterSchema
+            const schema = schemasByRole["worker"]
             console.log(schema)
 
             const validatedData = schema.parse(data)
             console.log('after validation')
-            const Data = await this._authWorkerService.registerWorker({...validatedData,category:new Types.ObjectId(validatedData.category)})
+            const Data = await this._Register.execute({...validatedData,category:new Types.ObjectId(validatedData.category)})
             if(Data.accessToken&&Data.refreshToken){
-              const accessTokenName = "worker_access_token";
-              const refreshTokenName = "worker_refresh_token";
+              const accessTokenName = "access_token";
+              const refreshTokenName = "refresh_token";
               setAuthCookies(
                 res,
                 Data.accessToken,
@@ -82,7 +93,7 @@ export class AuthWorkerController implements IWorkerAuthController {
             res.status(STATUS_CODES.CREATED).json({
                 success: true,
                 message: MESSAGES.REGISTRATION_SUCCESS,
-                worker:Data.workerDto
+                worker:Data.user
             });
         } catch (error) {
           console.error(error)
@@ -91,14 +102,14 @@ export class AuthWorkerController implements IWorkerAuthController {
     }
     async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
-        const {token} =req.body
-        const result=await this._authWorkerService.googleAuth(token)
+        const {token,role} =req.body
+        const result=await this._googleLogin.execute(token,role)
         if(!result.success){
           res.status(STATUS_CODES.BAD_REQUEST).json(result)
         }
         if(!result.isNew&&result.accessToken&&result.refreshToken){
-          const accessTokenName = "worker_access_token";
-          const refreshTokenName = "worker_refresh_token";
+          const accessTokenName = "access_token";
+          const refreshTokenName = "refresh_token";
           setAuthCookies(
             res,
             result.accessToken,
@@ -124,27 +135,39 @@ export class AuthWorkerController implements IWorkerAuthController {
     async login(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
          const loginCredential: LoginDto = req.body;
-          const { refreshToken, accessToken,workerDto } = await this._authWorkerService.login(
+          const {success,message, refreshToken, accessToken,user:workerDto } = await this._Login.execute(
           loginCredential
         );
-
-        const accessTokenName = "worker_access_token";
-        const refreshTokenName = "worker_refresh_token";
-        setAuthCookies(
-          res,
-          accessToken,
-          refreshToken,
-          accessTokenName,
-          refreshTokenName
-        )
-
-        res 
-          .status(STATUS_CODES.OK)
+        if(!success){
+          res 
+          .status(STATUS_CODES.CONFLICT)
           .json({ 
-            success: true,
-            message: MESSAGES.LOGIN_SUCCESS,
+            success ,
+            message,
             worker: workerDto
           });
+          
+        }
+
+        if(accessToken&&refreshToken){
+          const accessTokenName = "access_token";
+          const refreshTokenName = "refresh_token";
+          setAuthCookies(
+            res,
+            accessToken,
+            refreshToken,
+            accessTokenName,
+            refreshTokenName
+          )
+
+          res 
+            .status(STATUS_CODES.OK)
+            .json({ 
+              success: true,
+              message: MESSAGES.LOGIN_SUCCESS,
+              worker: workerDto
+            });
+        }
       } catch (error) {
         next(error);
       }
@@ -196,7 +219,7 @@ export class AuthWorkerController implements IWorkerAuthController {
 		try {
 			const refreshToken = (req as CustomRequest).user.refresh_token;
 			const newTokens = await this._tokenService.refreshToken(refreshToken);
-			const accessTokenName = `${newTokens.role}_access_token`;
+			const accessTokenName = `access_token`;
 			updateCookieWithAccessToken(
 				res,
 				newTokens.accessToken,
@@ -209,8 +232,8 @@ export class AuthWorkerController implements IWorkerAuthController {
 		} catch (error) {
 			clearAuthCookies(
 				res,
-				`${(req as CustomRequest).user.role}_access_token`,
-				`${(req as CustomRequest).user.role}_refresh_token`
+				`access_token`,
+				`refresh_token`
 			);
 			res.status(STATUS_CODES.UNAUTHORIZED).json({
 				message: MESSAGES.INVALID_TOKEN,
@@ -234,8 +257,8 @@ export class AuthWorkerController implements IWorkerAuthController {
 			);
       console.log('12')
       const user = (req as CustomRequest).user;
-			const accessTokenName = `worker_access_token`;
-			const refreshTokenName = `worker_refresh_token`;
+			const accessTokenName = `access_token`;
+			const refreshTokenName = `refresh_token`;
 			clearAuthCookies(res, accessTokenName, refreshTokenName);
       console.log('13')
 			res.status(STATUS_CODES.OK).json({
@@ -258,7 +281,7 @@ export class AuthWorkerController implements IWorkerAuthController {
 					message: MESSAGES.VALIDATION_ERROR,
 				});
       }
-      const data=await this._authWorkerService.isVerified(String(email))
+      const data=await this._isVerified.execute(String(email))
       if(!data._id||!data.status){
       
 				res.status(STATUS_CODES.BAD_REQUEST).json({

@@ -21,8 +21,9 @@ type OtpModalProps = {
   onFinalSubmit: () => void;
   onClose: () => void;
   email?: string;
+  role:"user"|"worker"
   generateOtp?: (email: string) => Promise<AxiosResponse<any>>
-  verifyOtp?: (otp: string, email: string) => Promise<any>;
+  verifyOtp?: (otp: string, email: string,role:"user"|"worker") => Promise<any>;
 };
 
 export default function OtpModal({
@@ -30,6 +31,7 @@ export default function OtpModal({
   onFinalSubmit,
   onClose,
   email = "",
+  role,
   generateOtp,
   verifyOtp,
 }: OtpModalProps) {
@@ -93,8 +95,8 @@ export default function OtpModal({
     try {
       console.log('here it is')
       const response = verifyOtp
-        ? await verifyOtp(otp, email)
-        : await authService.verifyOtp(otp, email);
+        ? await verifyOtp(otp, email,role)
+        : await authService.verifyOtp(otp, email,role);
 
       if (response?.data?.success) {
         onFinalSubmit();

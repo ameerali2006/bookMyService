@@ -3,8 +3,12 @@ export interface UserRegisterDTO {
   email: string;
   password?: string;
   phone?:string;
-  googleId?:string
+  googleId?:string;
   
+  
+}
+export interface UserDataRegisterDto extends  UserRegisterDTO{
+  role:"user"
 }
 export interface userResponse{
   name:string;

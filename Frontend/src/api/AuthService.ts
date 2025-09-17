@@ -18,16 +18,16 @@ export const authService={
         return await userAxios.post('/generate-otp',{email})
 
     },
-    register:async (formData:RegisterPayload)=>{
+    register:async (formData:RegisterPayload & {role:string})=>{
         return await userAxios.post('/register',formData)
     },
-    googleLogin:async (token:string)=>{
-        return await userAxios.post('/google-login',{token})
+    googleLogin:async (token:string,role:"user")=>{
+        return await userAxios.post('/google-login',{token,role})
     },
-    verifyOtp:async (otp:string,email:string)=>{
-        return await userAxios.post('/verify-otp',{otp,email})
+    verifyOtp:async (otp:string,email:string,role:string)=>{
+        return await userAxios.post('/verify-otp',{otp,email,role})
     },
-    login: async (credentials: { email: string; password: string }) => {
+    login: async (credentials: { email: string; password: string,role:"user" }) => {
         return await userAxios.post("/login", credentials);
     },
     userResetLink:async (email:string)=>{
@@ -45,8 +45,8 @@ export const authService={
 
     
     
-    workerVerifyOtp:async (otp:string,email:string)=>{
-        return await workerAxios.post('/verify-otp',{otp,email})
+    workerVerifyOtp:async (otp:string,email:string,role:string)=>{
+        return await workerAxios.post('/verify-otp',{otp,email,role})
     },
     workerGenerateOtp:async (email:string)=>{
         
@@ -56,13 +56,13 @@ export const authService={
     workerCloudinory:async ()=>{
         return await workerAxios.post('/cloudinary-signature')
     },
-    workerRegister: async (data: WorkerRegistrationData) => {
+    workerRegister: async (data: WorkerRegistrationData & {role:string}) => {
         return await workerAxios.post("/register", data); 
     },
-    googleWorkerLogin:async (token:string)=>{
-        return await workerAxios.post('/google-auth',{token})
+    googleWorkerLogin:async (token:string,role:"worker")=>{
+        return await workerAxios.post('/google-auth',{token,role})
     },
-    workerLogin:async (data:{email:string,password:string}) => {
+    workerLogin:async (data:{email:string,password:string,role:"worker"}) => {
         return await workerAxios.post("/login", data); 
     },
     workerLogout: async ()=>{
@@ -81,7 +81,7 @@ export const authService={
 
 
     
-    adminLogin: async (credentials: { email: string; password: string }) => {
+    adminLogin: async (credentials: { email: string; password: string ,role:"admin"}) => {
         return await adminAxios.post("/login", credentials);
     },
     adminLogout: async () => {

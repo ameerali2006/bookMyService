@@ -7,6 +7,8 @@ import IsWorkerLogout from "./protected/WorkerIsLogout";
 import IsWorkerLogin from "./protected/WorkerIsLogin";
 import WorkerForgotPassword from "./pages/worker/ForgotPassword";
 import WorkerResetPassword from "./pages/worker/ResetPassword";
+import WorkerProfilePage from "./pages/worker/WorkerProfile";
+import WorkManagementPage from "./pages/worker/SlotMangement";
 
 
 const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
@@ -21,7 +23,8 @@ const Worker = () => {
             <Route path="/dashboard" element={<IsWorkerLogin><WorkerDashboard/></IsWorkerLogin>}/>
             <Route path="/forgot-Password" element={<IsWorkerLogout><WorkerForgotPassword/></IsWorkerLogout>}/>
             <Route path="/reset-Password/:token" element={<IsWorkerLogout><WorkerResetPassword/></IsWorkerLogout>}/>
-            
+            <Route path="/profile/view" element={<IsWorkerLogin><WorkerProfilePage/></IsWorkerLogin>}/>
+            <Route path="/profile/slot" element={<IsWorkerLogin><WorkManagementPage/></IsWorkerLogin>}/>
             
 
         </Routes>

@@ -16,14 +16,24 @@ import { CloudinaryController } from "../../controller/worker/helper-worker.cont
 import { ICloudinaryController } from "../../interface/controller/helper-worker.controller.interface.js";
 import { IAdminManagementController } from "../../interface/controller/management-admin.controller.interface.js";
 import { ManagementAdmin } from "../../controller/admin/management-admin.js";
+import { IServiceConroller } from "../../interface/controller/services.controller.interface.js";
+import { ServiceController } from "../../controller/services.controller.js";
+import { ITokenController } from "../../interface/controller/token.controller.interface.js";
+import { TokenController } from "../../controller/token.controller.js";
+import { BlockStatusMiddleware } from "../../middleware/block-status.middleware.js";
+import { IWorkingDetailsController } from "../../interface/controller/working-details.controller.interface.js";
+import { WorkingDetailsController } from "../../controller/worker/working-details.controller.js";
 
 DependencyInjection.registerAll();
+
+export const blockStatusMiddleware = container.resolve(BlockStatusMiddleware);
+
 
 export const authController = container.resolve<IAuthController>(AuthUserController);
 export const authAdminController=container.resolve<IAdminController>(AuthAdminController)
 export const authWorkerController=container.resolve<IWorkerAuthController>(AuthWorkerController)
 export const cloudinaryController = container.resolve<ICloudinaryController>(CloudinaryController);
 export const managementAdminController=container.resolve<IAdminManagementController>(ManagementAdmin)
-
-
-  
+export const serviceController=container.resolve<IServiceConroller>(ServiceController)
+export const tokenController=container.resolve<ITokenController>(TokenController)
+export const workingDetailsController =container.resolve<IWorkingDetailsController>(WorkingDetailsController)

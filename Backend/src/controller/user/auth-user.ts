@@ -1,6 +1,5 @@
 import { Request, Response , NextFunction} from "express";
 import { injectable, inject } from "tsyringe";
-import { IAuthUserService } from "../../interface/service/auth-user.service.interface.js";
 import { IAuthController } from "../../interface/controller/auth-user.controller.interface.js";
 import { TYPES } from "../../config/constants/types.js";
 import { MESSAGES } from "../../config/constants/message.js";
@@ -10,24 +9,37 @@ import {clearAuthCookies, setAuthCookies, updateCookieWithAccessToken} from "../
 import { ITokenservice } from "../../interface/service/token.service.interface.js";
 import { CustomRequest } from "../../middleware/auth.middleware.js";
 import { IResetPassword } from "../../interface/service/resetPassword.service.interface.js";
+import { ILoginService } from "../../interface/service/auth/login.service.interface.js";
+import { schemasByRole } from "../validation/register.zod.js";
+import { IRegisterService } from "../../interface/service/auth/register.service.interface.js";
+import { IOtpService } from "../../interface/service/auth/otp.service.interface.js";
+import { IGoogleService } from "../../interface/service/auth/google.service.interface.js";
+import { CustomError } from "../../utils/custom-error.js";
 
 
 @injectable()
 export class AuthUserController implements IAuthController {
   constructor(
-    @inject(TYPES.AuthUserService) private _authUserService: IAuthUserService,
-    @inject(TYPES.TokenService) private _tokenService:ITokenservice,
+    
+    @inject(TYPES.TokenService) private _tokenService:ITokenservice, 
     @inject(TYPES.ResetPassword) private _resetPassword:IResetPassword,
+    @inject(TYPES.RegisterService) private _Register:IRegisterService,
+    @inject(TYPES.LoginService) private _Login:ILoginService,
+    @inject(TYPES.OtpService) private _Otp:IOtpService,
+    @inject(TYPES.GoogleService) private _googleAuth:IGoogleService,
 
 
   ) {}
 
   async register(req: Request, res: Response,next:NextFunction) {
     try {
-      const UserData = req.body;
-      const {accessToken,refreshToken,userData}=await this._authUserService.registerUser(UserData);
-      const accessTokenName = "user_access_token";
-      const refreshTokenName = "user_refresh_token";
+      const UserData = req.body as {role :keyof typeof schemasByRole}
+       const schema = schemasByRole["user"];
+      const result = schema.parse(UserData);
+      
+      const {accessToken,refreshToken,user:userData}=await this._Register.execute(result);
+      const accessTokenName = "access_token";
+      const refreshTokenName = "refresh_token";
       setAuthCookies(
         res,
         accessToken,
@@ -38,6 +50,7 @@ export class AuthUserController implements IAuthController {
       
       res.status(STATUS_CODES.CREATED).json({success:true, message:MESSAGES.REGISTRATION_SUCCESS ,userData });
     } catch (error) {
+      res.status(STATUS_CODES.BAD_REQUEST).json({success:false, message:MESSAGES.REGISTRATION_FAILED  })
       next(error)
       
     }
@@ -48,7 +61,7 @@ export class AuthUserController implements IAuthController {
 
       const email: string = req.body.email;
       console.log(`otp generation ${email}`)
-      await this._authUserService.generateOtp(email);
+      await this._Otp.generate(email);
       res
         .status(STATUS_CODES.CREATED)
         .json({ success: true, message: MESSAGES.OTP_SENT });
@@ -59,7 +72,8 @@ export class AuthUserController implements IAuthController {
   }
   async verifyOtp(req: Request, res: Response , next :NextFunction): Promise<void> {
     try {
-      await this._authUserService.verifyOtp(req.body);
+      
+      await this._Otp.verify(req.body);
 
       res
         .status(STATUS_CODES.OK)
@@ -72,33 +86,43 @@ export class AuthUserController implements IAuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const loginCredential: LoginDto = req.body;
-      const { refreshToken, accessToken,userData } = await this._authUserService.login(
+      const {success,message, refreshToken, accessToken,user:userData } = await this._Login.execute(
         loginCredential
       );
 
-      const accessTokenName = "user_access_token";
-      const refreshTokenName = "user_refresh_token";
-      setAuthCookies(
-        res,
-        accessToken,
-        refreshToken,
-        accessTokenName,
-        refreshTokenName
-      )
+      if(success&&accessToken&&refreshToken&&userData){
+        const accessTokenName = "access_token";
+        const refreshTokenName = "refresh_token";
+        setAuthCookies(
+          res,
+          accessToken,
+          refreshToken,
+          accessTokenName,
+          refreshTokenName
+        )
 
-      res 
-        .status(STATUS_CODES.OK)
-        .json({ 
-          success: true,
-          message: MESSAGES.LOGIN_SUCCESS,
-          user: {
-            name:userData.name,
-            email:userData.email,
-            image:userData?.image
+        res 
+          .status(STATUS_CODES.OK)
+          .json({ 
+            success: true,
+            message: MESSAGES.LOGIN_SUCCESS,
+            user: {
+              name:userData.name,
+              email:userData.email,
+              image:userData?.image
 
 
-          }
-        });
+            }
+          });
+      }else{
+        res 
+          .status(STATUS_CODES.OK)
+          .json({ 
+            success,
+            message,
+            user: null
+          });
+      }
     } catch (error) {
       next(error);
     }
@@ -106,32 +130,40 @@ export class AuthUserController implements IAuthController {
   async googleLogin(req: Request, res: Response, next: NextFunction) {
     console.log("google login - user")
     try {
-      const googleToken: string = req.body.token;
-      const { refreshToken, accessToken ,userData} =
-        await this._authUserService.googleLogin(googleToken);
-      const accessTokenName = "user_access_token";
-      const refreshTokenName = "user_refresh_token";
-      setAuthCookies(
-        res,
-        accessToken,
-        refreshToken,
-        accessTokenName,
-        refreshTokenName
-      )
+      const {token,role} = req.body;
+      const { success,message,refreshToken, accessToken ,user,isNew} =
+      await this._googleAuth.execute(token,role);
+      if(!isNew&& accessToken && refreshToken &&user){
+        const accessTokenName = "access_token";
+        const refreshTokenName = "refresh_token";
+        setAuthCookies(
+          res,
+          accessToken,
+          refreshToken,
+          accessTokenName,
+          refreshTokenName
+        )
 
-      res 
-        .status(STATUS_CODES.OK)
-        .json({ 
-          success: true,
-          message: MESSAGES.LOGIN_SUCCESS,
-          user: {
-            name:userData.name,
-            email:userData.email,
-            image:userData?.email 
+        res 
+          .status(STATUS_CODES.OK)
+          .json({ 
+            success: true,
+            message: MESSAGES.LOGIN_SUCCESS,
+            user: {
+              name:user.name,
+              email:user.email,
+              image:user?.email 
 
 
-          }
-        });
+            }
+          });
+
+              
+      
+      }else{
+        throw new CustomError(MESSAGES.REGISTRATION_FAILED,STATUS_CODES.BAD_REQUEST)
+      }
+      
     } catch (error) {
       next(error);
     }
@@ -151,8 +183,8 @@ export class AuthUserController implements IAuthController {
 			);
       console.log('12')
       const user = (req as CustomRequest).user;
-			const accessTokenName = `user_access_token`;
-			const refreshTokenName = `user_refresh_token`;
+			const accessTokenName = `access_token`;
+			const refreshTokenName = `refresh_token`;
 			clearAuthCookies(res, accessTokenName, refreshTokenName);
       console.log('13')
 			res.status(STATUS_CODES.OK).json({
@@ -212,7 +244,7 @@ export class AuthUserController implements IAuthController {
 		try {
 			const refreshToken = (req as CustomRequest).user.refresh_token;
 			const newTokens = await this._tokenService.refreshToken(refreshToken);
-			const accessTokenName = `${newTokens.role}_access_token`;
+			const accessTokenName = `access_token`;
 			updateCookieWithAccessToken(
 				res,
 				newTokens.accessToken,
@@ -225,26 +257,14 @@ export class AuthUserController implements IAuthController {
 		} catch (error) {
 			clearAuthCookies(
 				res,
-				`${(req as CustomRequest).user.role}_access_token`,
-				`${(req as CustomRequest).user.role}_refresh_token`
+				`access_token`,
+				`refresh_token`
 			);
 			res.status(STATUS_CODES.UNAUTHORIZED).json({
 				message: MESSAGES.INVALID_TOKEN,
 			});
 		}
 	}
-  async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const result = await this._authUserService.getAllServices(); // call service layer
-
-      res.status(200).json({
-        success: true,
-        data: result.services,   // only send services
-        message: "Fetched active services successfully",
-      });
-    } catch (error) {
-      next(error)
-    }
-  }
+  
   
 }

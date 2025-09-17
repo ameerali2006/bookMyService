@@ -1,11 +1,15 @@
-import { Response,Request,NextFunction } from "express";
+import { Response,Request,NextFunction, RequestHandler } from "express";
 import { BaseRoute } from "./base.route.js";
 import {
     authController,
+    blockStatusMiddleware,
+    serviceController,
+    tokenController,
     
 
  } from '../config/di/resolver.js' 
-import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
+import {  verifyAuth } from "../middleware/auth.middleware.js";
+
  export class UserRoute extends BaseRoute{
     constructor (){
         super()
@@ -32,7 +36,7 @@ import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
         
 
         
-        this.router.post('/logout',verifyAuth("user"),authorizeRole(["user"]),(req:Request,res:Response,next:NextFunction)=>{
+        this.router.post('/logout',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req:Request,res:Response,next:NextFunction)=>{
             authController.logout(req,res,next)
         });
         this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) =>
@@ -44,9 +48,12 @@ import { authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
             
         );
         this.router.get("/getService", (req: Request, res: Response, next: NextFunction) =>
-            authController.getServices(req, res, next)
+            serviceController.getServices(req, res, next)
             
         );
-
+        this.router.post("/refresh-token", (req: Request, res: Response, next: NextFunction) =>
+            tokenController.handleTokenRefresh(req, res)
+                    
+        );
     }
  } 

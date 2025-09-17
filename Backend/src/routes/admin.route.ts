@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseRoute } from "../routes/base.route";
-import { authAdminController,cloudinaryController,managementAdminController} from "../config/di/resolver";
+import { authAdminController,cloudinaryController,managementAdminController, tokenController} from "../config/di/resolver";
 import { authorizeRole, verifyAuth } from "../middleware/auth.middleware";
 
 
@@ -15,7 +15,7 @@ export class AdminRoute extends BaseRoute {
         this.router.post('/login', (req: Request, res: Response, next: NextFunction) => {
             authAdminController.login(req, res, next);
         })
-        this.router.post('/logout',verifyAuth("admin"),authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+        this.router.post('/logout',verifyAuth(),authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             authAdminController.logout(req, res, next);
         })
         this.router.get('/users', (req: Request, res: Response, next: NextFunction) => {
@@ -49,5 +49,8 @@ export class AdminRoute extends BaseRoute {
         this.router.patch("/services/:id/status",(req: Request, res: Response, next: NextFunction)=>{
             managementAdminController.updateServiceStatus(req,res,next)
         })
+        this.router.post("/refresh-token", (req: Request, res: Response, next: NextFunction) =>
+            tokenController.handleTokenRefresh(req, res)
+        );
     }
 }
