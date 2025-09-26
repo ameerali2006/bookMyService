@@ -9,7 +9,9 @@ export class IsVerified implements IIsVerified{
     ){}
     async execute(email: string): Promise<{ _id: string | null; status: string | null; }> {
         try {
+            console.log(email)
             const data =await this._workerRepo.findByEmail(email)
+            console.log(data)
             if(!data){
                 return {
                     _id:null,
@@ -28,4 +30,4 @@ export class IsVerified implements IIsVerified{
             }
         }
     }
-}
+} 

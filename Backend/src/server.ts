@@ -6,7 +6,7 @@ import { connectDB } from "./config/db";
 import {ENV} from './config/env/env'
 
 const port:number|string=ENV.PORT
-console.log('hello')
+
 const startServer=async ():Promise<void>=>{
     try {
         await connectDB()

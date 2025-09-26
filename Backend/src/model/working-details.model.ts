@@ -38,6 +38,15 @@ const CustomSlotSchema = new Schema<ICustomSlot>(
   },
   { _id: false }
 );
+export enum WeekDay {
+  MONDAY = "Monday",
+  TUESDAY = "Tuesday",
+  WEDNESDAY = "Wednesday",
+  THURSDAY = "Thursday",
+  FRIDAY = "Friday",
+  SATURDAY = "Saturday",
+  SUNDAY = "Sunday",
+}
 
 const WorkingDetailsSchema = new Schema<IWorkingDetails>(
   {
@@ -45,8 +54,8 @@ const WorkingDetailsSchema = new Schema<IWorkingDetails>(
     status: { type: String, enum: ["active", "inactive", "paused"], default: "active" },
     maxAppointmentsPerDay: { type: Number, default: null },
     breakEnforced: { type: Boolean, default: true },
-    weekStartDay: { type: String, enum: ["Monday", "Sunday"], default: "Monday" },
-    defaultSlotDuration: { type: Number, default: 60 }, // minutes
+    weekStartDay: { type: String, enum:Object.values(WeekDay) , default: WeekDay.MONDAY },
+    defaultSlotDuration: { type: Number, default: 60 },
     autoAcceptBookings: { type: Boolean, default: false },
     notes: { type: String },
     days: { type: [DayScheduleSchema], required: true },

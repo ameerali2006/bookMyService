@@ -41,6 +41,10 @@ import { IIsVerified } from "../../interface/service/auth/isVerified.service.int
 import { IsVerified } from "../../service/auth/isVerified.service";
 import { IGetWorkingDetails } from "../../interface/service/worker/getWorkingDetails.service.interface";
 import { GetWorkingDetails } from "../../service/worker/getWorkingDetails.service";
+import { IUpdateWorkingDetails } from "../../interface/service/worker/updateWorkerDetails.service.interface";
+import { UpdateWorkingDetails } from "../../service/worker/updateWorkerDetails.service";
+import { IDateConversionService } from "../../interface/service/date-convertion.service.interface";
+import { DateConversionService } from "../../service/helper/date-convertion.service";
  
 
 
@@ -69,5 +73,11 @@ export class ServiceRegistery{
         container.register<IGetServices>(TYPES.GetService,{useClass:GetServices})
         container.register<IIsVerified>(TYPES.IsVerified,{useClass:IsVerified})
         container.register<IGetWorkingDetails>(TYPES.GetWorkingDetails,{useClass:GetWorkingDetails})
+        container.register<IUpdateWorkingDetails>(TYPES.UpdateWorkingDetails,{useClass:UpdateWorkingDetails})
+        container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
+
+
+
+
     }
 } 

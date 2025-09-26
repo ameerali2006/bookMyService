@@ -14,6 +14,7 @@ export const TYPES = {
   AuthWorkerService:Symbol.for("AuthWorkerService"),
   CloudinaryService:Symbol.for("CloudinaryService"),
   GetWorkingDetails:Symbol.for("GetWorkingDetails"),
+  UpdateWorkingDetails:Symbol.for("UpdateWorkingDetails"),
 
   LoginService:Symbol.for("LoginService"),
   RegisterService:Symbol.for("RegisterService"),
@@ -33,6 +34,6 @@ export const TYPES = {
   ServiceRepository:Symbol.for('ServiceRepository'),
   WorkerHelperService:Symbol.for('WorkerHelperService'),
 
-  
+  DateConversionService:Symbol.for('DateConversionService'),
 
 };

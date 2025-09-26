@@ -25,22 +25,42 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/store';
 
 // ---------- Types ----------
-interface BreakItemType {
-  id: string;
+
+
+export interface BreakItemType {
+  id: string;            // frontend id
   label: string;
-  startTime: string;
-  endTime: string;
+  breakStart: string;     // full ISO string
+  breakEnd: string;       // full ISO string
 }
 
-interface DaySchedule {
-  id: string;
+export interface DaySchedule {
+  id: string;            
   name: string;
   enabled: boolean;
-  startTime: string;
-  endTime: string;
+  startTime: string;     
+  endTime: string;       
   breaks: BreakItemType[];
 }
 
+
+export interface BackendBreak {
+  label: string;
+  breakStart: string;     // full ISO string
+  breakEnd: string; 
+}     
+
+export interface BackendDay {
+  day: string;
+  enabled: boolean;
+  startTime: string;    
+  endTime: string;      
+  breaks: BackendBreak[];
+}
+
+export interface BackendData {
+  days: BackendDay[];
+}
 // ---------- Component ----------
 const WorkManagementPage: React.FC = () => {
   const worker = useSelector((state: RootState) => state.workerTokenSlice.worker)
@@ -51,37 +71,42 @@ const WorkManagementPage: React.FC = () => {
     fetchSchedule();
   },[])
    const fetchSchedule = async () => {
-  try {
-    setLoading(true);
-    console.log("Fetching schedule for:", worker?.email);
+    try {
+      setLoading(true);
+      console.log("Fetching schedule for:", worker?.email);
 
-    const response = await workerService.getWorkingDetails(String(worker?.email));
-    const backendData = response.data.data;
+      const response = await workerService.getWorkingDetails(String(worker?.email));
+      const backendData = response.data.data;
 
-    
+      console.log("before transformation",backendData.days)
+      
+      const transformedDays=transformedData(backendData)  
+      
+      setSchedule(transformedDays);
+
+      console.log(" Transformed Schedule:", transformedDays);
+    } catch (error) {
+      console.error(" Failed to fetch schedule:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const transformedData=(backendData:BackendData)=>{
     const transformedDays: DaySchedule[] = backendData.days.map((dayObj: any, index: number) => ({
       id: `${index}-${dayObj.day}`,
-      name: dayObj.day,     
-      startTime: new Date(dayObj.startTime).toISOString().slice(11, 16),
-      endTime: new Date(dayObj.endTime).toISOString().slice(11, 16),
-      enabled:dayObj.enabled,
+      name: dayObj.day,
+      enabled: dayObj.enabled,
+      startTime: dayObj.startTime,  
+      endTime: dayObj.endTime,       
       breaks: (dayObj.breaks || []).map((b: any, idx: number) => ({
         id: `break-${index}-${idx}`,
         label: b.label || `Break ${idx + 1}`,
-        startTime: b.startTime ? new Date(b.startTime).toISOString().slice(11, 16) : "12:00",
-        endTime: b.endTime ? new Date(b.endTime).toISOString().slice(11, 16) : "13:00",
-      })),
+        breakStart: b.breakStart,     
+        breakEnd: b.breakEnd,        
+      }))
     }));
-
-    setSchedule(transformedDays);
-
-    console.log(" Transformed Schedule:", transformedDays);
-  } catch (error) {
-    console.error(" Failed to fetch schedule:", error);
-  } finally {
-    setLoading(false);
+    return transformedDays
   }
-};
 
     
 
@@ -95,16 +120,27 @@ const WorkManagementPage: React.FC = () => {
   };
 
   const addBreak = (dayId: string) => {
-    const newBreak: BreakItemType = {
-      id: generateBreakId(),
-      label: 'New Break',
-      startTime: '12:00',
-      endTime: '13:00'
-    };
     setSchedule(prev =>
-      prev.map(day =>
-        day.id === dayId ? { ...day, breaks: [...day.breaks, newBreak] } : day
-      )
+      prev.map(day => {
+        if (day.id !== dayId) return day;
+
+        const baseDate = new Date(day.startTime); // actual day’s date
+
+        const breakStart = new Date(baseDate);
+        breakStart.setHours(12, 0, 0, 0);
+
+        const breakEnd = new Date(baseDate);
+        breakEnd.setHours(13, 0, 0, 0);
+
+        const newBreak: BreakItemType = {
+          id: generateBreakId(),
+          label: "New Break",
+          breakStart: breakStart.toISOString(),
+          breakEnd: breakEnd.toISOString()
+        };
+
+        return { ...day, breaks: [...day.breaks, newBreak] };
+      })
     );
   };
 
@@ -164,18 +200,18 @@ const WorkManagementPage: React.FC = () => {
     endTime: string,
     breaks: BreakItemType[]
   ) => {
-    const start = new Date(`2000-01-01T${startTime}:00`);
-    let end = new Date(`2000-01-01T${endTime}:00`);
+    const start = new Date(startTime);
+    let end = new Date(endTime);
 
     if (end < start) {
-      end = new Date(`2000-01-02T${endTime}:00`);
+      end = new Date(endTime);
     }
 
     const totalMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
 
     const totalBreakMinutes = breaks.reduce((total, breakItem) => {
-      const breakStart = new Date(`2000-01-01T${breakItem.startTime}:00`);
-      const breakEnd = new Date(`2000-01-01T${breakItem.endTime}:00`);
+      const breakStart = new Date(breakItem.breakStart);
+      const breakEnd = new Date(breakItem.breakEnd);
       const breakMinutes = (breakEnd.getTime() - breakStart.getTime()) / (1000 * 60);
       return total + (breakMinutes > 0 ? breakMinutes : 0);
     }, 0);
@@ -187,9 +223,9 @@ const WorkManagementPage: React.FC = () => {
     return { hours, minutes, totalMinutes: workingMinutes };
   };
 
-  const validateBreakTime = (startTime: string, endTime: string) => {
-    const start = new Date(`2000-01-01T${startTime}:00`);
-    const end = new Date(`2000-01-01T${endTime}:00`);
+  const validateBreakTime = (startIso: string, endIso: string) => {
+    const start = new Date(startIso);
+    const end = new Date(endIso);
     return start < end;
   };
 
@@ -202,9 +238,58 @@ const WorkManagementPage: React.FC = () => {
     return Coffee;
   };
 
-  const saveSchedule = () => {
-    console.log('Saving schedule:', schedule);
-    alert('Schedule saved successfully!');
+  const saveSchedule = async () => {
+    try {
+      // 🔄 Convert schedule back to backend format
+      const payload = {
+        days: schedule.map((day) => ({
+          day: day.name, // backend expects "day"
+          enabled: day.enabled,
+          startTime: day.startTime, // convert HH:mm → full ISO
+          endTime: day.endTime,
+          breaks: day.breaks.map((b) => ({
+            label: b.label,
+            breakStart: b.breakStart,
+            breakEnd: b.breakEnd,
+          })),
+        })),
+      };
+
+      console.log("📤 Sending payload to backend:", payload);
+
+      const response = await workerService.updateWorkingDetails(
+        String(worker?.email),
+        payload
+      );
+      
+      const transformedDays=transformedData(response.data.data)
+      setSchedule(transformedDays)
+      console.log("✅ Schedule updated:", response.data);
+      alert("✅ Schedule saved successfully!");
+    } catch (error) {
+      console.error("❌ Failed to save schedule:", error);
+      alert("❌ Failed to save schedule. Please try again.");
+    }
+  };
+  const toTimeValue = (iso: string) => {
+    if (!iso) return "00:00";
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",   // force IST
+    }).format(d);
+  };
+  const updateTime = (oldIso: string, newTime: string) => {
+    const d = new Date(oldIso || new Date());
+    const [hours, minutes] = newTime.split(":").map(Number);
+    d.setHours(hours, minutes, 0, 0);
+
+    // format back to "YYYY-MM-DD HH:mm:ss+05:30"
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const formatted = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00+05:30`;
+    return formatted;
   };
 
   const activeDaysCount = schedule.filter(day => day.enabled).length;
@@ -257,7 +342,7 @@ const WorkManagementPage: React.FC = () => {
     dayEnabled: boolean;
   }> = ({ dayId, breakItem, dayEnabled }) => {
     const BreakIcon = getBreakIcon(breakItem.label);
-    const isValidTime = validateBreakTime(breakItem.startTime, breakItem.endTime);
+    const isValidTime = validateBreakTime(breakItem.breakStart, breakItem.breakEnd);
 
     return (
       <div className={`p-3 rounded-lg border transition-all ${
@@ -288,15 +373,15 @@ const WorkManagementPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <TimeInput
             label="Start"
-            value={breakItem.startTime}
-            onChange={(e) => updateBreak(dayId, breakItem.id, 'startTime', e.target.value)}
+            value={toTimeValue(breakItem.breakStart)}
+            onChange={(e) => updateBreak(dayId, breakItem.id, 'breakStart', updateTime(breakItem.breakStart,e.target.value))}
             disabled={!dayEnabled}
             error={!isValidTime}
           />
           <TimeInput
             label="End"
-            value={breakItem.endTime}
-            onChange={(e) => updateBreak(dayId, breakItem.id, 'endTime', e.target.value)}
+            value={toTimeValue(breakItem.breakEnd)}
+            onChange={(e) => updateBreak(dayId, breakItem.id, 'breakEnd', updateTime(breakItem.breakEnd,e.target.value))}
             disabled={!dayEnabled}
             error={!isValidTime}
           />
@@ -379,14 +464,14 @@ const WorkManagementPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <TimeInput
                 label="Start Time"
-                value={day.startTime}
-                onChange={(e) => updateDay(day.id, 'startTime', e.target.value)}
+                value={toTimeValue(day.startTime)}
+                onChange={(e) => updateDay(day.id, 'startTime', updateTime(day.startTime,e.target.value))}
                 disabled={!day.enabled}
               />
               <TimeInput
                 label="End Time"
-                value={day.endTime}
-                onChange={(e) => updateDay(day.id, 'endTime', e.target.value)}
+                value={toTimeValue(day.endTime)}
+                onChange={(e) => updateDay(day.id, 'endTime', updateTime(day.endTime,e.target.value))}
                 disabled={!day.enabled}
               />
             </div>

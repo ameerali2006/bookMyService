@@ -5,8 +5,8 @@ interface WorkerData {
   name: string;
   email: string;
   image?: string;
+   
 }
-
 interface WorkerState {
   worker: WorkerData | null;
 }

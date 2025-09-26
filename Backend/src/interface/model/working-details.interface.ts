@@ -39,7 +39,7 @@ export interface IWorkingDetails extends Document {
   status: "active" | "inactive" | "paused";
   maxAppointmentsPerDay?: number;
   breakEnforced: boolean;
-  weekStartDay: "Monday" | "Sunday";
+  weekStartDay: WeekDay;
   defaultSlotDuration: number;
   autoAcceptBookings: boolean;
   notes?: string;

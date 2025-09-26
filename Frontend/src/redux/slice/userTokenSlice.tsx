@@ -4,6 +4,11 @@ interface UserData {
   name: string;
   email: string;
   image?: string;
+  location:{
+    lat: number
+    lng: number
+    address?: string
+  }
 }
 
 interface UserState {

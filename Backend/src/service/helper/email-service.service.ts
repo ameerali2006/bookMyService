@@ -18,6 +18,7 @@ export class EmailService implements IEmailService {
         user: ENV.EMAIL_USER,
         pass: ENV.EMAIL_PASS,
       },
+      tls: { rejectUnauthorized: false }
     });
 
     // verify transporter at startup

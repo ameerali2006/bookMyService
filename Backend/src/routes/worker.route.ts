@@ -65,5 +65,9 @@ export class WorkerRoute extends BaseRoute{
             workingDetailsController.getWorkingDetails(req, res, next)
                     
         );
+        this.router.post("/profile/slot/update", (req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.updateWorkingDetails(req, res, next)
+                    
+        );
     }
 }
