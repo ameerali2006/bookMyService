@@ -30,7 +30,7 @@ export const verifyAuth =() => async (
 				success: false,
 				message: MESSAGES.UNAUTHORIZED_ACCESS,
 			});
-			return; // ✅ add return to stop execution
+			return; 
 		}
 
 		if (await isBlacklisted(token.access_token)) {
@@ -104,7 +104,7 @@ const extractToken = (
   const refresh_token = req.cookies?.[`refresh_token`];
   console.log('tokens:',{access_token,refresh_token})
 
-  if (!access_token || !refresh_token) return null; // ✅ Add this check
+  if (!access_token || !refresh_token) return null; 
 
   return { access_token, refresh_token };
 };

@@ -1,11 +1,16 @@
 import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
 
-
+interface LocationData {
+  lat: number;
+  lng: number;
+  address?: string;
+  pincode?: string;
+}
 interface WorkerData {
   name: string;
   email: string;
   image?: string;
-   
+  location?:LocationData
 }
 interface WorkerState {
   worker: WorkerData | null;
@@ -22,6 +27,12 @@ const workerTokenSlice = createSlice({
     addWorker: (state, action: PayloadAction<WorkerData>) => {
       state.worker = action.payload;
       localStorage.setItem("WorkerData", JSON.stringify(action.payload));
+    },
+    updateLocation: (state, action: PayloadAction<LocationData>) => {
+      if (state.worker) {
+        state.worker.location = action.payload;
+        localStorage.setItem("WorkerData", JSON.stringify(state.worker));
+      }
     },
     removeWorker: (state) => {
       state.worker = null;

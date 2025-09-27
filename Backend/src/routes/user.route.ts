@@ -5,6 +5,7 @@ import {
     blockStatusMiddleware,
     serviceController,
     tokenController,
+    userController,
     
 
  } from '../config/di/resolver.js' 
@@ -55,5 +56,11 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
             tokenController.handleTokenRefresh(req, res)
                     
         );
+
+        this.router.get('/profile/userDetails',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            userController.userProfileDetails(req, res, next)
+            
+        );
+
     }
  } 

@@ -23,6 +23,8 @@ import { TokenController } from "../../controller/token.controller.js";
 import { BlockStatusMiddleware } from "../../middleware/block-status.middleware.js";
 import { IWorkingDetailsController } from "../../interface/controller/working-details.controller.interface.js";
 import { WorkingDetailsController } from "../../controller/worker/working-details.controller.js";
+import { IUserController } from "../../interface/controller/user-controller.controller.interface.js";
+import { UserController } from "../../controller/user/user-controller.js";
 
 DependencyInjection.registerAll();
 
@@ -37,3 +39,5 @@ export const managementAdminController=container.resolve<IAdminManagementControl
 export const serviceController=container.resolve<IServiceConroller>(ServiceController)
 export const tokenController=container.resolve<ITokenController>(TokenController)
 export const workingDetailsController =container.resolve<IWorkingDetailsController>(WorkingDetailsController)
+export const userController =container.resolve<IUserController>(UserController)
+

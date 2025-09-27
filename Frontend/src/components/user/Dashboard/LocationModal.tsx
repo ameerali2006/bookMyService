@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useCallback, lazy, Suspense } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -6,12 +8,15 @@ import { Label } from "@/components/ui/label"
 import { MapPin, Search, Loader2, Navigation } from "lucide-react"
 import { ErrorToast, SuccessToast, WarningToast } from "@/components/shared/Toaster"
 
+
 const MapComponent = lazy(() => import("../../shared/Map"))
 
 interface LocationData {
   lat: number
   lng: number
   address?: string
+  city?: string
+  pincode?: string
 }
 
 interface LocationModalProps {
@@ -22,13 +27,33 @@ interface LocationModalProps {
 }
 
 export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationModalProps) {
-  const [coords, setCoords] = useState<{ lat: number; lng: number }>({
-    lat: 20.5937,  
-    lng: 78.9629,
-  })
+  const [coords, setCoords] = useState({ lat: 20.5937, lng: 78.9629 })
   const [location, setLocation] = useState("")
+  const [cityName, setCityName] = useState("")
+  const [pincode, setPincode] = useState("")
   const [loading, setLoading] = useState(false)
   const [geoLoading, setGeoLoading] = useState(false)
+
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=en`,
+      )
+      const data = await response.json()
+      if (data && data.address) {
+        const address = data.address
+        const city = address.city || address.town || address.village || address.suburb || ""
+        const postal = address.postcode || ""
+        setCityName(city)
+        setPincode(postal)
+        setLocation(data.display_name || "")
+        return { city, postal, address: data.display_name }
+      }
+    } catch (error) {
+      ErrorToast("Reverse geocoding failed.")
+    }
+    return null
+  }, [])
 
   const handleSearch = useCallback(async () => {
     if (!location.trim()) {
@@ -39,16 +64,14 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
     setLoading(true)
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&accept-language=en`,
       )
       const data = await response.json()
-
       if (data && data.length > 0) {
         const result = data[0]
-        setCoords({
-          lat: Number.parseFloat(result.lat),
-          lng: Number.parseFloat(result.lon),
-        })
+        const newCoords = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+        setCoords(newCoords)
+        await reverseGeocode(newCoords.lat, newCoords.lng)
         SuccessToast(`Location found: ${result.display_name}`)
       } else {
         ErrorToast("Location not found. Please try a different search term.")
@@ -58,22 +81,25 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
     } finally {
       setLoading(false)
     }
-  }, [location])
+  }, [location, reverseGeocode])
 
   const handleCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      ErrorToast("Your browser doesn't support geolocation")
+      ErrorToast("Your browser doesn't support geolocation.")
       return
     }
 
     setGeoLoading(true)
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        })
-        SuccessToast("Current location detected. Map updated to your location.")
+      async (position) => {
+        const newCoords = { lat: position.coords.latitude, lng: position.coords.longitude }
+        setCoords(newCoords)
+        const geocodeResult = await reverseGeocode(newCoords.lat, newCoords.lng)
+        SuccessToast(
+          geocodeResult?.city
+            ? `Location set to ${geocodeResult.city}${geocodeResult.postal ? `, ${geocodeResult.postal}` : ""}`
+            : "Map updated to your current location"
+        )
         setGeoLoading(false)
       },
       (error) => {
@@ -92,47 +118,61 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
         ErrorToast(message)
         setGeoLoading(false)
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
-      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     )
-  }, [])
+  }, [reverseGeocode])
 
-  const handleMapClick = useCallback((lat: number, lng: number) => {
+  const handleMapClick = useCallback(async (lat: number, lng: number) => {
     setCoords({ lat, lng })
-  }, [])
+    await reverseGeocode(lat, lng)
+  }, [reverseGeocode])
 
   const handleConfirm = useCallback(() => {
+    if (!location.trim()) {
+      WarningToast("Please select or search for a location before confirming.")
+      return
+    }
+
+    if (!cityName.trim()) {
+      WarningToast("City name not found. Please choose a valid location.")
+      return
+    }
+
+    if (!pincode.trim()) {
+      WarningToast("Pincode is missing. Please select a complete location.")
+      return
+    }
+
+    if (!coords.lat || !coords.lng) {
+      WarningToast("Coordinates missing. Please select a valid location on the map.")
+      return
+    }
+
     onConfirm({
       lat: coords.lat,
       lng: coords.lng,
-      address: location || `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+      address: location,
+      city: cityName,
+      pincode: pincode,
     })
-  }, [coords, location, onConfirm])
+    SuccessToast("Location confirmed successfully!")
+  }, [coords, location, cityName, pincode, onConfirm])
 
-  const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        handleSearch()
-      }
-    },
-    [handleSearch],
-  )
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") handleSearch()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Select Your Location
+          <DialogTitle>
+            <MapPin className="h-6 w-6 mr-2 inline-block align-middle" />
+            Set your location
           </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
-          {/* Controls Section */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="location-input">Search Location</Label>
@@ -161,6 +201,16 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
               Use Current Location
             </Button>
 
+            {(cityName || pincode) && (
+              <div className="space-y-2">
+                <Label>Location Details</Label>
+                <div className="text-sm bg-muted p-3 rounded-md space-y-1">
+                  {cityName && <div><span className="font-medium">City:</span> {cityName}</div>}
+                  {pincode && <div><span className="font-medium">Pincode:</span> {pincode}</div>}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Selected Coordinates</Label>
               <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
@@ -176,17 +226,13 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
             </div>
           </div>
 
-          {/* Map Section */}
           <div className="space-y-2">
             <Label>Map</Label>
             <div className="h-80 lg:h-96 rounded-md overflow-hidden border">
               <Suspense
                 fallback={
                   <div className="h-full flex items-center justify-center bg-muted">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Loading map...</p>
-                    </div>
+                    <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
                 }
               >
@@ -197,11 +243,7 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
         </div>
 
         <DialogFooter className="gap-2">
-          {onSkip && (
-            <Button variant="outline" onClick={onSkip}>
-              Skip
-            </Button>
-          )}
+          {/* {onSkip && <Button variant="outline" onClick={onSkip}>Skip</Button>} */}
           <Button onClick={handleConfirm}>Confirm Location</Button>
         </DialogFooter>
       </DialogContent>

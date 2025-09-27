@@ -1,14 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
+interface LocationData {
+  lat: number;
+  lng: number;
+  city?:string
+  address?: string;
+  pincode?: string;
+}
 interface UserData {
   name: string;
   email: string;
   image?: string;
-  location:{
-    lat: number
-    lng: number
-    address?: string
-  }
+  location?:LocationData
 }
 
 interface UserState {
@@ -27,6 +29,12 @@ const userSlice = createSlice({
       state.user = action.payload;
       localStorage.setItem("userData", JSON.stringify(action.payload));
     },
+    updateLocation: (state, action: PayloadAction<LocationData>) => {
+      if (state.user) {
+        state.user.location = action.payload;
+        localStorage.setItem("userData", JSON.stringify(state.user));
+      }
+    },
     removeUser: (state) => {
       state.user = null;
       localStorage.removeItem("userData");
@@ -34,5 +42,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { addUser, removeUser } = userSlice.actions;
+export const { addUser, removeUser,updateLocation } = userSlice.actions;
 export default userSlice.reducer;

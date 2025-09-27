@@ -45,6 +45,8 @@ import { IUpdateWorkingDetails } from "../../interface/service/worker/updateWork
 import { UpdateWorkingDetails } from "../../service/worker/updateWorkerDetails.service";
 import { IDateConversionService } from "../../interface/service/date-convertion.service.interface";
 import { DateConversionService } from "../../service/helper/date-convertion.service";
+import { IProfileManagement } from "../../interface/service/user/profileManagement.service.interface";
+import { ProfileManagement } from "../../service/user/profileMangement.service";
  
 
 
@@ -75,7 +77,7 @@ export class ServiceRegistery{
         container.register<IGetWorkingDetails>(TYPES.GetWorkingDetails,{useClass:GetWorkingDetails})
         container.register<IUpdateWorkingDetails>(TYPES.UpdateWorkingDetails,{useClass:UpdateWorkingDetails})
         container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
-
+        container.register<IProfileManagement>(TYPES.ProfileManagement,{useClass:ProfileManagement})
 
 
 

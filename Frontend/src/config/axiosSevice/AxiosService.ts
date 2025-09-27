@@ -29,6 +29,7 @@ export function createAxiosClient({
     let isRefreshing = false;
 
     instance.interceptors.response.use(
+        
         (response) => response,
         async (error) => {
         const originalRequest = error.config;
@@ -37,10 +38,12 @@ export function createAxiosClient({
         if (publicRoutes.includes(originalRequest.url)) {
             return Promise.reject(error);
         }
+        console.log("axios interseptor issue 1")
+        console.log(error.response?.status ,error.response.data.message)
 
         if (
             error.response?.status === 401 &&
-            error.response.data.message === "Token Expired" &&
+            error.response.data.message === "Token expired." &&
             !originalRequest._retry
         ) {
             originalRequest._retry = true;
@@ -48,6 +51,7 @@ export function createAxiosClient({
             if (!isRefreshing) {
                 isRefreshing = true;
                 try {
+                    console.log("refreshitta pannii")
                     await instance.post(refreshTokenEndpoint);
                     isRefreshing = false;
                     return instance(originalRequest);

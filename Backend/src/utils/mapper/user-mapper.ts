@@ -1,4 +1,5 @@
 
+import { ProfileDetails } from "../../dto/user/auth/profile.dto";
 import { UserRegisterDTO, userResponse } from "../../dto/user/auth/user-register.dto";
 import { IUser } from "../../interface/model/user.model.interface";
 
@@ -20,4 +21,13 @@ export class UserMapper {
       image:user?.image
     }
   }
+  static responseuserProfileDetails(user:IUser):ProfileDetails{
+    return {
+      name:user.name,
+      email:user.email,
+      phone:user.phone,
+      image:user?.image
+    }
+  }
+  
 }

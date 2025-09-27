@@ -5,6 +5,7 @@ import IsLogin from "./protected/IsLogin";
 import IsLogout from "./protected/IsLogout";
 import UserForgotPassword from "./pages/user/ForgotPassword";
 import UserResetPassword from "./pages/user/UserResetPassword";
+import { ProfilePage } from "./pages/user/Profile";
 
 
 
@@ -23,6 +24,8 @@ const User = () => {
             <Route path="/login" element={<IsLogout><Login/></IsLogout>}/>
             <Route path="/forgot-Password" element={<IsLogout><UserForgotPassword/></IsLogout>}/>
             <Route path="/reset-Password/:token" element={<IsLogout><UserResetPassword/></IsLogout>}/>
+            <Route path="/profile" element={<IsLogin><ProfilePage/></IsLogin>}/>
+
 
         </Routes>
       

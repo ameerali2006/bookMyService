@@ -22,7 +22,7 @@ export const TYPES = {
   GoogleService:Symbol.for("GoogleService"),
   GetService:Symbol.for("GetService"),
   IsVerified:Symbol.for("IsVerified"),
-
+  ProfileManagement:Symbol.for("ProfileManagement"),
   AuthUserRepository: Symbol.for("AuthUserRepository"),
   OtpRepository:Symbol.for('OtpRepository'),
   AdminRepository:Symbol.for('AdminRepository'),
