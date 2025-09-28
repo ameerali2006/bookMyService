@@ -6,49 +6,107 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Edit3, Save, X } from "lucide-react"
+import { Edit3, Save, X, Loader2 } from "lucide-react"
 import { userService } from "@/api/UserService"
-import { ErrorToast } from "@/components/shared/Toaster"
+import { ErrorToast, SuccessToast, WarningToast } from "@/components/shared/Toaster"
+
+interface UserProfile {
+  name: string
+  email: string
+  phone?: string
+  image?: string
+}
 
 export function ProfileSection() {
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState<{name:string,email:string,phone?:string,image?:string}>({
-    name: "",
-    email: "",
-    phone: "",
-    image:""
-  })
-  useEffect(()=>{
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState<UserProfile>({ name: "", email: "", phone: "", image: "" })
+  const [originalData, setOriginalData] = useState<UserProfile>({ name: "", email: "", phone: "", image: "" })
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({})
+
+  useEffect(() => {
     fetchUserData()
-  },[])
+  }, [])
 
-  const fetchUserData=async ()=>{
+  const fetchUserData = async () => {
     try {
-        const response=await userService.getUserDetails()
-        if(!response.data.success){
-            ErrorToast(response.data.message||"Data invalid")
-        }
-        console.log(response)
-        if (response?.data?.user) {
+      setLoading(true)
+      const response = await userService.getUserDetails()
+      if (response?.data?.user) {
         setFormData(response.data.user)
-        } else {
-        ErrorToast("User data not found")
-        }
+        setOriginalData(response.data.user)
+      } else {
+        ErrorToast(response?.data?.message || "User data not found")
+      }
     } catch (error) {
-        ErrorToast('Invalid Profile,Try again')
-        console.error(error)
-
+      console.error(error)
+      ErrorToast("Invalid Profile, Try again")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleSave = () => {
-    // Handle save logic here
-    setIsEditing(false)
+  
+  const validateForm = () => {
+    const newErrors: { name?: string; phone?: string } = {}
+
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required"
+    } else if (!/^[A-Za-z\s]+$/.test(formData.name.trim())) {
+      newErrors.name = "Name can only contain letters"
+    } else if (formData.name.trim().length < 3 || formData.name.trim().length > 20) {
+      newErrors.name = "Name must be between 3 and 20 characters"
+    }
+
+   
+    if (formData.phone && !/^\d{10}$/.test(formData.phone.trim())) {
+      newErrors.phone = "Phone number must be exactly 10 digits"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSave = async () => {
+    if (!validateForm()) return 
+
+    
+    if (JSON.stringify(formData) === JSON.stringify(originalData)) {
+      WarningToast("No changes made to your profile")
+      setIsEditing(false)
+      return
+    }
+
+    try {
+      setSaving(true)
+      const response = await userService.updateUserDetails(formData)
+
+      if (!response?.data?.success) {
+        setFormData(originalData)
+        ErrorToast(response?.data?.message || "User editing failed")
+      } else {
+        setOriginalData(formData)
+        SuccessToast("User profile updated successfully")
+      }
+    } catch (error) {
+      console.error(error)
+      ErrorToast("Something went wrong while updating your profile")
+    } finally {
+      setSaving(false)
+      setIsEditing(false)
+    }
   }
 
   const handleCancel = () => {
-    // Reset form data if needed
+    setFormData(originalData)
+    setErrors({})
     setIsEditing(false)
+  }
+
+  if (loading) {
+    return <p className="text-center text-muted-foreground">Loading profile...</p>
   }
 
   return (
@@ -68,26 +126,23 @@ export function ProfileSection() {
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                className="flex items-center gap-2 bg-transparent"
-              >
+              <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2 bg-transparent">
                 <X className="h-4 w-4" />
                 Cancel
               </Button>
-              <Button size="sm" onClick={handleSave} className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Save
+              <Button size="sm" onClick={handleSave} disabled={saving} className="flex items-center gap-2">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {saving ? "Saving..." : "Save"}
               </Button>
             </div>
           )}
         </CardHeader>
+
         <CardContent className="space-y-6">
+          {/* Profile Picture */}
           <div className="flex items-center gap-6">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={formData?.image||"https://i.pinimg.com/736x/e5/9e/51/e59e51dcbba47985a013544769015f25.jpg"} />
+              <AvatarImage src={formData?.image || "https://i.pinimg.com/736x/e5/9e/51/e59e51dcbba47985a013544769015f25.jpg"} />
               <AvatarFallback className="text-lg">{formData?.name?.[0] || "U"}</AvatarFallback>
             </Avatar>
             <div>
@@ -99,46 +154,50 @@ export function ProfileSection() {
             </div>
           </div>
 
+          {/* Form Fields */}
           <div className="grid gap-4 md:grid-cols-2">
+            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               {isEditing ? (
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
+                <>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                </>
               ) : (
                 <p className="text-foreground font-medium">{formData.name}</p>
               )}
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               {isEditing ? (
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled={true}
-                />
+                <Input id="email" type="email" value={formData.email} disabled={true} />
               ) : (
                 <p className="text-foreground font-medium">{formData.email}</p>
               )}
             </div>
 
+            {/* Phone */}
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               {isEditing ? (
-                <Input
-                  id="phone"
-                  placeholder={formData.phone?"":"Add your Phone"}
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
+                <>
+                  <Input
+                    id="phone"
+                    placeholder={formData.phone ? "" : "Add your Phone"}
+                    value={formData.phone || ""}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                  {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                </>
               ) : (
-                <p className="text-foreground font-medium">{formData.phone||"Add your Phone..."}</p>
+                <p className="text-foreground font-medium">{formData.phone || "Add your Phone..."}</p>
               )}
             </div>
           </div>

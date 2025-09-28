@@ -61,6 +61,10 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
             userController.userProfileDetails(req, res, next)
             
         );
+        this.router.put('/profile/updateUserDetails',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            userController.updateProfileDetails(req, res, next)
+            
+        );
 
     }
  } 

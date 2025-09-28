@@ -1,16 +1,15 @@
 import { inject, injectable } from "tsyringe";
-import { TYPES } from "../../config/constants/types";
-import { ProfileDetails } from "../../dto/user/auth/profile.dto";
-import { IUserRepository } from "../../interface/repository/user.repository.interface";
-import { IProfileManagement } from "../../interface/service/user/profileManagement.service.interface";
-import { success } from "zod";
-import { UserMapper } from "../../utils/mapper/user-mapper";
+import { TYPES } from "../../../config/constants/types";
+import { ProfileDetails } from "../../../dto/user/auth/profile.dto";
+import { IUserRepository } from "../../../interface/repository/user.repository.interface";
+import { IGetUserProfileDetails } from "../../../interface/service/user/getUserProfileDetails.service.interface";
+import { UserMapper } from "../../../utils/mapper/user-mapper";
 @injectable()
-export class ProfileManagement implements IProfileManagement{
+export class GetUserProfileDetails implements IGetUserProfileDetails{
     constructor(
         @inject(TYPES.AuthUserRepository) private userRepo:IUserRepository
     ) {}
-    async getProfileDetails(userId: string): Promise<{ success: boolean; message: string; user: ProfileDetails | null; }> {
+    async execute(userId: string): Promise<{ success: boolean; message: string; user: ProfileDetails | null; }> {
         try {
              console.log("user service")
              console.log(userId)
