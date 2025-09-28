@@ -8,6 +8,7 @@ import { STATUS_CODES } from "../../config/constants/status-code";
 import { IUpdateUserDetails } from "../../interface/service/user/updateUserProfileDatails.service.interface";
 import { CustomError } from "../../utils/custom-error";
 import { MESSAGES } from "../../config/constants/message";
+import { updateUserProfileSchema } from "../validation/updateUserProfileDetails";
 @injectable()
 export class UserController implements IUserController{
     constructor(
@@ -29,8 +30,20 @@ export class UserController implements IUserController{
     }
     async updateProfileDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const user=req.body
-            console.log(req.body)
+            
+           const parsedData = updateUserProfileSchema.safeParse(req.body)
+
+            if (!parsedData.success) {
+            const errors = parsedData.error.format()
+                res.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    errors,
+                })
+                throw new CustomError(MESSAGES.VALIDATION_ERROR,STATUS_CODES.CONFLICT)
+            }
+
+            const user = parsedData.data
             const userId=(req as CustomRequest).user._id
 
             const updatedData=await this._updateProfile.execute(user,userId)

@@ -1,4 +1,4 @@
-import { Search, Calendar, User, Menu } from "lucide-react";
+import { Search, Calendar, User, Menu, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -12,12 +12,15 @@ import { Button } from "@/components/ui/button";
 import { authService } from "@/api/AuthService";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "@/redux/slice/userTokenSlice";
-import type { RootState } from "@/redux/store"; // Adjust the path as per your store setup
+import type { RootState } from "@/redux/store";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useDispatch();
+
+  // ✅ Get user and city from Redux
   const user = useSelector((state: RootState) => state.userTokenSlice.user);
+  const city = useSelector((state: RootState) => state.userTokenSlice.user?.location?.city || "Your City");
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -25,11 +28,8 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      console.log('logout')
       await authService.logout();
       dispatch(removeUser());
-      console.log('logout after',user)
-      
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -49,6 +49,12 @@ const Header = () => {
           </Link>
         </div>
 
+        {/* ✅ City Name from Redux */}
+        <div className="flex items-center text-white text-sm space-x-1">
+          <MapPin className="h-4 w-4 text-yellow-400" />
+          <span className="truncate max-w-[120px]">{city}</span>
+        </div>
+
         {/* Search Bar */}
         <div className="flex-1 max-w-md mx-8 relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -61,7 +67,6 @@ const Header = () => {
 
         {/* Navigation and Icons */}
         <div className="flex items-center space-x-6">
-          {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-white hover:text-blue-200 transition-colors">
               Home
@@ -74,11 +79,9 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Icons or Auth */}
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                {/* Calendar Icon */}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -87,7 +90,6 @@ const Header = () => {
                   <Calendar className="h-5 w-5" />
                 </Button>
 
-                {/* Profile Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-400 text-black hover:bg-yellow-300 transition-colors">
@@ -104,7 +106,7 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={()=>handleLogout()}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
                     >
                       Logout
