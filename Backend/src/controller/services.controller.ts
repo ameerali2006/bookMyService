@@ -10,17 +10,19 @@ export class ServiceController implements IServiceConroller{
         @inject(TYPES.GetService) private _getService:IGetServices,
     ){}
     async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-      const result = await this._getService.execute(); 
-      console.log(result)
+      try {
+        const { lat, lng, maxDistance = 2000000 } = req.query;
 
-      res.status(STATUS_CODES.CREATED).json({
-        success: true,
-        data: result.services,   // only send services
-        message: "Fetched active services successfully",
-      });
-    } catch (error) {
-      next(error)
-    }
+        const response = await this._getService.execute(
+          parseFloat(lat as string),
+          parseFloat(lng as string),
+          parseFloat(maxDistance as string)
+        );
+        console.log(response)
+
+        res.status(response.status).json(response);
+      } catch (error) {
+        next(error)
+      }
     }
 }

@@ -36,8 +36,9 @@ export const authService={
     userResetPassword:async (data:{token:string,password: string,confirmPassword:string})=>{
         return await userAxios.post('/reset-password',data)
     },
-    getUserServices:async()=>{
-        return await userAxios.get("/getService")
+    getUserServices:async(location:{city:string,lat:number,lng:number})=>{
+          const query = `location=${encodeURIComponent(location.city)}&lat=${location.lat}&lng=${location.lng}`;
+        return await userAxios.get(`/getService?${query}`)
     },
     logout: async ()=>{
         return await userAxios.post('/logout')

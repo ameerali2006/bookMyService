@@ -17,7 +17,9 @@ import { IServiceRepository } from "../../interface/repository/service.repositor
 import { ServiceRepository } from "../../repository/helper/service.repository";
 import { IWorkingDetailsRepository } from "../../interface/repository/working-details.interface";
 import { WorkingDetailsRepository } from "../../repository/shared/working-details.repository";
-// Make sure this class is decorated with @injectable()
+import { IWorkerAggregation } from "../../interface/repository/workerAggregation.repository.interface";
+import { WorkerAggregation } from "../../repository/worker/workerAggregation.repository";
+
 
 
 
@@ -31,6 +33,7 @@ export class RepositoryRegistery{
         container.register<IRefreshTokenRepository>(TYPES.RefreshTokenRepository,{useClass:RefreshTokenRepository})
         container.register<IServiceRepository>(TYPES.ServiceRepository,{useClass:ServiceRepository})
         container.register<IWorkingDetailsRepository>(TYPES.WorkingDetailsRepository,{useClass:WorkingDetailsRepository})
+        container.register<IWorkerAggregation>(TYPES.WorkerAggregation,{useClass:WorkerAggregation})
         
 
     }

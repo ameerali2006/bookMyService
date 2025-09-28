@@ -84,7 +84,7 @@ export default function Homepage() {
         </section>
 
         {/* Service Categories Section */}
-        <ServiceCategories />
+        <ServiceCategories setShowLocationModal={setShowLocationModal} />
 
         {/* Why bookMyService Section */}
         <section className="bg-gray-100 py-12">

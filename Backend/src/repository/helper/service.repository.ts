@@ -20,4 +20,7 @@ export class ServiceRepository
   async findByCategory(category: string): Promise<IService[]> {
     return this.find({ category });
   }
+  async findActiveServicesByIds(ids: string[]): Promise<IService[]> {
+    return this.find({ _id: { $in: ids }, status: "active" });
+  }
 }

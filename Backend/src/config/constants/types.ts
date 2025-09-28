@@ -9,7 +9,7 @@ export const TYPES = {
   RedisTokenRepository:Symbol.for("RedisTokenRepository"),
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
   WorkingDetailsRepository: Symbol.for("WorkingDetailsRepository"),
-
+  WorkerAggregation: Symbol.for("WorkerAggregation"),
   WorkerRepository: Symbol.for("WorkerRepository"),
   AuthWorkerService:Symbol.for("AuthWorkerService"),
   CloudinaryService:Symbol.for("CloudinaryService"),
