@@ -33,7 +33,7 @@ export const TYPES = {
   ResetPassword:Symbol.for('ResetPassword'),
   ServiceRepository:Symbol.for('ServiceRepository'),
   WorkerHelperService:Symbol.for('WorkerHelperService'),
-
+  GetNearByWorkers:Symbol.for('GetNearByWorkers'),
   DateConversionService:Symbol.for('DateConversionService'),
 
 };

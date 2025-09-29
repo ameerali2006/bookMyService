@@ -49,6 +49,8 @@ import {IGetUserProfileDetails } from "../../interface/service/user/getUserProfi
 import { GetUserProfileDetails } from "../../service/user/profileManagement/getUserProfileDetails.service";
 import { IUpdateUserDetails } from "../../interface/service/user/updateUserProfileDatails.service.interface";
 import { UpdateUserDetails } from "../../service/user/profileManagement/updateUserProfile.service";
+import { IGetNearByWorkers } from "../../interface/service/services/getNearByWorkers.service.interface";
+import { GetNearByWorkers } from "../../service/services/getNearByWorkers.service";
  
 
 
@@ -81,7 +83,7 @@ export class ServiceRegistery{
         container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
         container.register<IGetUserProfileDetails>(TYPES.GetUserProfileDetails,{useClass:GetUserProfileDetails})
         container.register<IUpdateUserDetails>(TYPES.UpdateUserDetails,{useClass:UpdateUserDetails})
-
+        container.register<IGetNearByWorkers>(TYPES.GetNearByWorkers,{useClass:GetNearByWorkers})
 
 
     }

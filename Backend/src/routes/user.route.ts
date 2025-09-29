@@ -65,6 +65,8 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
             userController.updateProfileDetails(req, res, next)
             
         );
-
+        this.router.get('/workers/nearby',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            serviceController.getNearByWorkers(req, res, next)
+        );
     }
  } 
