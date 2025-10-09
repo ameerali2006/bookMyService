@@ -68,5 +68,8 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
         this.router.get('/workers/nearby',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
             serviceController.getNearByWorkers(req, res, next)
         );
+        this.router.get('/workers/availability',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            serviceController.getWorkerAvailability(req, res, next)
+        );
     }
  } 

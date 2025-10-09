@@ -62,8 +62,11 @@ export class RegisterService implements IRegisterService{
                     password: user.password,
 
                     location: {
-                    lat: parseFloat(user.latitude),
-                    lng: parseFloat(user.longitude),
+                    type: "Point" as const,
+                    coordinates: [
+                        parseFloat(user.longitude),
+                        parseFloat(user.latitude), 
+                    ] as [number,number],
                     },
 
                     zone: user.zone,

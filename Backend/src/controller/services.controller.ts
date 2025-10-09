@@ -2,20 +2,19 @@ import { NextFunction, Request, Response } from "express";
 import { IServiceConroller } from "../interface/controller/services.controller.interface";
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "../config/constants/types";
-import { IGetServices } from "../interface/service/services/getServices.service.interface";
 import { STATUS_CODES } from "../config/constants/status-code";
-import { IGetNearByWorkers } from "../interface/service/services/getNearByWorkers.service.interface";
+
+import { IServiceDetails } from "../interface/service/services/ServiceDetails.service.interface";
 @injectable()
 export class ServiceController implements IServiceConroller{
     constructor(
-        @inject(TYPES.GetService) private _getService:IGetServices,
-        @inject(TYPES.GetNearByWorkers) private _getNearWorker:IGetNearByWorkers,
+        @inject(TYPES.ServiceDetails) private _serviceDetails:IServiceDetails
     ){}
     async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
         const { lat, lng, maxDistance = 2000000 } = req.query;
 
-        const response = await this._getService.execute(
+        const response = await this._serviceDetails.getServices(
           parseFloat(lat as string),
           parseFloat(lng as string),
           parseFloat(maxDistance as string)
@@ -39,7 +38,7 @@ export class ServiceController implements IServiceConroller{
         lng,
       } = req.query;
 
-      const response = await this._getNearWorker.execute(
+      const response = await this._serviceDetails.getNearByWorkers(
         serviceId as string,
         Number(lat),
         Number(lng),
@@ -58,17 +57,32 @@ export class ServiceController implements IServiceConroller{
           totalPages: Math.ceil(response.data?.totalCount as number / Number(pageSize)),
           currentPage: Number(page),
         });
+      }else{
+         res.status(STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          message: response.message || "Failed to fetch nearby workers",
+        });
       }
-      res.status(STATUS_CODES.BAD_REQUEST).json({
-        success: false,
-        message: response.message || "Failed to fetch nearby workers",
-      });
+     
     } catch (error: any) {
       res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: error.message || "Failed to fetch nearby workers",
       });
     }
+  }
+  async getWorkerAvailability(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { workerId } = req.query;
+      console.log(workerId)
+      if (!workerId)  res.status(STATUS_CODES.BAD_REQUEST).json({ error: "Missing workerId" });
+
+      const data = await this._serviceDetails.getWorkerAvailablity(workerId as string);
+      console.log(data.data?.dates)
+      res.status(STATUS_CODES.OK).json(data);
+    } catch (err: any) {
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
     }
+  }
     
 }

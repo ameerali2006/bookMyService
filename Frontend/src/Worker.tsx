@@ -9,6 +9,7 @@ import WorkerForgotPassword from "./pages/worker/ForgotPassword";
 import WorkerResetPassword from "./pages/worker/ResetPassword";
 import WorkerProfilePage from "./pages/worker/WorkerProfile";
 import WorkManagementPage from "./pages/worker/SlotMangement";
+import { WORKER_ROUTES } from "./config/constant/routes/workerRoutes";
 
 
 const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
@@ -16,18 +17,39 @@ const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
 const Worker = () => {
   return (
     <Suspense fallback={<Loader message="loading..."/>}>
-        <Routes>
-            
-            <Route path="/register" element={<IsWorkerLogout><WorkerRegistration/></IsWorkerLogout>}/>
-            <Route path="/login" element={<IsWorkerLogout><WorkerLogin/></IsWorkerLogout>}/>
-            <Route path="/dashboard" element={<IsWorkerLogin><WorkerDashboard/></IsWorkerLogin>}/>
-            <Route path="/forgot-Password" element={<IsWorkerLogout><WorkerForgotPassword/></IsWorkerLogout>}/>
-            <Route path="/reset-Password/:token" element={<IsWorkerLogout><WorkerResetPassword/></IsWorkerLogout>}/>
-            <Route path="/profile/view" element={<IsWorkerLogin><WorkerProfilePage/></IsWorkerLogin>}/>
-            <Route path="/profile/slot" element={<IsWorkerLogin><WorkManagementPage/></IsWorkerLogin>}/>
-            
+       <Routes>
+        {/* Auth Routes */}
+        <Route
+          path={WORKER_ROUTES.REGISTER}
+          element={<IsWorkerLogout><WorkerRegistration /></IsWorkerLogout>}
+        />
+        <Route
+          path={WORKER_ROUTES.LOGIN}
+          element={<IsWorkerLogout><WorkerLogin /></IsWorkerLogout>}
+        />
+        <Route
+          path={WORKER_ROUTES.FORGOT_PASSWORD}
+          element={<IsWorkerLogout><WorkerForgotPassword /></IsWorkerLogout>}
+        />
+        <Route
+          path={WORKER_ROUTES.RESET_PASSWORD}
+          element={<IsWorkerLogout><WorkerResetPassword /></IsWorkerLogout>}
+        />
 
-        </Routes>
+        {/* Protected Routes */}
+        <Route
+          path={WORKER_ROUTES.DASHBOARD}
+          element={<IsWorkerLogin><WorkerDashboard /></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.PROFILE_VIEW}
+          element={<IsWorkerLogin><WorkerProfilePage /></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.PROFILE_SLOT}
+          element={<IsWorkerLogin><WorkManagementPage /></IsWorkerLogin>}
+        />
+      </Routes>
       
     </Suspense> 
   )

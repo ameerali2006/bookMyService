@@ -25,4 +25,9 @@ export const userService={
         });
 
     },
+    getWorkerAvailability:async (workerId:string)=>{
+        
+        return await userAxios.get(`/workers/availability?workerId=${workerId}`)
+
+    },
 } 

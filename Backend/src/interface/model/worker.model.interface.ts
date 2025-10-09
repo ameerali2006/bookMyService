@@ -10,9 +10,9 @@ export interface IWorker  extends Document{
   profileImage?: string;
   googleId?: string;
   location: {
-    lat: number;
-    lng: number;
-  };
+    type: "Point";
+    coordinates: [number, number]; 
+  }
   zone: string;
   experience: "0-1" | "2-5" | "6-10" | "10+";
   category: Types.ObjectId

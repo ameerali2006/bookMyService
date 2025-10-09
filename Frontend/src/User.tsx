@@ -7,6 +7,8 @@ import UserForgotPassword from "./pages/user/ForgotPassword";
 import UserResetPassword from "./pages/user/UserResetPassword";
 import { ProfilePage } from "./pages/user/Profile";
 import WorkerListingPage from "./pages/user/WorkerListing";
+import BasicBookingDetails from "./pages/user/BasicBookingDetails";
+import { USER_ROUTES } from "./config/constant/routes/userRoutes";
 
 
 
@@ -20,17 +22,41 @@ const User = () => {
   return (
     <Suspense fallback={<Loader message="loading..."/>}>
         <Routes>
-            <Route index element={<Homepage/>}/>
-            <Route path="/register" element={<IsLogout><Register /></IsLogout>}/>
-            <Route path="/login" element={<IsLogout><Login/></IsLogout>}/>
-            <Route path="/forgot-Password" element={<IsLogout><UserForgotPassword/></IsLogout>}/>
-            <Route path="/reset-Password/:token" element={<IsLogout><UserResetPassword/></IsLogout>}/>
-            <Route path="/profile" element={<IsLogin><ProfilePage/></IsLogin>}/>
-            <Route path="/services/:Id" element={<IsLogin><WorkerListingPage/></IsLogin>}/>
-            
+       
+        <Route index element={<Homepage />} />
 
+        
+        <Route
+          path={USER_ROUTES.REGISTER}
+          element={<IsLogout><Register /></IsLogout>}
+        />
+        <Route
+          path={USER_ROUTES.LOGIN}
+          element={<IsLogout><Login /></IsLogout>}
+        />
+        <Route
+          path={USER_ROUTES.FORGOT_PASSWORD}
+          element={<IsLogout><UserForgotPassword /></IsLogout>}
+        />
+        <Route
+          path={USER_ROUTES.RESET_PASSWORD}
+          element={<IsLogout><UserResetPassword /></IsLogout>}
+        />
 
-        </Routes>
+       
+        <Route
+          path={USER_ROUTES.PROFILE}
+          element={<IsLogin><ProfilePage /></IsLogin>}
+        />
+        <Route
+          path={USER_ROUTES.SERVICES.LIST}
+          element={<IsLogin><WorkerListingPage /></IsLogin>}
+        />
+        <Route
+          path={USER_ROUTES.SERVICES.BOOK_DETAILS}
+          element={<IsLogin><BasicBookingDetails /></IsLogin>}
+        />
+      </Routes>
       
     </Suspense> 
   ) 

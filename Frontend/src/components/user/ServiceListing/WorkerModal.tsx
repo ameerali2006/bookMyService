@@ -7,16 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 
 interface Worker {
-  id: number|string
+  _id:string
   name: string
-//   role: string
   experience: string
-//   rating: number
-//   reviews: number
+  fees:number
   image: string
-  price: string
-  location: string
-//   skills: string[]
+  zone: string
+  distance:number
+
 }
 
 interface WorkerProfileModalProps {
@@ -62,13 +60,13 @@ export function WorkerProfileModal({ worker, isOpen, onClose }: WorkerProfileMod
                 </div>
                 <div className="flex items-center space-x-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{worker.location}</span>
+                  <span>{worker.zone}</span>
                 </div>
               </div>
             </div>
 
             <div className="text-right">
-              <div className="text-2xl font-bold text-primary">{worker.price}</div>
+              <div className="text-2xl font-bold text-primary">{worker.fees}</div>
               <div className="flex items-center space-x-1 mt-1">
                 <Star className="h-4 w-4 fill-accent text-accent" />
                 {/* <span className="font-medium">{worker.rating}</span>

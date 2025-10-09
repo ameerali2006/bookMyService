@@ -1,31 +1,29 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Search, Star, Filter, ChevronDown } from "lucide-react"
+import { Search, Star, Filter, ChevronDown, MapPin } from "lucide-react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Pagination } from "@/components/ui/Pagination"
-import { WorkerProfileModal } from "@/components/worker/ServiceListing/WorkerModal"
+import { WorkerProfileModal } from "@/components/user/ServiceListing/WorkerModal"
 import Header from "@/components/user/shared/Header"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { userService } from "@/api/UserService"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/redux/store"
 
-type Worker = {
-  id: string | number
+interface Worker {
+  _id: string
   name: string
-//   role: string
   experience: string
-//   rating: number
-//   reviews: number
+  fees:number
   image: string
-  price: string
-  location: string
- 
+  zone: string
+  distance:number
+
 }
 
 type SortOption = "rating" | "experience" | "price"
@@ -42,6 +40,7 @@ export default function WorkerListingPage() {
     const [loading, setLoading] = useState(false)
     const param=useParams()
     const location=useSelector((state:RootState)=>state.userTokenSlice.user?.location)
+    const navigate = useNavigate() 
         
     // Fetch workers from backend
     const fetchWorkers = async () => {
@@ -69,13 +68,14 @@ export default function WorkerListingPage() {
                 location.lng
             )
             console.log(response)
-            // if (data?.success) {
-            // setWorkers(data.workers)
-            // setTotalWorkers(data.totalCount)
-            // } else {
-            // setWorkers([])
-            // setTotalWorkers(0)
-            // }
+            const data=response.data
+            if (data?.success) {
+            setWorkers(data.workers)
+            setTotalWorkers(data.totalCount)
+            } else {
+            setWorkers([])
+            setTotalWorkers(0)
+            }
 
         } catch (err) {
             console.error("Error fetching workers:", err)
@@ -96,10 +96,10 @@ export default function WorkerListingPage() {
     }
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-white">
         <Header />
 
-        <div className="container mx-auto px-4 py-8 pt-20">
+        <div className="container mx-auto px-4 py-8 pt-20 ">
             {/* Search and Filter Bar */}
             <div className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="relative flex-1">
@@ -143,11 +143,11 @@ export default function WorkerListingPage() {
             </div>
 
             {/* Worker Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 " >
             {workers.map((worker) => (
                 <Card
-                key={worker.id}
-                className="hover:shadow-lg transition-shadow shadow-amber-500 duration-200 cursor-pointer group bg-white "
+                key={worker._id}
+                className="hover:shadow-lg transition-shadow shadow-blue-500 duration-200 cursor-pointer group bg-white "
                 onClick={() => handleWorkerClick(worker)}
                 >
                 <CardContent className="p-6">
@@ -168,14 +168,15 @@ export default function WorkerListingPage() {
                         <p className="text-muted-foreground text-sm mb-2">{worker.experience} experience</p>
 
                         <div className="flex items-center space-x-1 mb-2">
-                        <Star className="h-4 w-4 fill-accent text-accent" />
-                        {/* <span className="font-medium">{worker.rating}</span>
-                        <span className="text-muted-foreground text-sm">({worker.reviews} reviews)</span> */}
+                        <Star className="h-4 w-4  fill-amber-400 text-accent" />
+                        <span className="font-medium">{5}</span>
+                        {/* <span className="text-muted-foreground text-sm">({worker.reviews} reviews)</span> */}
                         </div>
 
                         <div className="flex items-center justify-between">
-                        <span className="font-semibold text-primary">{worker.price}</span>
-                        <span className="text-muted-foreground text-sm">{worker.location}</span>
+                        <span className="font-semibold text-primary">{worker.fees}/perWork</span>
+                        <div><MapPin className="h-4 w-4 text-yellow-400" />
+                        <span className="text-muted-foreground text-sm">{worker.zone}</span></div>
                         </div>
                     </div>
                     </div>
@@ -196,8 +197,8 @@ export default function WorkerListingPage() {
                     <Button
                         className="flex-1 bg-accent hover:bg-blue-800 text-accent-foreground"
                         onClick={(e) => {
-                        e.stopPropagation()
-                        // Handle booking logic here
+                            e.stopPropagation()
+                            navigate(`/services/bookDetails/${worker._id}`)
                         }}
                     >
                         Book Now

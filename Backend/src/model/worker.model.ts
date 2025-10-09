@@ -11,9 +11,17 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
     profileImage: { type: String },
     googleId: { type: String, unique: true, sparse: true },
     location: {
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true },
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+      default: "Point",
     },
+    coordinates: {
+      type: [Number], 
+      required: true,
+    },
+  },
 
     zone: { type: String, required: true, trim: true },
 
@@ -29,8 +37,8 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
       required: true,
     },
 
-    fees: { type: Number, default: 0 },
-    isBlocked: { type: Boolean, default: true },
+    fees: { type: Number, default: 200 },
+    isBlocked: { type: Boolean, default: false },
     isActive: { type: Boolean, default: false },
     isVerified: { 
       type: String, 
@@ -44,5 +52,5 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
     timestamps: true,
   }
 );
-
+WorkerSchema.index({ location: "2dsphere" });
 export const WorkerModel = mongoose.model<IWorker>("Worker",WorkerSchema);

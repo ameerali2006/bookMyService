@@ -1,9 +1,9 @@
-
 import { WorkerModel } from "../../model/worker.model";
 import { injectable } from "inversify";
 import { BaseRepository } from "../shared/base.repository";
 import { IWorker } from "../../interface/model/worker.model.interface";
 import { IWorkerAggregation } from "../../interface/repository/workerAggregation.repository.interface";
+import { Types } from "mongoose";
 
 @injectable()
 export class WorkerAggregation
@@ -14,41 +14,16 @@ export class WorkerAggregation
     super(WorkerModel);
   }
 
+  
   async findNearbyWorkers(lat: number, lng: number, maxDistance: number) {
     return WorkerModel.aggregate([
       {
-        $addFields: {
-          distance: {
-            $multiply: [
-              6371, 
-              {
-                $acos: {
-                  $add: [
-                    {
-                      $multiply: [
-                        { $sin: { $degreesToRadians: "$location.lat" } },
-                        { $sin: { $degreesToRadians: lat } },
-                      ],
-                    },
-                    {
-                      $multiply: [
-                        { $cos: { $degreesToRadians: "$location.lat" } },
-                        { $cos: { $degreesToRadians: lat } },
-                        { $cos: { $degreesToRadians: { $subtract: ["$location.lng", lng] } } },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        $match: {
-          distance: { $lte: maxDistance }, 
-          
-          isVerified: "approved",
+        $geoNear: {
+          near: { type: "Point", coordinates: [lng, lat] },
+          distanceField: "distance",
+          maxDistance: maxDistance, 
+          spherical: true,
+          query: { isVerified: "approved" },
         },
       },
       {
@@ -59,78 +34,63 @@ export class WorkerAggregation
       },
     ]);
   }
-   async findNearbyWorkersByServiceId(
+
+  
+  async findNearbyWorkersByServiceId(
     serviceId: string,
     lat: number,
     lng: number,
     search: string,
     sort: string,
     page: number,
-    pageSize: number
-  ):Promise<{workers:IWorker[],totalCount:number}> {
-
+    pageSize: number,
+    maxDistance: number = 200000 // default 20 km
+  ): Promise<{ workers: IWorker[]; totalCount: number }> {
     const skip = (page - 1) * pageSize;
+    const serviceObjectId = new Types.ObjectId(serviceId);
 
+    
     const pipeline: any[] = [
-      // Step 1: Match by service
       {
-        $match: {
-          serviceId,
-          ...(search && {
-            name: { $regex: search, $options: "i" },
-          }),
-        },
-      },
-
-      // Step 2: Calculate distance using Haversine formula
-      {
-        $addFields: {
-          distance: {
-            $multiply: [
-              6371, // Earth radius in km
-              {
-                $acos: {
-                  $add: [
-                    {
-                      $multiply: [
-                        { $sin: { $degreesToRadians: "$location.lat" } },
-                        { $sin: { $degreesToRadians: lat } },
-                      ],
-                    },
-                    {
-                      $multiply: [
-                        { $cos: { $degreesToRadians: "$location.lat" } },
-                        { $cos: { $degreesToRadians: lat } },
-                        {
-                          $cos: {
-                            $subtract: [
-                              { $degreesToRadians: "$location.lng" },
-                              { $degreesToRadians: lng },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
+        $geoNear: {
+          near: { type: "Point", coordinates: [lng, lat] },
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: maxDistance, 
+          query: {
+            category: serviceObjectId,
+            isVerified: "approved",
+            ...(search && { name: { $regex: search, $options: "i" } }),
           },
         },
       },
-
-      // Step 3: Sort
-      {
-        $sort: sort === "asc" ? { distance: 1 } : { distance: -1 },
-      },
-
-      // Step 4: Pagination
+      { $sort: sort === 'rating' ? { distance: 1 } : { distance: -1 } },
       { $skip: skip },
       { $limit: pageSize },
     ];
 
     const workers = await WorkerModel.aggregate(pipeline);
-    const totalCount = await WorkerModel.countDocuments({ serviceId });
+
+    
+    const countPipeline: any[] = [
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [lng, lat] },
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: maxDistance,
+          query: {
+            category: serviceObjectId,
+            isVerified: "approved",
+            ...(search && { name: { $regex: search, $options: "i" } }),
+          },
+        },
+      },
+      { $count: "totalCount" },
+    ];
+
+    const countResult = await WorkerModel.aggregate(countPipeline);
+    const totalCount = countResult[0]?.totalCount || 0;
 
     return { workers, totalCount };
   }

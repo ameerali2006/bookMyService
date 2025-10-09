@@ -35,22 +35,21 @@ import { IOtpService } from "../../interface/service/auth/otp.service.interface"
 import { OtpService } from "../../service/auth/otp.service";
 import { IGoogleService } from "../../interface/service/auth/google.service.interface";
 import { GoogleService } from "../../service/auth/googleAuth.service";
-import { IGetServices } from "../../interface/service/services/getServices.service.interface";
-import { GetServices } from "../../service/services/getService.service";
+
 import { IIsVerified } from "../../interface/service/auth/isVerified.service.interface";
 import { IsVerified } from "../../service/auth/isVerified.service";
-import { IGetWorkingDetails } from "../../interface/service/worker/getWorkingDetails.service.interface";
-import { GetWorkingDetails } from "../../service/worker/getWorkingDetails.service";
-import { IUpdateWorkingDetails } from "../../interface/service/worker/updateWorkerDetails.service.interface";
-import { UpdateWorkingDetails } from "../../service/worker/updateWorkerDetails.service";
+
 import { IDateConversionService } from "../../interface/service/date-convertion.service.interface";
 import { DateConversionService } from "../../service/helper/date-convertion.service";
-import {IGetUserProfileDetails } from "../../interface/service/user/getUserProfileDetails.service.interface";
-import { GetUserProfileDetails } from "../../service/user/profileManagement/getUserProfileDetails.service";
-import { IUpdateUserDetails } from "../../interface/service/user/updateUserProfileDatails.service.interface";
-import { UpdateUserDetails } from "../../service/user/profileManagement/updateUserProfile.service";
-import { IGetNearByWorkers } from "../../interface/service/services/getNearByWorkers.service.interface";
-import { GetNearByWorkers } from "../../service/services/getNearByWorkers.service";
+
+
+
+import { IServiceDetails } from "../../interface/service/services/ServiceDetails.service.interface";
+import { ServiceDetails } from "../../service/services/serviceDetails.service";
+import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
+import { ProfileManagement } from "../../service/user/profileManagement.service";
+import { IWorkingDetailsManagement } from "../../interface/service/worker/workingDetails.service.interface";
+import { WorkingDetailsManagement } from "../../service/worker/workingDetails.service";
  
 
 
@@ -76,14 +75,16 @@ export class ServiceRegistery{
         container.register<IRegisterService>(TYPES.RegisterService,{useClass:RegisterService})
         container.register<IOtpService>(TYPES.OtpService,{useClass:OtpService})
         container.register<IGoogleService>(TYPES.GoogleService,{useClass:GoogleService})
-        container.register<IGetServices>(TYPES.GetService,{useClass:GetServices})
+
         container.register<IIsVerified>(TYPES.IsVerified,{useClass:IsVerified})
-        container.register<IGetWorkingDetails>(TYPES.GetWorkingDetails,{useClass:GetWorkingDetails})
-        container.register<IUpdateWorkingDetails>(TYPES.UpdateWorkingDetails,{useClass:UpdateWorkingDetails})
+        
         container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
-        container.register<IGetUserProfileDetails>(TYPES.GetUserProfileDetails,{useClass:GetUserProfileDetails})
-        container.register<IUpdateUserDetails>(TYPES.UpdateUserDetails,{useClass:UpdateUserDetails})
-        container.register<IGetNearByWorkers>(TYPES.GetNearByWorkers,{useClass:GetNearByWorkers})
+        
+        container.register<IProfileManagement>(TYPES.ProfileManagement,{useClass:ProfileManagement})
+        container.register<IServiceDetails>(TYPES.ServiceDetails,{useClass:ServiceDetails})
+        container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement,{useClass:WorkingDetailsManagement})
+
+
 
 
     }

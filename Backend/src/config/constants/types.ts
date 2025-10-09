@@ -35,5 +35,13 @@ export const TYPES = {
   WorkerHelperService:Symbol.for('WorkerHelperService'),
   GetNearByWorkers:Symbol.for('GetNearByWorkers'),
   DateConversionService:Symbol.for('DateConversionService'),
+  BookingRepository:Symbol.for('BookingRepository'),
+  GetWorkerAvailability:Symbol.for('GetWorkerAvailability'),
+  ServiceDetails:Symbol.for('ServiceDetails'),
+  ProfileManagement:Symbol.for('ProfileManagement'),
+  WorkingDetailsManagement:Symbol.for('WorkingDetailsManagement'),
+
+
+
 
 };

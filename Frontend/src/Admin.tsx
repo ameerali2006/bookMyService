@@ -8,6 +8,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import WorkerManagement from "./pages/admin/WorkerManagement";
 import WorkerVerification from "./pages/admin/WorkerVerification";
 import ServiceManagement from "./pages/admin/ServiceManagement";
+import { ADMIN_ROUTES } from "./config/constant/routes/adminRoutes";
 
 
 const LoginPage = lazy(()=>import("./pages/admin/LoginPage"));
@@ -17,14 +18,34 @@ const Admin = () => {
     <>
     <Suspense fallback={<Loader message={'loading...'} />}>
         <Routes>
-          <Route path="/login"  element={<IsAdminLogout><LoginPage /></IsAdminLogout>}></Route>
-          <Route path="/dashboard"  element={<IsAdminLogin><AdminDashboard /></IsAdminLogin>}></Route>
-          <Route path="/users" element={<IsAdminLogin><UserManagement/></IsAdminLogin>} ></Route>
-          <Route path="/workers" element={<IsAdminLogin><WorkerManagement/></IsAdminLogin>} ></Route>
-          <Route path="/unVerified" element={<IsAdminLogin><WorkerVerification/></IsAdminLogin>} ></Route>
-          <Route path="/services" element={<IsAdminLogin><ServiceManagement/></IsAdminLogin>} ></Route>
+        {/* Auth Route */}
+        <Route
+          path={ADMIN_ROUTES.LOGIN}
+          element={<IsAdminLogout><LoginPage /></IsAdminLogout>}
+        />
 
-          </Routes>
+        {/* Protected Routes */}
+        <Route
+          path={ADMIN_ROUTES.DASHBOARD}
+          element={<IsAdminLogin><AdminDashboard /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.USERS}
+          element={<IsAdminLogin><UserManagement /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.WORKERS}
+          element={<IsAdminLogin><WorkerManagement /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.UNVERIFIED}
+          element={<IsAdminLogin><WorkerVerification /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.SERVICES}
+          element={<IsAdminLogin><ServiceManagement /></IsAdminLogin>}
+        />
+      </Routes>
     </Suspense></>
   )
 }
