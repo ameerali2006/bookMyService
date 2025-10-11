@@ -21,6 +21,7 @@ import {
 import { MESSAGES } from "../../config/constants/message";
 import { CustomError } from "../../utils/custom-error";
 import { STATUS_CODES } from "../../config/constants/status-code";
+import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
 @injectable()
 export class WorkingDetailsManagement implements IWorkingDetailsManagement {
   constructor(
@@ -28,7 +29,9 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
     private _workingRepo: IWorkingDetailsRepository,
     @inject(TYPES.WorkerRepository) private _workerRepo: IWorkerRepository,
     @inject(TYPES.DateConversionService)
-    private _dateService: IDateConversionService
+    private _dateService: IDateConversionService,
+    @inject(TYPES.WorkingHelper)
+    private _workingHelper: IWorkingHelper
   ) {}
   async getWorkingDetails(email: string): Promise<IWorkingDetailsDocument> {
     try {
@@ -63,17 +66,11 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
         ];
 
         const defaultDays = dayOrder.map((day, i) => {
-          const baseDate = addDays(new Date(), i);
-          const startTime = setMilliseconds(
-            setSeconds(setMinutes(setHours(baseDate, 9), 0), 0),
-            0
-          );
-          const endTime = setMilliseconds(
-            setSeconds(setMinutes(setHours(baseDate, 17), 0), 0),
-            0
-          );
+          const date = addDays(new Date(), i);
+          const startTime = "09:00";
+          const endTime = "17:00";
 
-          return { day, enabled: false, startTime, endTime, breaks: [] };
+          return { day,date, enabled: false, startTime, endTime, breaks: [] };
         });
 
         details = await this._workingRepo.create({
@@ -89,31 +86,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
           customSlots: [],
         } as unknown as Partial<IWorkingDetailsDocument>);
       } else if (daysOfWeek[new Date().getDay()] != details.weekStartDay) {
-        // update day dates for next week
-        const today = new Date();
-        const getNextDayDate = (targetDayIndex: number, fromDate: Date) => {
-          const diff = (targetDayIndex - fromDate.getDay() + 7) % 7;
-          return addDays(fromDate, diff);
-        };
-
-        details.days = details.days.map((d) => {
-          const dayIndex = daysOfWeek.indexOf(d.day);
-          const nextDayDate = getNextDayDate(dayIndex, today);
-
-          const startTime = setMilliseconds(
-            setSeconds(setMinutes(setHours(nextDayDate, 9), 0), 0),
-            0
-          );
-          const endTime = setMilliseconds(
-            setSeconds(setMinutes(setHours(nextDayDate, 17), 0), 0),
-            0
-          );
-
-          return { ...d, startTime, endTime, enabled: d.enabled ?? false };
-        });
-        details.weekStartDay = daysOfWeek[new Date().getDay()] as WeekDay;
-
-        await details.save();
+        details=await this._workingHelper.rotateDayShedule(String(details._id)) as IWorkingDetails
       }
       console.log("before convertion", details);
 
@@ -123,12 +96,12 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
         : { ...details };
       const convertedDays = (plainDetails.days as IDaySchedule[]).map((d) => ({
         ...d,
-        startTime: this._dateService.formatIST(new Date(d.startTime)),
-        endTime: this._dateService.formatIST(new Date(d.endTime)),
+        startTime: d.startTime,
+        endTime:d.endTime,
         breaks: (d.breaks || []).map((b) => ({
           ...b,
-          startTime: this._dateService.formatIST(new Date(b.breakStart)),
-          endTime: this._dateService.formatIST(new Date(b.breakEnd)),
+          breakStart: b.breakStart,
+          breakEnd: b.breakEnd,
         })),
       }));
       console.log("converted data", ...convertedDays);
@@ -158,13 +131,13 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
 
       const normalizedPayload: Partial<IDaySchedule> = {
         ...payload,
-        startTime: this._dateService.istToUTC(new Date(payload.startTime)),
-        endTime: this._dateService.istToUTC(new Date(payload.endTime)),
+        startTime:payload.startTime ,
+        endTime: payload.endTime,
         breaks:
           payload.breaks?.map((b) => ({
             ...b,
-            breakStart: this._dateService.istToUTC(new Date(b.breakStart)),
-            breakEnd: this._dateService.istToUTC(new Date(b.breakEnd)),
+            breakStart: b.breakStart,
+            breakEnd: b.breakEnd,
           })) || [],
       };
 

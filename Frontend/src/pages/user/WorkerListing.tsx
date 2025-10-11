@@ -48,7 +48,7 @@ export default function WorkerListingPage() {
         try {
             
              
-            const serviceId = param.Id
+            const serviceId = param.id
             
             if (!location?.lat || !location?.lng) {
                 console.warn("User location not available")

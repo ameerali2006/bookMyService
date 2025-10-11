@@ -131,42 +131,56 @@ export function ChooseDateTime({
   }
 
   // Helper: is this minute inside an "available" range?
-  const isMinuteSelectable = React.useCallback(
-    (mins: number) => {
-      if (!availableTimes || availableTimes.length === 0) return false
-      return availableTimes.some((range) => {
-        const start = timeToMinutes(range.start)
-        const end = timeToMinutes(range.end)
-        return mins >= start && mins < end && range.status === "available"
-      })
+  const getStatusAtMinute = React.useCallback(
+    (mins: number): TimeStatus => {
+      if (!availableTimes || availableTimes.length === 0) return "unavailable";
+
+      // Find all overlapping ranges
+      const overlapping = availableTimes.filter((range) => {
+        const start = timeToMinutes(range.start);
+        const end = timeToMinutes(range.end);
+        return mins >= start && mins < end;
+      });
+
+      if (overlapping.length === 0) return "unavailable";
+
+      // Pick the "strongest" status among overlaps
+      const priority = ["break", "booked", "available", "unavailable"];
+      overlapping.sort(
+        (a, b) => priority.indexOf(a.status) - priority.indexOf(b.status)
+      );
+
+      return overlapping[0].status;
     },
-    [availableTimes],
-  )
+    [availableTimes]
+  );
+
 
   const handleClickTrack = (e: React.MouseEvent<HTMLDivElement>) => {
-    const container = scrollRef.current
-    const track = trackRef.current
-    if (!container || !track) return
+    const container = scrollRef.current;
+    if (!container) return;
 
-    // Use the container's bounding rect (more stable when scrolled)
-    const containerRect = container.getBoundingClientRect()
-    const x = e.clientX - containerRect.left + container.scrollLeft
-    const minsRaw = x / PX_PER_MIN
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left + container.scrollLeft;
+    const minsRaw = x / PX_PER_MIN;
 
-    // Snap to STEP_MINUTES (e.g. 5-minute grid)
-    const snapped = Math.round(minsRaw / STEP_MINUTES) * STEP_MINUTES
-    const clamped = clampMinutes(snapped)
+    const snapped = Math.round(minsRaw / STEP_MINUTES) * STEP_MINUTES;
+    const clamped = clampMinutes(snapped);
 
-    // If clicked area is not selectable, show a short feedback and don't select
-    if (!isMinuteSelectable(clamped)) {
-      setInvalidClickAt(clamped)
-      window.setTimeout(() => setInvalidClickAt(null), 650)
-      return
+    const status = getStatusAtMinute(clamped);
+
+    if (status !== "available") {
+      // 🚫 not selectable: break/booked/unavailable
+      setInvalidClickAt(clamped);
+      window.setTimeout(() => setInvalidClickAt(null), 650);
+      return;
     }
 
-    setSelectedMinutes(clamped)
-    onTimeSelect(minutesToTimeString(clamped))
-  }
+    // ✅ valid selection
+    setSelectedMinutes(clamped);
+    onTimeSelect(minutesToTimeString(clamped));
+  };
+
 
   // Status -> Tailwind classes
   const getStatusClass = (status: TimeStatus) => {

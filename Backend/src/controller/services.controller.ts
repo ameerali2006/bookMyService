@@ -37,6 +37,7 @@ export class ServiceController implements IServiceConroller{
         lat,
         lng,
       } = req.query;
+      console.log(req.query)
 
       const response = await this._serviceDetails.getNearByWorkers(
         serviceId as string,

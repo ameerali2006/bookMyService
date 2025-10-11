@@ -40,7 +40,7 @@ export const TYPES = {
   ServiceDetails:Symbol.for('ServiceDetails'),
   ProfileManagement:Symbol.for('ProfileManagement'),
   WorkingDetailsManagement:Symbol.for('WorkingDetailsManagement'),
-
+  WorkingHelper:Symbol.for('WorkingHelper'),
 
 
 

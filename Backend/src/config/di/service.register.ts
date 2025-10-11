@@ -50,6 +50,8 @@ import { IProfileManagement } from "../../interface/service/user/profileManageme
 import { ProfileManagement } from "../../service/user/profileManagement.service";
 import { IWorkingDetailsManagement } from "../../interface/service/worker/workingDetails.service.interface";
 import { WorkingDetailsManagement } from "../../service/worker/workingDetails.service";
+import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
+import { WorkingHelper } from "../../service/helper/working-helper.service";
  
 
 
@@ -83,7 +85,7 @@ export class ServiceRegistery{
         container.register<IProfileManagement>(TYPES.ProfileManagement,{useClass:ProfileManagement})
         container.register<IServiceDetails>(TYPES.ServiceDetails,{useClass:ServiceDetails})
         container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement,{useClass:WorkingDetailsManagement})
-
+        container.register<IWorkingHelper>(TYPES.WorkingHelper,{useClass:WorkingHelper})
 
 
 

@@ -2,8 +2,8 @@ import { Document, Schema } from "mongoose";
 
 export interface IBreak {
   label: string;
-  breakStart: Date;
-  breakEnd: Date;
+  breakStart: string; 
+  breakEnd: string;  
 }
 export enum WeekDay {
   MONDAY = "Monday",
@@ -18,8 +18,9 @@ export enum WeekDay {
 export interface IDaySchedule {
   day: WeekDay;
   enabled: boolean;
-  startTime: Date;
-  endTime: Date;
+  date:Date
+  startTime: string;
+  endTime: string;
   breaks: IBreak[];
 }
 
@@ -30,8 +31,8 @@ export interface IHoliday {
 
 export interface ICustomSlot {
   date: Date;
-  startTime: Date;
-  endTime: Date;
+  startTime: string; 
+  endTime: string;  
 }
 
 export interface IWorkingDetails extends Document {

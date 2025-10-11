@@ -186,15 +186,15 @@ export class ServiceDetails implements IServiceDetails {
             });
             } else {
             availableTimes.push({
-                start: this.toHM(daySchedule.startTime),
-                end: this.toHM(daySchedule.endTime),
+                start: daySchedule.startTime,
+                end: daySchedule.endTime,
                 status: "available",
             });
 
             for (const br of daySchedule.breaks || []) {
                 availableTimes.push({
-                start: this.toHM(br.breakStart),
-                end: this.toHM(br.breakEnd),
+                start: br.breakStart,
+                end: br.breakEnd,
                 status: "break",
                 });
             }
@@ -204,14 +204,14 @@ export class ServiceDetails implements IServiceDetails {
             );
             for (const cs of customSlots) {
                 availableTimes.push({
-                start: this.toHM(cs.startTime),
-                end: this.toHM(cs.endTime),
+                start: cs.startTime,
+                end:cs.endTime,
                 status: "available",
                 });
             }
 
-            const startHM = this.toHM(daySchedule.startTime);
-            const endHM = this.toHM(daySchedule.endTime);
+            const startHM = daySchedule.startTime;
+            const endHM = daySchedule.endTime;
             availableTimes.push({
                 start: "00:00",
                 end: startHM,
