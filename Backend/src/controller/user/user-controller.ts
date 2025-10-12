@@ -9,6 +9,8 @@ import { CustomError } from "../../utils/custom-error";
 import { MESSAGES } from "../../config/constants/message";
 import { updateUserProfileSchema } from "../validation/updateUserProfileDetails";
 import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
+import { addressSchema } from "../validation/addAddress.zod";
+
 @injectable()
 export class UserController implements IUserController{
     constructor(
@@ -53,6 +55,53 @@ export class UserController implements IUserController{
             res.status(STATUS_CODES.OK).json(updatedData)
 
            
+        } catch (error) {
+            next(error)
+        }
+    }
+    async getUserAddresses(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId=(req as CustomRequest).user._id
+            console.log(userId)
+            const data= await this._profileManage.getUserAddress(userId)
+            console.log(data)
+            res.status(STATUS_CODES.OK).json(data)
+        } catch (error) {
+            next(error)
+        }
+    }
+    async addUserAddress(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            
+            const userId=(req as CustomRequest).user._id
+            
+            const address=addressSchema.parse(req.body)
+            const data=await this._profileManage.addUserAddress(userId,address)
+            if(!data.success){
+                res.status(STATUS_CODES.BAD_REQUEST).json(data)
+            }else{
+                res.status(STATUS_CODES.OK).json(data)
+            }
+            
+
+
+        } catch (error) {
+            next(error)
+        }
+    }
+    async setPrimaryAddress(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            
+            const userId=(req as CustomRequest).user._id
+            console.log(req)
+            const toSetId=req.body.toSetId
+            console.log(userId+"+"+toSetId)
+            const respose=await this._profileManage.setPrimaryAddress(userId,toSetId)
+            if(!respose.success){
+                res.status(STATUS_CODES.BAD_REQUEST).json(respose)
+            }else{
+                res.status(STATUS_CODES.OK).json(respose)
+            }
         } catch (error) {
             next(error)
         }

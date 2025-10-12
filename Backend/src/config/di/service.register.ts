@@ -52,6 +52,8 @@ import { IWorkingDetailsManagement } from "../../interface/service/worker/workin
 import { WorkingDetailsManagement } from "../../service/worker/workingDetails.service";
 import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
 import { WorkingHelper } from "../../service/helper/working-helper.service";
+import { IAddressRepository } from "../../interface/repository/address.repository.interface";
+import { AddressRepository } from "../../repository/shared/address.repository";
  
 
 
@@ -77,6 +79,7 @@ export class ServiceRegistery{
         container.register<IRegisterService>(TYPES.RegisterService,{useClass:RegisterService})
         container.register<IOtpService>(TYPES.OtpService,{useClass:OtpService})
         container.register<IGoogleService>(TYPES.GoogleService,{useClass:GoogleService})
+        container.register<IAddressRepository>(TYPES.AddressRepository,{useClass:AddressRepository})
 
         container.register<IIsVerified>(TYPES.IsVerified,{useClass:IsVerified})
         

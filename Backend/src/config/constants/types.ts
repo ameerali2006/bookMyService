@@ -1,4 +1,4 @@
-import { symbol } from "zod";
+ 
 
 
 export const TYPES = {
@@ -41,7 +41,7 @@ export const TYPES = {
   ProfileManagement:Symbol.for('ProfileManagement'),
   WorkingDetailsManagement:Symbol.for('WorkingDetailsManagement'),
   WorkingHelper:Symbol.for('WorkingHelper'),
+  AddressRepository:Symbol.for('AddressRepository'),
 
 
-
-};
+}; 

@@ -1,4 +1,18 @@
 import userAxios from "@/config/axiosSevice/UserAxios";
+    
+    interface  AddressForm {
+        label: "Home" | "Work" | "Shop"
+        buildingName: string
+        street: string
+        area: string
+        city: string
+        state: string
+        country: string
+        pinCode: string
+        landmark: string
+        latitude?: number
+        longitude?: number
+    }
 export const userService={
     getUserDetails:async ()=>{
         
@@ -30,4 +44,15 @@ export const userService={
         return await userAxios.get(`/workers/availability?workerId=${workerId}`)
 
     },
+    getUserAddress:async ()=>{
+        return await userAxios.get('/addresses')
+    },
+    addUserAddress:async (data:AddressForm)=>{
+       
+        return await userAxios.post('/addAddress',data)
+    },
+    setPrimaryAddress:async (toSetId:string)=>{
+        console.log(toSetId)
+        return await userAxios.put('/address/setPrimary',{toSetId})
+    }
 } 

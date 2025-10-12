@@ -71,5 +71,16 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
         this.router.get('/workers/availability',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
             serviceController.getWorkerAvailability(req, res, next)
         );
+        this.router.get('/addresses',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            userController.getUserAddresses(req, res, next)
+        );
+        this.router.post("/addAddress",verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler ,(req: Request, res: Response, next: NextFunction) =>
+            userController.addUserAddress(req, res,next)
+                    
+        );
+        this.router.put("/address/setPrimary",verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler ,(req: Request, res: Response, next: NextFunction) =>
+            userController.setPrimaryAddress(req, res,next)
+                            
+        );
     }
  } 
