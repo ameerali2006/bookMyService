@@ -3,6 +3,7 @@ import { BaseRoute } from "./base.route.js";
 import {
     authController,
     blockStatusMiddleware,
+    bookingController,
     serviceController,
     tokenController,
     userController,
@@ -81,6 +82,10 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
         this.router.put("/address/setPrimary",verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler ,(req: Request, res: Response, next: NextFunction) =>
             userController.setPrimaryAddress(req, res,next)
                             
+        );
+        this.router.post("/basicBookingDetails",verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler ,(req: Request, res: Response, next: NextFunction) =>
+           bookingController.setBasicBookingDetails(req, res,next)
+                    
         );
     }
  } 

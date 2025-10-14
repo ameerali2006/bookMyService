@@ -1,74 +1,116 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import ChooseDateTime, { type TimeRange } from "@/components/user/ServiceListing/DateTimeSelect"
-import { cn } from "@/lib/utils"
-import Header from "@/components/user/shared/Header"
-import { Label } from "@/components/ui/label"
-
-import { userService } from "@/api/UserService"
-import { useParams } from "react-router-dom"
-
+import ChooseDateTime, {
+  type TimeRange,
+} from "@/components/user/ServiceListing/DateTimeSelect";
+import { cn } from "@/lib/utils";
+import Header from "@/components/user/shared/Header";
+import { Label } from "@/components/ui/label";
+import { userService } from "@/api/UserService";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
 
 export default function BasicBookingDetails() {
-  
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [availableTimes, setAvailableTimes] = useState<TimeRange[]>([]);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [datesData, setDatesData] = useState<any[]>([]);
+  const navigate=useNavigate()
+  const param = useParams();
+  const workerId = param.workerId;
 
-  const [selectedDate, setSelectedDate] = React.useState<Date>(new Date())
-  const [availableTimes, setAvailableTimes] = React.useState<TimeRange[]>([])
-  const [selectedTime, setSelectedTime] = React.useState<string | null>(null)
-  const [description, setDescription] = React.useState("")
-  const [loading, setLoading] = React.useState(false)
-  const [datesData, setDatesData] = React.useState<any[]>([])
-  const param =useParams()
-  const workerId=param.workerId
-
-  // Fetch availability when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        setLoading(true)
-        console.log(workerId)
-        const response = await userService.getWorkerAvailability(workerId as string)
-        const { success, data } = response.data
+        setLoading(true);
+        const response = await userService.getWorkerAvailability(
+          workerId as string
+        );
+        const { success, data } = response.data;
 
         if (success && data?.dates) {
-          setDatesData(data.dates)
-        
-          const todayStr = selectedDate.toISOString().split("T")[0]
-          const todayAvailability = data.dates.find((d: any) => d.date === todayStr)
-          setAvailableTimes(todayAvailability?.availableTimes || [])
+          setDatesData(data.dates);
+          const todayStr = selectedDate.toISOString().split("T")[0];
+          const todayAvailability = data.dates.find(
+            (d: any) => d.date === todayStr
+          );
+          setAvailableTimes(todayAvailability?.availableTimes || []);
         } else {
-          setDatesData([])
-          setAvailableTimes([])
+          setDatesData([]);
+          setAvailableTimes([]);
         }
       } catch (err) {
-        console.error("Error fetching availability:", err)
-        setAvailableTimes([])
+        console.error("Error fetching availability:", err);
+        setAvailableTimes([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchAvailability()
-  }, [workerId])
+    fetchAvailability();
+  }, [workerId]);
 
   const handleDateChange = (date: Date) => {
-    setSelectedDate(date)
-    setSelectedTime(null)
+    setSelectedDate(date);
+    setSelectedTime(null);
 
-    const selectedDateStr = date.toISOString().split("T")[0]
-    const found = datesData.find((d: any) => d.date === selectedDateStr)
+    const selectedDateStr = date.toISOString().split("T")[0];
+    const found = datesData.find((d: any) => d.date === selectedDateStr);
 
     if (found?.enabled) {
-      setAvailableTimes(found.availableTimes)
+      setAvailableTimes(found.availableTimes);
     } else {
-      setAvailableTimes([])
+      setAvailableTimes([]);
     }
-  }
+  };
 
   const handleTimeSelect = (t: string) => {
-    setSelectedTime(t)
-  }
+    setSelectedTime(t);
+  };
+
+  const handleProceed = async () => {
+    try {
+      if (!workerId) {
+        ErrorToast("Worker not found. Please try again.");
+        return;
+      }
+
+      if (!selectedTime) {
+        ErrorToast("Please select a time slot before proceeding.");
+        return;
+      }
+
+      const data = {
+        date: selectedDate,
+        time: selectedTime,
+        description,
+        workerId,
+      };
+
+      setLoading(true);
+
+      const response = await userService.selectDateTimeAvailablity(data);
+
+      if (response.data.success) {
+        SuccessToast("Time slot selected successfully!");
+        
+        navigate(`/services/preBooking/${response.data.bookingId}`);
+      } else {
+        ErrorToast(response.data.message || "Failed to confirm time slot.");
+      }
+    } catch (error) {
+      console.error(error);
+      ErrorToast("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isProceedDisabled =
+    !selectedDate || !selectedTime || description.trim().length === 0;
 
   return (
     <>
@@ -102,12 +144,19 @@ export default function BasicBookingDetails() {
 
         <div className="fixed bottom-0 left-0 w-full bg-white py-3 shadow-md">
           <button
-            className="mx-auto block w-[800px] rounded-2xl bg-yellow-400 px-8 py-4 text-xl font-semibold text-blue-900 shadow-lg hover:bg-yellow-500 transition"
+            disabled={isProceedDisabled}
+            onClick={handleProceed}
+            className={cn(
+              "mx-auto block w-[800px] rounded-2xl px-8 py-4 text-xl font-semibold shadow-lg transition",
+              isProceedDisabled
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-yellow-400 text-blue-900 hover:bg-yellow-500"
+            )}
           >
             Proceed
           </button>
         </div>
       </main>
     </>
-  )
+  );
 }

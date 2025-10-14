@@ -9,6 +9,7 @@ import { ProfilePage } from "./pages/user/Profile";
 import WorkerListingPage from "./pages/user/WorkerListing";
 import BasicBookingDetails from "./pages/user/BasicBookingDetails";
 import { USER_ROUTES } from "./config/constant/routes/userRoutes";
+import AdvancePaymentPage from "./pages/user/AdvancePaymentPage";
 
 
 
@@ -55,6 +56,10 @@ const User = () => {
         <Route
           path={USER_ROUTES.SERVICES.BOOK_DETAILS}
           element={<IsLogin><BasicBookingDetails /></IsLogin>}
+        />
+        <Route
+          path={USER_ROUTES.SERVICES.PRE_BOOKING_SLOT}
+          element={<IsLogin><AdvancePaymentPage /></IsLogin>}
         />
       </Routes>
       

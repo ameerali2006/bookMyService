@@ -8,5 +8,6 @@ export const USER_ROUTES = {
   SERVICES: {
     LIST: "/services/:id",
     BOOK_DETAILS: "/services/bookDetails/:workerId",
+    PRE_BOOKING_SLOT:"/services/preBooking/:bookingId",
   },
 };

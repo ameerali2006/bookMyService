@@ -3,6 +3,7 @@ import User from "./User";
 import Admin from "./Admin";
 import Worker from "./Worker";
 import {ToastContainer} from 'react-toastify'
+import { DemoPaymentWrapper } from "./components/stripe/Stripe";
 
 
 

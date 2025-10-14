@@ -1,22 +1,59 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
-export interface IBooking extends Document {
-  userId: Types.ObjectId;           
-  workerId: Types.ObjectId;        
-  serviceId: Types.ObjectId;        
-  date: Date;                       
-  startTime: string;                
-  endTime?: string;                 
-  description?: string;             
-  status: "pending" | "confirmed" | "in-progress" | "completed" | "cancelled";
-  paymentStatus: "unpaid" | "paid" | "refunded" | "failed";
-  paymentMethod?: "stripe" | "razorpay" | "upi" | "cash";
-  paymentId?: string;              
+export interface IAdditionalItem{
+  name: string;
+  price: number;
+}
+
+export interface IRating {
+  score?: number;
+  review?: string;
+}
+
+export interface IBooking extends Document{
+  _id: Types.ObjectId;
+
+  userId: Types.ObjectId|string;
+  workerId: Types.ObjectId|string;
+  serviceId: Types.ObjectId|string;
+  address: Types.ObjectId|string;
+
+  date: Date;
+  startTime: string;
+  endTime?: string;
+  description?: string;
+
+  
+  advanceAmount: number;
   totalAmount?: number;
-  workerResponse: "accepted" | "rejected" | "pending";
-  address?: Types.ObjectId;       
-  otp?: string;                     
-  rating?: { score: number; review?: string };
-  createdAt: Date;
-  updatedAt: Date;
+  remainingAmount?: number;
+
+  advancePaymentId?: string;
+  advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+
+  finalPaymentId?: string;
+  finalPaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+
+  paymentMethod?: "stripe" | "upi" | "cash";
+
+ 
+  additionalItems?: IAdditionalItem[];
+
+  
+  status:
+    | "pending"                
+    | "confirmed"             
+    | "in-progress"            
+    | "awaiting-final-payment" 
+    | "completed"            
+    | "cancelled";
+
+  workerResponse?: "accepted" | "rejected" | "pending";
+
+  otp?: string;
+
+  rating?: IRating;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }

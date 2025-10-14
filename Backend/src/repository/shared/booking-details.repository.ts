@@ -86,4 +86,28 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
             status: { $ne: "cancelled" },
         }).select("startTime endTime date status").lean();
     }
+
+    async findBookingWithinTimeRange(
+        workerId: string,
+        date: Date,
+        startTime: Date,
+        endTime: Date
+    ): Promise<IBooking | null> {
+        
+        
+        return await Booking.findOne({
+            workerId,
+            date: {
+            $eq:new Date(new Date(date).toDateString()),
+            },
+            startTime: { $lt: endTime },
+            endTime: { $gt: startTime },
+            status: { $nin: ["cancelled", "completed"] },
+        });
+
+        
+        
+    }
+    
+
 }

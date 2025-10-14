@@ -42,6 +42,6 @@ export const TYPES = {
   WorkingDetailsManagement:Symbol.for('WorkingDetailsManagement'),
   WorkingHelper:Symbol.for('WorkingHelper'),
   AddressRepository:Symbol.for('AddressRepository'),
-
+  BookingService:Symbol.for('BookingService'),
 
 }; 

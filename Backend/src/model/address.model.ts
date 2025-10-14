@@ -13,7 +13,7 @@ const addressSchema = new Schema<IAddress>(
     country: { type: String, required: true, trim: true },
     pinCode: { type: String, required: true, trim: true },
     landmark: { type: String, trim: true },
-    formattedAddress: { type: String, trim: true },
+    formattedAddress: { type: String, trim: true ,default:""},
     isPrimary: { type: Boolean, default: false },
     location: {
       type: {

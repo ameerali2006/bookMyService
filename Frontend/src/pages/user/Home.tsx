@@ -7,6 +7,7 @@ import { LocationModal } from "@/components/user/Dashboard/LocationModal";
 import { useDispatch,useSelector } from "react-redux";
 import { updateLocation } from "@/redux/slice/userTokenSlice";
 import type { RootState } from "@/redux/store";
+import { DemoPaymentWrapper } from "@/components/stripe/Stripe";
 
 
 export default function Homepage() {

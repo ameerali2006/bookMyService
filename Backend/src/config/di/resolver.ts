@@ -25,6 +25,8 @@ import { IWorkingDetailsController } from "../../interface/controller/working-de
 import { WorkingDetailsController } from "../../controller/worker/working-details.controller.js";
 import { IUserController } from "../../interface/controller/user-controller.controller.interface.js";
 import { UserController } from "../../controller/user/user-controller.js";
+import { IBookingController } from "../../interface/controller/booking-controller.controller.interface.js";
+import { BookingController } from "../../controller/booking.controller.js";
 
 DependencyInjection.registerAll();
 
@@ -40,4 +42,4 @@ export const serviceController=container.resolve<IServiceConroller>(ServiceContr
 export const tokenController=container.resolve<ITokenController>(TokenController)
 export const workingDetailsController =container.resolve<IWorkingDetailsController>(WorkingDetailsController)
 export const userController =container.resolve<IUserController>(UserController)
-
+export const bookingController =container.resolve<IBookingController>(BookingController)

@@ -52,7 +52,12 @@ export const userService={
         return await userAxios.post('/addAddress',data)
     },
     setPrimaryAddress:async (toSetId:string)=>{
-        console.log(toSetId)
+        
         return await userAxios.put('/address/setPrimary',{toSetId})
-    }
+    },
+    selectDateTimeAvailablity:async (data:{time:string,date:Date,description:string,workerId:string})=>{
+       
+        return await userAxios.post('/basicBookingDetails',data)
+    },
+    
 } 

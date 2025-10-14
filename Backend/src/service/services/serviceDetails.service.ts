@@ -10,13 +10,16 @@ import { MESSAGES } from "../../config/constants/message";
 import { IServiceRepository } from "../../interface/repository/service.repository.interface";
 import { IWorkingDetailsRepository } from "../../interface/repository/working-details.interface";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
+import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
+import { IWorkingDetails } from "../../interface/model/working-details.interface";
 @injectable()
 export class ServiceDetails implements IServiceDetails {
     constructor(
         @inject(TYPES.WorkerAggregation) private _workerAgg: IWorkerAggregation,
         @inject(TYPES.ServiceRepository) private _serviceRepo: IServiceRepository,
         @inject(TYPES.WorkingDetailsRepository) private _workingDetails: IWorkingDetailsRepository,
-        @inject(TYPES.BookingRepository) private _booking: IBookingRepository
+        @inject(TYPES.BookingRepository) private _booking: IBookingRepository,
+         @inject(TYPES.WorkingHelper) private _workingHelper: IWorkingHelper,
     ) {}
     async getNearByWorkers(
         serviceId: string,
@@ -128,142 +131,162 @@ export class ServiceDetails implements IServiceDetails {
         return h * 60 + m;
     }
     async getWorkerAvailablity(
-        workerId: string
-    ): Promise<{
-        status: number;
-        success: boolean;
-        message: string;
-        data?: {
-        dates: {
-            date: string;
-            enabled: boolean;
-            day: string;
-            availableTimes: {
-            start: string;
-            end: string;
-            status: "available" | "unavailable" | "break" | "booked";
-            }[];
-        }[];
-        };
-    }> {
-        try {
-        const working = await this._workingDetails.findByWorkerId(workerId);
-        if (!working) {
-            return {
-            status: 404,
-            success: false,
-            message: "Working details not found",
-            };
-        }
-
-        const today = new Date();
-        const todayName = today.toLocaleString("en-US", { weekday: "long" });
-        const rotatedDays = this.rotateDays(working.days, todayName);
-
-        const results: any[] = [];
-
-        for (let i = 0; i < 7; i++) {
-            const targetDate = new Date(today);
-            targetDate.setDate(today.getDate() + i);
-            const dateStr = targetDate.toISOString().split("T")[0];
-            const daySchedule = rotatedDays[i];
-
-            const isHoliday = working.holidays.some(
-            (h) => h.date.toDateString() === targetDate.toDateString()
-            );
-
-            const availableTimes: {
-            start: string;
-            end: string;
-            status: "available" | "unavailable" | "break" | "booked";
-            }[] = [];
-
-            if (isHoliday || !daySchedule || !daySchedule.enabled) {
-            availableTimes.push({
-                start: "00:00",
-                end: "24:00",
-                status: "unavailable",
-            });
-            } else {
-            availableTimes.push({
-                start: daySchedule.startTime,
-                end: daySchedule.endTime,
-                status: "available",
-            });
-
-            for (const br of daySchedule.breaks || []) {
-                availableTimes.push({
-                start: br.breakStart,
-                end: br.breakEnd,
-                status: "break",
-                });
-            }
-
-            const customSlots = (working.customSlots || []).filter(
-                (cs) => cs.date.toDateString() === targetDate.toDateString()
-            );
-            for (const cs of customSlots) {
-                availableTimes.push({
-                start: cs.startTime,
-                end:cs.endTime,
-                status: "available",
-                });
-            }
-
-            const startHM = daySchedule.startTime;
-            const endHM = daySchedule.endTime;
-            availableTimes.push({
-                start: "00:00",
-                end: startHM,
-                status: "unavailable",
-            });
-            availableTimes.push({
-                start: endHM,
-                end: "24:00",
-                status: "unavailable",
-            });
-            }
-
-            const bookings = await this._booking.findByWorkerAndDate(
-            workerId,
-            targetDate
-            );
-            for (const b of bookings) {
-            availableTimes.push({
-                start: b.startTime,
-                end: b.endTime || b.startTime,
-                status: "booked",
-            });
-            }
-
-            availableTimes.sort(
-            (a, b) => this.timeToMinutes(a.start) - this.timeToMinutes(b.start)
-            );
-
-            results.push({
-            date: dateStr,
-            day:
-                daySchedule?.day ||
-                targetDate.toLocaleString("en-US", { weekday: "long" }),
-            enabled: !!daySchedule?.enabled && !isHoliday,
-            availableTimes,
-            });
-        }
-        console.log(...results);
-
-        return {
-            status: 200,
-            success: true,
-            message: "Availability fetched successfully",
-            data: { dates: results },
-        };
-        } catch (error) {
-        console.error("Error in GetWorkerAvailability:", error);
-        return {
-            status: 500,
-            success: false,
-            message: "Internal server error while fetching availability",
-        };
-        }
+  workerId: string
+): Promise<{
+  status: number;
+  success: boolean;
+  message: string;
+  data?: {
+    dates: {
+      date: string;
+      enabled: boolean;
+      day: string;
+      availableTimes: {
+        start: string;
+        end: string;
+        status: "available" | "unavailable" | "break" | "booked";
+      }[];
+    }[];
+  };
+}> {
+  try {
+    // 1️⃣ Fetch working details
+    let details = await this._workingDetails.findByWorkerId(workerId);
+    if (!details) {
+      return {
+        status: 404,
+        success: false,
+        message: "Working details not found",
+      };
     }
+
+    // 2️⃣ Check if rotation needed
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const todayName = daysOfWeek[new Date().getDay()];
+
+    if (details.weekStartDay && todayName !== details.weekStartDay) {
+      details = (await this._workingHelper.rotateDayShedule(
+        String(details._id)
+      )) as IWorkingDetails;
+    }
+
+    // 3️⃣ Use rotated (or original) day list
+    const rotatedDays = details.days;
+    const today = new Date();
+    const results: any[] = [];
+
+    // 4️⃣ Loop for next 7 days
+    for (let i = 0; i < 7; i++) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + i);
+      const dateStr = targetDate.toISOString().split("T")[0];
+      const daySchedule = rotatedDays[i];
+
+      const isHoliday = details.holidays.some(
+        (h) => h.date.toDateString() === targetDate.toDateString()
+      );
+
+      const availableTimes: {
+        start: string;
+        end: string;
+        status: "available" | "unavailable" | "break" | "booked";
+      }[] = [];
+
+      // 5️⃣ Handle unavailable / normal workdays
+      if (isHoliday || !daySchedule || !daySchedule.enabled) {
+        availableTimes.push({
+          start: "00:00",
+          end: "24:00",
+          status: "unavailable",
+        });
+      } else {
+        // working time
+        availableTimes.push({
+          start: daySchedule.startTime,
+          end: daySchedule.endTime,
+          status: "available",
+        });
+
+        // breaks
+        for (const br of daySchedule.breaks || []) {
+          availableTimes.push({
+            start: br.breakStart,
+            end: br.breakEnd,
+            status: "break",
+          });
+        }
+
+        // custom slots (special availability)
+        const customSlots = (details.customSlots || []).filter(
+          (cs) => cs.date.toDateString() === targetDate.toDateString()
+        );
+        for (const cs of customSlots) {
+          availableTimes.push({
+            start: cs.startTime,
+            end: cs.endTime,
+            status: "available",
+          });
+        }
+
+        // mark time outside work hours unavailable
+        availableTimes.push(
+          { start: "00:00", end: daySchedule.startTime, status: "unavailable" },
+          { start: daySchedule.endTime, end: "24:00", status: "unavailable" }
+        );
+      }
+
+      // 6️⃣ Mark booked slots
+      const bookings = await this._booking.findByWorkerAndDate(
+        workerId,
+        targetDate
+      );
+      for (const b of bookings) {
+        availableTimes.push({
+          start: b.startTime,
+          end: b.endTime || b.startTime,
+          status: "booked",
+        });
+      }
+
+      // 7️⃣ Sort time slots by start time
+      availableTimes.sort(
+        (a, b) => this.timeToMinutes(a.start) - this.timeToMinutes(b.start)
+      );
+
+      // 8️⃣ Push final result for this date
+      results.push({
+        date: dateStr,
+        day:
+          daySchedule?.day ||
+          targetDate.toLocaleString("en-US", { weekday: "long" }),
+        enabled: !!daySchedule?.enabled && !isHoliday,
+        availableTimes,
+      });
+    }
+
+    // 9️⃣ Return final data
+    return {
+      status: 200,
+      success: true,
+      message: "Availability fetched successfully",
+      data: { dates: results },
+    };
+  } catch (error) {
+    console.error("Error in GetWorkerAvailability:", error);
+    return {
+      status: 500,
+      success: false,
+      message: "Internal server error while fetching availability",
+    };
+  }
+}
+
 }
