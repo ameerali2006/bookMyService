@@ -29,6 +29,8 @@ import { IBookingController } from "../../interface/controller/booking-controlle
 import { BookingController } from "../../controller/booking.controller.js";
 import { IStripeController } from "../../interface/controller/stripe.controller.interface.js";
 import { StripeController } from "../../controller/stripe.controller.js";
+import { IWorkerBookingController } from "../../interface/controller/worker-booking.controller.interface.js";
+import { WorkerBookingController } from "../../controller/worker/worker-booking.controller.js";
 
 DependencyInjection.registerAll();
 
@@ -46,3 +48,5 @@ export const workingDetailsController =container.resolve<IWorkingDetailsControll
 export const userController =container.resolve<IUserController>(UserController)
 export const bookingController =container.resolve<IBookingController>(BookingController)
 export const stripeController=container.resolve<IStripeController>(StripeController)
+export const workerbookingController=container.resolve<IWorkerBookingController>(WorkerBookingController)
+

@@ -39,3 +39,15 @@ export interface GoogleLoginResponseDTO {
   }|null;   
   isNew: boolean;
 }
+interface ServiceRequest {
+  id: string;
+  serviceName: string;
+  userName: string;
+  date: string;
+  time: string;
+  location: string;
+  status: "pending" | "approved" | "rejected";
+  userLocation: { lat: number; lng: number };
+  notes: string;
+  phone: string;
+}

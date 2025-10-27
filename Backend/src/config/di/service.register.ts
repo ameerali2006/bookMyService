@@ -58,6 +58,8 @@ import { IBookingService } from "../../interface/service/services/bookingService
 import { BookingService } from "../../service/services/bookingService.service";
 import { IStripeService } from "../../interface/service/stripe.service.interface";
 import { StripeService } from "../../service/helper/stripe.service";
+import { IWorkerBookingService } from "../../interface/service/worker/worker-booking.service.interface";
+import { WorkerBookingService } from "../../service/worker/workerBooking.service";
  
 
 
@@ -88,7 +90,7 @@ export class ServiceRegistery{
         container.register<IIsVerified>(TYPES.IsVerified,{useClass:IsVerified})
         
         container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
-        
+        container.register<IWorkerBookingService>(TYPES.WorkerBookingService,{useClass:WorkerBookingService})
         container.register<IProfileManagement>(TYPES.ProfileManagement,{useClass:ProfileManagement})
         container.register<IServiceDetails>(TYPES.ServiceDetails,{useClass:ServiceDetails})
         container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement,{useClass:WorkingDetailsManagement})

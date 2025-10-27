@@ -69,5 +69,10 @@ export class WorkerRoute extends BaseRoute{
             workingDetailsController.updateWorkingDetails(req, res, next)
                     
         );
+        this.router.get("/appointments/requestService", (req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.getWorkingDetails(req, res, next)
+                    
+        );
+        
     }
 }

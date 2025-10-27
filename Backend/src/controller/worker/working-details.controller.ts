@@ -43,4 +43,5 @@ export class WorkingDetailsController implements IWorkingDetailsController{
             next(error)
         }
     }
+    
 }

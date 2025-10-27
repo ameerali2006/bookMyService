@@ -2,6 +2,7 @@
 
 
 export const TYPES = {
+  WorkerBookingService: Symbol.for("WorkerBookingService"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   AuthUserService: Symbol.for("AuthUserService"),
   PasswordService:Symbol.for('PasswordService'),
