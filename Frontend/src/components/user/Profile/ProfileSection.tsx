@@ -1,5 +1,6 @@
 "use client"
 
+
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Edit3, Save, X, Loader2 } from "lucide-react"
 import { userService } from "@/api/UserService"
 import { ErrorToast, SuccessToast, WarningToast } from "@/components/shared/Toaster"
+import CropImageModal from "@/components/shared/ImageCropModal.";
+import { uploadImageCloudinary } from "@/lib/cloudinaryService"
 
 interface UserProfile {
   name: string
@@ -24,6 +27,7 @@ export function ProfileSection() {
   const [formData, setFormData] = useState<UserProfile>({ name: "", email: "", phone: "", image: "" })
   const [originalData, setOriginalData] = useState<UserProfile>({ name: "", email: "", phone: "", image: "" })
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({})
+  const [isCropOpen, setIsCropOpen] = useState(false);
 
   useEffect(() => {
     fetchUserData()
@@ -68,6 +72,32 @@ export function ProfileSection() {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
+  const handleCropComplete = async (file: File) => {
+  try {
+    setSaving(true);
+
+    // Upload to Cloudinary
+    const relativePath = await uploadImageCloudinary   (file);
+    const newImageUrl = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}/image/upload/${relativePath}`;
+
+    // Update backend profile
+    const updatedData = { ...formData, image: newImageUrl };
+    const response = await userService.updateUserDetails(updatedData);
+
+    if (response.data.success) {
+      setFormData(updatedData);
+      setOriginalData(updatedData);
+      SuccessToast("Profile photo updated successfully");
+    } else {
+      ErrorToast("Failed to update photo");
+    }
+  } catch (err) {
+    console.error(err);
+    ErrorToast("Error uploading image");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleSave = async () => {
     if (!validateForm()) return 
@@ -148,9 +178,20 @@ export function ProfileSection() {
             <div>
               <h3 className="font-medium text-foreground">Profile Picture</h3>
               <p className="text-sm text-muted-foreground">Upload a new profile picture to personalize your account.</p>
-              <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                Change Photo
-              </Button>
+             <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 bg-transparent"
+              onClick={() => setIsCropOpen(true)}
+            >
+              Change Photo
+            </Button>
+
+            <CropImageModal
+              open={isCropOpen}
+              onClose={() => setIsCropOpen(false)}
+              onCropComplete={handleCropComplete}
+            />
             </div>
           </div>
 

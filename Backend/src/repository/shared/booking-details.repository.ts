@@ -4,6 +4,7 @@ import { IBookingRepository } from "../../interface/repository/booking.repositor
 import { IBooking } from "../../interface/model/booking.model.interface";
 import { BaseRepository } from "./base.repository";
 import { Booking } from "../../model/booking.model";
+import { PaymentStatus } from "../../interface/model/payement.model.interface";
 
 @injectable()
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
@@ -108,6 +109,35 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         
         
     }
-    
+    async findByIdWithDetails(id: string): Promise<IBooking | null> {
+        return await Booking.findById(id)
+        .populate("workerId", "name")  
+        .populate("serviceId", "category")  
+        .populate("userId", "name");   
+    }
+    async updateAdvancePaymentStatus(
+        bookingId: string,
+        paymentIntentId: string,
+        status: PaymentStatus
+        ): Promise<IBooking|null> {
+        return await Booking.findByIdAndUpdate(bookingId, {
+            advancePaymentId: paymentIntentId,
+            advancePaymentStatus: status === "succeeded" ? "paid" : status,
+            status: status === "succeeded" ? "awaiting-final-payment" : "pending",
+        });
+        }
+
+        async updateFinalPaymentStatus(
+        bookingId: string,
+        paymentIntentId: string,
+        status: PaymentStatus
+        ): Promise<IBooking|null> {
+        return await Booking.findByIdAndUpdate(bookingId, {
+            finalPaymentId: paymentIntentId,
+            finalPaymentStatus: status === "succeeded" ? "paid" : status,
+            status: status === "succeeded" ? "completed" : "awaiting-final-payment",
+        });
+        }
+        
 
 }

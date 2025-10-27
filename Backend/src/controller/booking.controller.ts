@@ -5,6 +5,7 @@ import { CustomRequest } from "../middleware/auth.middleware";
 import { TYPES } from "../config/constants/types";
 import { IBookingService } from "../interface/service/services/bookingService.sevice.interface";
 import { STATUS_CODES } from "../config/constants/status-code";
+import { StringExpression } from "mongoose";
 @injectable()
 export class BookingController implements IBookingController{
     constructor(
@@ -31,4 +32,19 @@ export class BookingController implements IBookingController{
         }
         
     }
+    async getBookingDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const bookingId=req.query.bookingId
+            console.log(req.query)
+            const response=await this._bookingService.getBookingDetails(bookingId as string)
+            if(!response.success){
+                res.status(STATUS_CODES.BAD_REQUEST).json(response)
+            }else{
+                res.status(STATUS_CODES.OK).json(response)
+            }
+        } catch (error) {
+            next(error)
+        }
+    }
+    
 }

@@ -7,12 +7,12 @@ export interface CreatePaymentIntenServicetInput {
   receiptEmail: string;
   metadata : {
     bookingId : string;
-    vendorId : string;
-    clientId : string;
+    workerId : string;
+    userId : string;
   }
 }
 export interface IStripeService {
-    createPaymentIntent(input : CreatePaymentIntenServicetInput): Promise<Stripe.PaymentIntent>
+    createPaymentIntent(input : CreatePaymentIntenServicetInput): Promise<{success:boolean,message:string,paymentIntent:Stripe.PaymentIntent|null}>
     updatePaymentStatus(paymentIntentId: string,status: PaymentStatus) : Promise<void>
     handleWebhookEvent(event : Stripe.Event) : Promise<void>
 }

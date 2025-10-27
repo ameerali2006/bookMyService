@@ -2,6 +2,7 @@
 
 
 export const TYPES = {
+  PaymentRepository: Symbol.for("PaymentRepository"),
   AuthUserService: Symbol.for("AuthUserService"),
   PasswordService:Symbol.for('PasswordService'),
   EmailService:Symbol.for('EmailService'),
@@ -43,5 +44,6 @@ export const TYPES = {
   WorkingHelper:Symbol.for('WorkingHelper'),
   AddressRepository:Symbol.for('AddressRepository'),
   BookingService:Symbol.for('BookingService'),
+  StripeService:Symbol.for('StripeService'),
 
 }; 

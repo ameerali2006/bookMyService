@@ -1,39 +1,34 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Header from "@/components/user/shared/Header"
-import Footer from "@/components/user/shared/Footer"
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Header from "@/components/user/shared/Header";
+import Footer from "@/components/user/shared/Footer";
+import { userService } from "@/api/UserService";
+import AddAddressModal from "@/components/user/Profile/AddAddress";
 
+import { useParams } from "react-router-dom";
+import { PaymentWrapper } from "@/components/stripe/Stripe";
+
+export type AddressLabel = "Home" | "Work" | "Shop";
 type Address = {
-  id: string
-  label: string // e.g., "Home", "Office"
-  address: string
-  phone: string
-}
-
-const mockAddresses: Address[] = [
-  {
-    id: "addr-1",
-    label: "Home",
-    address: "123 MG Road, 4th Cross, Indiranagar, Bengaluru, Karnataka - 560038",
-    phone: "+91 98765 43210",
-  },
-  {
-    id: "addr-2",
-    label: "Office",
-    address: "9th Floor, Tech Park, Outer Ring Road, Marathahalli, Bengaluru - 560037",
-    phone: "+91 99887 76655",
-  },
-  {
-    id: "addr-3",
-    label: "Parents",
-    address: "22/7 South Street, Anna Nagar, Chennai, Tamil Nadu - 600040",
-    phone: "+91 90909 80808",
-  },
-]
+  _id: string;
+  label: AddressLabel;
+  buildingName: string;
+  street: string;
+  area: string;
+  city: string;
+  state: string;
+  phone: string;
+  country: string;
+  pinCode: string;
+  landmark?: string;
+  latitude?: number;
+  longitude?: number;
+  isPrimary: boolean;
+};
 
 const bookingDetails = {
   workerName: "John Doe",
@@ -43,90 +38,141 @@ const bookingDetails = {
   description: "AC not cooling properly, need gas refill.",
   totalPrice: 500,
   advance: 100,
-}
+};
 
 export default function AdvancePaymentPage() {
-  const [selectedAddressId, setSelectedAddressId] = useState<string>(mockAddresses[0]?.id ?? "")
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false)
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [showAddAddressModal, setShowAddAddressModal] = useState(false);
+  const [showStripePayment, setShowStripePayment] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState<{
+    workerName: string;
+    serviceName: string;
+    date: string;
+    time: string;
+    description: string;
+    totalPrice: number;
+    advance: number;
+  } | null>(null);
+  const param=useParams()
+  
+  useEffect(() => {
+    fetchAddresses();
+    fetchBookingDetails();
+  }, []);
 
-  const selectedAddress = mockAddresses.find((a) => a.id === selectedAddressId)
-
-  const handleConfirmStripe = () => {
-    console.log("Stripe checkout initiated")
-    console.log("Selected address:", selectedAddress)
-    setIsStripeModalOpen(false)
-  }
+  const fetchBookingDetails = async () => {
+    try {
+        const bookingId=param.bookingId
+        console.log(bookingId)
+      const res = await userService.getBookingDetails(bookingId as string);
+      console.log(res)
+      if (res.data.details) {
+        setBookingDetails(res.data.details);
+      }
+    } catch (err) {
+      console.error("Failed to fetch booking details:", err);
+    }
+  };
+  const fetchAddresses = async () => {
+    try {
+      const res = await userService.getUserAddress();
+      if (res.data.addresses && res.data.addresses.length > 0) {
+        setAddresses(res.data.addresses);
+        setSelectedAddressId(res.data.addresses[0]._id);
+      }
+    } catch (err) {
+      console.error("Failed to fetch addresses:", err);
+    }
+  };
+    if (!bookingDetails) {
+    return <p>Loading booking details...</p>;
+    }
+  const selectedAddress = addresses.find((a) => a._id === selectedAddressId);
 
   const handleWalletPay = () => {
-    console.log(`Wallet payment initiated for ₹${bookingDetails.advance}`)
-    console.log("Selected address:", selectedAddress)
-  }
+    console.log(`Wallet payment initiated for ₹${bookingDetails.advance}`);
+    console.log("Selected address:", selectedAddress);
+  };
+
+  const handleStripePay = () => {
+    setShowStripePayment(true);
+  };
 
   return (
     <main className="min-h-[100dvh] bg-white">
-      {/* Progress indicator */}
       <div className="w-full border-b border-border bg-background">
-        <Header/>
+        <Header />
       </div>
 
       <section className="mx-auto max-w-6xl grid grid-cols-1 pt-20 md:grid-cols-2 gap-6 p-6 bg-white">
         {/* Left: Address Selection */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground text-pretty">Select Address</h2>
+          <h2 className="text-xl font-semibold text-foreground text-pretty">
+            Select Address
+          </h2>
 
-          <div className="space-y-3">
+          {addresses.length > 0 ? (
             <form className="space-y-3" aria-label="Saved addresses">
-              {mockAddresses.map((addr) => (
-                <label key={addr.id} className="block " >
+              {addresses.map((addr) => (
+                <label key={addr._id} className="block">
                   <Card
                     className={cn(
-                      "shadow-lg rounded-2xl p-4  border border-border transition-colors cursor-pointer bg-white",
-                      selectedAddressId === addr.id
-                        ? "ring-2 ring-ring bg-gray-300 "
-                        : "hover:bg-accent hover:text-accent-foreground",
+                      "shadow-lg rounded-2xl p-4 border border-border transition-colors cursor-pointer bg-white",
+                      selectedAddressId === addr._id
+                        ? "ring-2 ring-ring bg-gray-300"
+                        : "hover:bg-accent hover:text-accent-foreground"
                     )}
                   >
                     <div className="flex items-start gap-3">
                       <input
                         type="radio"
                         name="address"
-                        className="mt-1 h-4 w-4 accent-yellow-200"
+                        className="mt-1 h-4 w-4 accent-yellow-400"
                         aria-label={`Select ${addr.label} address`}
-                        checked={selectedAddressId === addr.id}
-                        onChange={() => setSelectedAddressId(addr.id)}
-                      />          
+                        checked={selectedAddressId === addr._id}
+                        onChange={() => setSelectedAddressId(addr._id)}
+                      />
                       <div className="space-y-1">
                         <div className="flex items-center justify-between gap-3">
-                          <p className="font-medium text-foreground">{addr.label}</p>
+                          <p className="font-medium text-foreground">
+                            {addr.label}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">{addr.address}</p>
-                        <p className="text-sm text-muted-foreground">Phone: {addr.phone}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {`${addr.buildingName}, ${addr.street}, ${addr.area}, ${addr.city}, ${addr.state}, ${addr.country} - ${addr.pinCode}`}
+                        </p>
+                        {addr.landmark && (
+                          <p className="text-sm text-muted-foreground">
+                            Landmark: {addr.landmark}
+                          </p>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          Phone: {addr.phone}
+                        </p>
                       </div>
                     </div>
                   </Card>
                 </label>
               ))}
             </form>
-          </div>
-
-          {/* <div>
+          ) : (
             <Button
-              type="button"
-              variant="secondary"
+              onClick={() => setShowAddAddressModal(true)}
               className="w-full"
-              onClick={() => console.log("Add New Address clicked")}
-              aria-label="Add new address"
             >
-              + Add New Address
+              + Add Address
             </Button>
-          </div> */}
+          )}
         </div>
 
         {/* Right: Booking Details & Payment */}
         <div className="space-y-6 ">
           {/* Booking Details */}
           <Card className="shadow-lg rounded-2xl p-4  border border-border bg-gray-50">
-            <h3 className="text-lg font-semibold text-foreground mb-3">Booking Details</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-3">
+              Booking Details
+            </h3>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="space-y-1">
                 <dt className="text-muted-foreground">Worker Name</dt>
@@ -134,7 +180,9 @@ export default function AdvancePaymentPage() {
               </div>
               <div className="space-y-1">
                 <dt className="text-muted-foreground">Service Name</dt>
-                <dd className="text-foreground">{bookingDetails.serviceName}</dd>
+                <dd className="text-foreground">
+                  {bookingDetails.serviceName}
+                </dd>
               </div>
               <div className="space-y-1">
                 <dt className="text-muted-foreground">Date</dt>
@@ -146,86 +194,85 @@ export default function AdvancePaymentPage() {
               </div>
               <div className="sm:col-span-2 space-y-1">
                 <dt className="text-muted-foreground">Description</dt>
-                <dd className="text-foreground">{bookingDetails.description}</dd>
+                <dd className="text-foreground">
+                  {bookingDetails.description}
+                </dd>
               </div>
               <div className="sm:col-span-2 flex items-center justify-between pt-2 border-t border-border">
                 <dt className="font-medium text-foreground">Total Price</dt>
-                <dd className="font-semibold text-foreground">₹{bookingDetails.totalPrice}</dd>
+                <dd className="font-semibold text-foreground">
+                  To be decided after work
+                </dd>
               </div>
             </dl>
           </Card>
 
           {/* Bill Summary + Payment */}
-          <Card className="shadow-lg rounded-2xl p-4 bg-gray-100 border border-border">
-            <h3 className="text-lg font-semibold text-foreground mb-3">Bill Summary</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Amount</span>
-                <span className="text-foreground">₹{bookingDetails.totalPrice}</span>
+          {!showStripePayment ? (
+            <Card className="shadow-lg rounded-2xl p-4 bg-gray-100 border border-border">
+              <h3 className="text-lg font-semibold text-foreground mb-3">
+                Bill Summary
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Total Amount</span>
+                  <span className="text-foreground">
+                    ₹--
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">
+                    Advance to Pay Now
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    ₹{bookingDetails.advance}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Advance to Pay Now</span>
-                <span className="font-semibold text-foreground">₹{bookingDetails.advance}</span>
-              </div>
-            </div>
 
-            <div className="mt-4 space-y-2">
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full hover:bg-gray-300"
-                onClick={handleWalletPay}
-                aria-label={`Pay ₹${bookingDetails.advance} via Wallet`}
-              >
-                {"Pay ₹100 via Wallet"}
-              </Button>
-              <Button
-                type="button"
-                className="w-full bg-blue-900 hover:bg-blue-800"
-                onClick={() => setIsStripeModalOpen(true)}
-                aria-label={`Pay ₹${bookingDetails.advance} via Stripe`}
-              >
-                {"Pay ₹100 via Stripe"}
-              </Button>
-            </div>
-          </Card>
+              {addresses.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full hover:bg-gray-300"
+                    onClick={handleWalletPay}
+                    disabled={!selectedAddressId}
+                  >
+                    Pay ₹{bookingDetails.advance} via Wallet
+                  </Button>
+                  <Button
+                    type="button"
+                    className="w-full bg-blue-900 hover:bg-blue-800"
+                    onClick={() => setShowStripePayment(true)}
+                    disabled={!selectedAddressId}
+                  >
+                    Pay ₹{bookingDetails.advance} via Stripe
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ) : (
+            // Replace Bill Summary with Stripe Payment
+            <PaymentWrapper
+              totalAmount={100}
+              paymentType="advance"
+            />
+          )}
         </div>
       </section>
 
-      {/* Stripe Payment Modal */}
-      {isStripeModalOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="stripe-modal-title"
-          aria-describedby="stripe-modal-desc"
-        >
-          <Card className="w-full max-w-md shadow-lg rounded-2xl p-6 bg-card border border-border">
-            <h4 id="stripe-modal-title" className="text-lg font-semibold text-foreground">
-              Stripe Payment
-            </h4>
-            <p id="stripe-modal-desc" className="mt-2 text-sm text-muted-foreground">
-              You will be redirected to the Stripe Checkout page.
-            </p>
+      {showAddAddressModal && (
+        <AddAddressModal
+          open={showAddAddressModal}
+          onClose={() => {
+            setShowAddAddressModal(false);
+            fetchAddresses(); 
+          }}
+        />
+      )}
 
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button type="button" onClick={handleConfirmStripe} aria-label="Confirm Stripe payment">
-                Confirm Payment
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsStripeModalOpen(false)}
-                aria-label="Cancel Stripe payment"
-              >
-                Cancel
-              </Button>
-            </div>
-          </Card>
-        </div>
-      ) : null}
-      <Footer/>
+      <Footer />
     </main>
-  )
+  );
 }

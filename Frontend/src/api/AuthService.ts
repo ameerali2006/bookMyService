@@ -22,6 +22,7 @@ export const authService={
         return await userAxios.post('/register',formData)
     },
     googleLogin:async (token:string,role:"user")=>{
+        console.log("google>login")
         return await userAxios.post('/google-login',{token,role})
     },
     verifyOtp:async (otp:string,email:string,role:string)=>{

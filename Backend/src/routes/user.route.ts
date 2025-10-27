@@ -1,10 +1,11 @@
-import { Response,Request,NextFunction, RequestHandler } from "express";
+import express ,{ Response,Request,NextFunction, RequestHandler} from "express";
 import { BaseRoute } from "./base.route.js";
 import {
     authController,
     blockStatusMiddleware,
     bookingController,
     serviceController,
+    stripeController,
     tokenController,
     userController,
     
@@ -31,8 +32,11 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
             authController.login(req, res, next)
             
         );
-         this.router.post("/google-login", (req: Request, res: Response, next: NextFunction) =>
+         this.router.post("/google-login", (req: Request, res: Response, next: NextFunction) =>{
+             console.log("google.login")
             authController.googleLogin(req, res, next)
+         }
+           
             
         );
         
@@ -87,5 +91,13 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
            bookingController.setBasicBookingDetails(req, res,next)
                     
         );
+        this.router.get('/getBoookingDetails',verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+            bookingController.getBookingDetails(req, res, next)
+        );
+        this.router.post("/payment/create-payment-intent",verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler ,(req: Request, res: Response, next: NextFunction) =>
+          stripeController.createPaymentIntent(req, res,next)
+                    
+        );
+        
     }
  } 

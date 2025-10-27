@@ -21,6 +21,8 @@ import { IWorkerAggregation } from "../../interface/repository/workerAggregation
 import { WorkerAggregation } from "../../repository/worker/workerAggregation.repository";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
 import { BookingRepository } from "../../repository/shared/booking-details.repository";
+import { IPaymentRepository } from "../../interface/repository/payment.repository.interface";
+import { PaymentRepository } from "../../repository/shared/payment.repository";
 
 
 
@@ -37,6 +39,7 @@ export class RepositoryRegistery{
         container.register<IWorkingDetailsRepository>(TYPES.WorkingDetailsRepository,{useClass:WorkingDetailsRepository})
         container.register<IWorkerAggregation>(TYPES.WorkerAggregation,{useClass:WorkerAggregation})
         container.register<IBookingRepository>(TYPES.BookingRepository,{useClass:BookingRepository})
+        container.register<IPaymentRepository>(TYPES.PaymentRepository,{useClass:PaymentRepository})
 
 
     }

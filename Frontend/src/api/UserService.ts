@@ -1,6 +1,6 @@
 import userAxios from "@/config/axiosSevice/UserAxios";
     
-    interface  AddressForm {
+    export interface  AddressForm {
         label: "Home" | "Work" | "Shop"
         buildingName: string
         street: string
@@ -13,6 +13,22 @@ import userAxios from "@/config/axiosSevice/UserAxios";
         latitude?: number
         longitude?: number
     }
+    export interface CreatePaymentIntentInput {
+        amount: number; 
+        currency: string; 
+        description: string; 
+        receiptEmail?: string; 
+        metadata: {
+            bookingId?: string; 
+            paymentType?:"advance" | "final"
+        };
+    }
+    export interface UpdatePaymentStatusInput {
+    bookingId: string;
+    paymentIntentId: string;
+    status: "pending" | "succeeded" | "failed" | "processing" | "refunded" | "partially_refunded";
+    }
+
 export const userService={
     getUserDetails:async ()=>{
         
@@ -59,5 +75,13 @@ export const userService={
        
         return await userAxios.post('/basicBookingDetails',data)
     },
-    
-} 
+    getBookingDetails:async (bookingId:string)=>{
+        return await userAxios.get('/getBoookingDetails',{params:{bookingId}})
+    },
+    createPaymentIntent: async (data:CreatePaymentIntentInput) => {
+        return await userAxios.post("/payment/create-payment-intent", data);
+    },
+    updatePaymentStatus: async (data: UpdatePaymentStatusInput) => {
+        return await userAxios.post("/payment/webhook", data);
+    },
+}   

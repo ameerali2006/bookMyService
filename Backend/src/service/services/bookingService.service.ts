@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IBookingService } from "../../interface/service/services/bookingService.sevice.interface";
+import { BookingDetails, IBookingService } from "../../interface/service/services/bookingService.sevice.interface";
 import { TYPES } from "../../config/constants/types";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface";
@@ -95,6 +95,56 @@ export class  BookingService implements IBookingService{
                 message: "internal Error",
                 bookingId: null,
             };
+        }
+    }
+    async getBookingDetails(bookingId: string): Promise<{ success: boolean; message: string; details: BookingDetails | null; }> {
+        try {
+            if(!bookingId){
+                return {
+                    success:false,
+                    message:"booking details not found",
+                    details:null
+
+                }
+            }
+
+            const booking=await this._bookingRepo.findByIdWithDetails(bookingId)
+            if(!booking){
+                return {
+                    success:false,
+                    message:"booking details not found",
+                    details:null
+
+                }
+            }
+            const worker = booking.workerId as unknown as { name?: string };
+            const service = booking.serviceId as unknown as { category?: string };
+
+            let time= `${Number(booking.startTime.split(":")[0])%12}:${booking.startTime.split(":")[1]} `
+            Number(booking.startTime.split(":")[0])%12== Number(booking.startTime.split(":")[0])?time+=" AM":time+=" PM"
+            const data ={
+                workerName: worker.name as string,
+                serviceName: service.category as string,
+                date: booking.date.toISOString().split("T")[0],
+                time,
+                description:booking.description as string,
+                
+                advance: booking.advanceAmount
+            }
+            return {
+                success:true,
+                message:"booking details  found",
+                details:data
+            }
+
+
+        } catch (error) {
+            return {
+                    success:false,
+                    message:"internal error",
+                    details:null
+
+            }
         }
     }
 }

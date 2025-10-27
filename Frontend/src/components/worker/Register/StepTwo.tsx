@@ -35,7 +35,7 @@ export default function Step2({
   handleInputChange,
   handleFileUpload,
   workCategories,
-}: Props) {
+}: Props) { 
   return (
     <div className="space-y-6">
       <div className="space-y-2">

@@ -72,9 +72,10 @@ const WorkingDetailsSchema = new Schema<IWorkingDetails>(
   { timestamps: true }
 );
 
-WorkingDetailsSchema.index({ workerId: 1 });
+
 
 export const WorkingDetails = model<IWorkingDetails>(
   "WorkingDetails",
   WorkingDetailsSchema
 );
+ 

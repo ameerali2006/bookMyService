@@ -56,6 +56,8 @@ import { IAddressRepository } from "../../interface/repository/address.repositor
 import { AddressRepository } from "../../repository/shared/address.repository";
 import { IBookingService } from "../../interface/service/services/bookingService.sevice.interface";
 import { BookingService } from "../../service/services/bookingService.service";
+import { IStripeService } from "../../interface/service/stripe.service.interface";
+import { StripeService } from "../../service/helper/stripe.service";
  
 
 
@@ -92,7 +94,7 @@ export class ServiceRegistery{
         container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement,{useClass:WorkingDetailsManagement})
         container.register<IWorkingHelper>(TYPES.WorkingHelper,{useClass:WorkingHelper})
         container.register<IBookingService>(TYPES.BookingService,{useClass:BookingService})
-
+        container.register<IStripeService>(TYPES.StripeService,{useClass:StripeService})
 
     }
 } 

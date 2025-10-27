@@ -27,6 +27,8 @@ import { IUserController } from "../../interface/controller/user-controller.cont
 import { UserController } from "../../controller/user/user-controller.js";
 import { IBookingController } from "../../interface/controller/booking-controller.controller.interface.js";
 import { BookingController } from "../../controller/booking.controller.js";
+import { IStripeController } from "../../interface/controller/stripe.controller.interface.js";
+import { StripeController } from "../../controller/stripe.controller.js";
 
 DependencyInjection.registerAll();
 
@@ -43,3 +45,4 @@ export const tokenController=container.resolve<ITokenController>(TokenController
 export const workingDetailsController =container.resolve<IWorkingDetailsController>(WorkingDetailsController)
 export const userController =container.resolve<IUserController>(UserController)
 export const bookingController =container.resolve<IBookingController>(BookingController)
+export const stripeController=container.resolve<IStripeController>(StripeController)

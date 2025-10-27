@@ -15,8 +15,13 @@ import { authService } from "@/api/AuthService";
 
 const navItems = [
   { label: "Dashboard", icon: <LayoutDashboard />, path: "/worker/dashboard" },
-  { label: "Appointments", icon: <Calendar />, path: "/worker/appointments" },
   { label: "Messages", icon: <MessageCircle />, path: "/worker/messages" },
+];
+
+const appointmentSubItems = [
+  { label: "Requests", path: "/worker/appointments/request" },
+  { label: "Approved", path: "/worker/appointments/approved" },
+  { label: "Completed", path: "/worker/appointments/completed" },
 ];
 
 const profileSubItems = [
@@ -28,6 +33,7 @@ const profileSubItems = [
 export const WorkerSidebar = () => {
   const dispatch = useDispatch();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [appointmentOpen, setAppointmentOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -43,6 +49,7 @@ export const WorkerSidebar = () => {
       <div className="p-6 space-y-6">
         <h2 className="text-2xl font-bold text-black">Worker Panel</h2>
         <nav className="space-y-2">
+          {/* Static Links */}
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -57,6 +64,42 @@ export const WorkerSidebar = () => {
               {item.label}
             </NavLink>
           ))}
+
+          {/* Appointments with Submenu */}
+          <div>
+            <button
+              onClick={() => setAppointmentOpen((prev) => !prev)}
+              className="flex w-full items-center justify-between p-2 rounded-lg font-medium hover:bg-muted transition text-muted-foreground"
+            >
+              <span className="flex items-center gap-3">
+                <Calendar />
+                Appointments
+              </span>
+              {appointmentOpen ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            {appointmentOpen && (
+              <div className="pl-8 mt-2 space-y-1">
+                {appointmentSubItems.map((subItem) => (
+                  <NavLink
+                    key={subItem.path}
+                    to={subItem.path}
+                    className={({ isActive }) =>
+                      `block p-2 rounded-md text-sm hover:bg-muted transition ${
+                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                      }`
+                    }
+                  >
+                    {subItem.label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Profile with Submenu */}
           <div>

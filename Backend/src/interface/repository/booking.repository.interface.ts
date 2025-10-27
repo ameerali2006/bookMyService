@@ -1,4 +1,5 @@
 import { IBooking } from "../model/booking.model.interface";
+import { PaymentStatus } from "../model/payement.model.interface";
 import { IBaseRepository } from "./base.repository.interface";
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
@@ -25,5 +26,16 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     date: Date,
     startTime: Date,
     endTime: Date
+  ): Promise<IBooking | null>;
+  findByIdWithDetails(id: string): Promise<IBooking | null>;
+  updateAdvancePaymentStatus(
+    bookingId: string,
+    paymentIntentId: string,
+    status: PaymentStatus
+  ): Promise<IBooking | null>;
+   updateFinalPaymentStatus(
+    bookingId: string,
+    paymentIntentId: string,
+    status: PaymentStatus
   ): Promise<IBooking | null>;
 }

@@ -10,13 +10,13 @@ const BookingSchema = new Schema<IBooking>(
 
     date: { type: Date, required: true },
     startTime: { type: String, required: true },
-    endTime: { type: String }, // worker sets later
+    endTime: { type: String }, 
     description: { type: String },
 
     address: { type: Schema.Types.ObjectId, ref: "Address" },
 
-    // 🧾 Payment Details
-    advanceAmount: { type: Number, required: true ,default:0},
+    
+    advanceAmount: { type: Number, required: true ,default:100},
     totalAmount: { type: Number, default: 0 },
     remainingAmount: { type: Number, default: 0 },
 
@@ -39,7 +39,7 @@ const BookingSchema = new Schema<IBooking>(
       enum: ["stripe", "upi", "cash"],
     },
 
-    // Worker-added items or charges
+    
     additionalItems: [
       {
         name: { type: String },
@@ -50,11 +50,11 @@ const BookingSchema = new Schema<IBooking>(
     status: {
       type: String,
       enum: [
-        "pending",      // just booked
-        "confirmed",    // advance paid
-        "in-progress",  // worker started work
-        "awaiting-final-payment", // work done, waiting for remaining payment
-        "completed",    // all done
+        "pending",      
+        "confirmed",    
+        "in-progress",  
+        "awaiting-final-payment", 
+        "completed",   
         "cancelled",
       ],
       default: "pending",

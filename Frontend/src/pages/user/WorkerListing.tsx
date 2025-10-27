@@ -14,7 +14,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { userService } from "@/api/UserService"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/redux/store"
-import { DemoPaymentWrapper } from "@/components/stripe/Stripe"
+
 
 interface Worker {
   _id: string
@@ -37,7 +37,7 @@ export default function WorkerListingPage() {
     const [totalWorkers, setTotalWorkers] = useState(0)
     const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const workersPerPage = 6
+    const workersPerPage = 1
     const [loading, setLoading] = useState(false)
     const param=useParams()
     const location=useSelector((state:RootState)=>state.userTokenSlice.user?.location)
@@ -99,7 +99,7 @@ export default function WorkerListingPage() {
     return (
         <div className="min-h-screen bg-white">
         <Header />
-        <DemoPaymentWrapper name="ameer punda"/>
+      
 
         <div className="container mx-auto px-4 py-8 pt-20 ">
             {/* Search and Filter Bar */}

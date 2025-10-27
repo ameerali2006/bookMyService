@@ -6,4 +6,5 @@ export const WORKER_ROUTES = {
   DASHBOARD: "/dashboard",
   PROFILE_VIEW: "/profile/view",
   PROFILE_SLOT: "/profile/slot",
+  SERVICE_REQUEST:"/appointments/request"
 };
