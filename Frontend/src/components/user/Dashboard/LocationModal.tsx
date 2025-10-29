@@ -1,13 +1,12 @@
 "use client"
 
-import React, { useState, useCallback, lazy, Suspense } from "react"
+import React, { useState, useCallback, useEffect, lazy, Suspense } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MapPin, Search, Loader2, Navigation } from "lucide-react"
 import { ErrorToast, SuccessToast, WarningToast } from "@/components/shared/Toaster"
-
 
 const MapComponent = lazy(() => import("../../shared/Map"))
 
@@ -26,13 +25,17 @@ interface LocationModalProps {
   onSkip?: () => void
 }
 
-export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationModalProps) {
+export function LocationModal({ isOpen, onClose, onConfirm }: LocationModalProps) {
   const [coords, setCoords] = useState({ lat: 20.5937, lng: 78.9629 })
   const [location, setLocation] = useState("")
   const [cityName, setCityName] = useState("")
   const [pincode, setPincode] = useState("")
   const [loading, setLoading] = useState(false)
   const [geoLoading, setGeoLoading] = useState(false)
+
+  // 🆕 Auto-suggestion states
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false)
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     try {
@@ -49,18 +52,51 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
         setLocation(data.display_name || "")
         return { city, postal, address: data.display_name }
       }
-    } catch (error) {
+    } catch {
       ErrorToast("Reverse geocoding failed.")
     }
     return null
   }, [])
+
+  // 🆕 Fetch suggestions as user types (debounced)
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (location.trim().length < 3) {
+        setSuggestions([])
+        return
+      }
+      setIsFetchingSuggestions(true)
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=5&addressdetails=1&accept-language=en`
+        )
+        const data = await res.json()
+        setSuggestions(data)
+      } catch {
+        setSuggestions([])
+      } finally {
+        setIsFetchingSuggestions(false)
+      }
+    }, 500)
+
+    return () => clearTimeout(delayDebounce)
+  }, [location])
+
+  // 🆕 When a suggestion is clicked
+  const handleSelectSuggestion = async (suggestion: any) => {
+    const lat = parseFloat(suggestion.lat)
+    const lng = parseFloat(suggestion.lon)
+    setCoords({ lat, lng })
+    setLocation(suggestion.display_name)
+    setSuggestions([])
+    await reverseGeocode(lat, lng)
+  }
 
   const handleSearch = useCallback(async () => {
     if (!location.trim()) {
       WarningToast("Please enter a location. Enter a city, area, or pincode to search.")
       return
     }
-
     setLoading(true)
     try {
       const response = await fetch(
@@ -76,7 +112,7 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
       } else {
         ErrorToast("Location not found. Please try a different search term.")
       }
-    } catch (error) {
+    } catch {
       ErrorToast("Unable to search for location. Please try again.")
     } finally {
       setLoading(false)
@@ -102,20 +138,8 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
         )
         setGeoLoading(false)
       },
-      (error) => {
-        let message = "Unable to get your location"
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message = "Location access denied. Please enable location permissions."
-            break
-          case error.POSITION_UNAVAILABLE:
-            message = "Location information unavailable"
-            break
-          case error.TIMEOUT:
-            message = "Location request timed out"
-            break
-        }
-        ErrorToast(message)
+      () => {
+        ErrorToast("Unable to get your location.")
         setGeoLoading(false)
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
@@ -140,11 +164,6 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
 
     if (!pincode.trim()) {
       WarningToast("Pincode is missing. Please select a complete location.")
-      return
-    }
-
-    if (!coords.lat || !coords.lng) {
-      WarningToast("Coordinates missing. Please select a valid location on the map.")
       return
     }
 
@@ -173,10 +192,11 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
-          <div className="space-y-4">
+          {/* Left Section */}
+          <div className="space-y-4 relative">
             <div className="space-y-2">
               <Label htmlFor="location-input">Search Location</Label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 relative">
                 <Input
                   id="location-input"
                   placeholder="Enter city, area, or pincode..."
@@ -189,6 +209,25 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                 </Button>
               </div>
+
+              {/* 🆕 Suggestion Dropdown */}
+              {suggestions.length > 0 && (
+                <ul className="absolute z-10 w-full bg-white border rounded-md shadow-md mt-1 max-h-48 overflow-y-auto">
+                  {isFetchingSuggestions ? (
+                    <li className="p-2 text-sm text-gray-500">Loading...</li>
+                  ) : (
+                    suggestions.map((sug, i) => (
+                      <li
+                        key={i}
+                        className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleSelectSuggestion(sug)}
+                      >
+                        {sug.display_name}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
             </div>
 
             <Button
@@ -218,14 +257,9 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
                 <div>Longitude: {coords.lng.toFixed(6)}</div>
               </div>
             </div>
-
-            <div className="text-sm text-muted-foreground">
-              <p>• Click on the map to place a marker</p>
-              <p>• Search for a location using the input above</p>
-              <p>• Use your current location with GPS</p>
-            </div>
           </div>
 
+          {/* Right Section (Map) */}
           <div className="space-y-2">
             <Label>Map</Label>
             <div className="h-80 lg:h-96 rounded-md overflow-hidden border">
@@ -242,8 +276,7 @@ export function LocationModal({ isOpen, onClose, onConfirm, onSkip }: LocationMo
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
-          {/* {onSkip && <Button variant="outline" onClick={onSkip}>Skip</Button>} */}
+        <DialogFooter>
           <Button onClick={handleConfirm}>Confirm Location</Button>
         </DialogFooter>
       </DialogContent>

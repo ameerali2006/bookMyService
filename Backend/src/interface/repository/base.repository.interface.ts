@@ -20,4 +20,8 @@ export interface IBaseRepository<T extends Document> {
     skip?: number,
     limit?: number
   ): Promise<{ data: TReturn[]; total: number }>;
+  findByIdAndPopulate<TReturn = T>(
+    id: string,
+    populateFields: { path: string; select?: string; match?: any }[] 
+  ): Promise<TReturn | null>
 }

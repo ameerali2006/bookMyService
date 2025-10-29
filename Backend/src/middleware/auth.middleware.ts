@@ -26,7 +26,7 @@ export const verifyAuth =() => async (
 		console.log('**token',token)
 		if (!token || !token.access_token || !token.refresh_token) {
 			console.log('in verifyToken');
-			res.status(STATUS_CODES.UNAUTHORIZED).json({
+			res.status(STATUS_CODES.FORBIDDEN).json({
 				success: false,
 				message: MESSAGES.UNAUTHORIZED_ACCESS,
 			});
@@ -139,7 +139,7 @@ export const authorizeRole = (allowedRoles: string[]) => {
 
 			res.status(STATUS_CODES.FORBIDDEN).json({
 				success: false,
-				message: MESSAGES.VALIDATION_ERROR,
+				message: MESSAGES.INVALID_TOKEN,
 				userRole: user ? user.role : "none",
 			});
 			return;

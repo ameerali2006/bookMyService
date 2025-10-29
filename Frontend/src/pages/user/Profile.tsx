@@ -1,18 +1,22 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
 import { AddressesSection } from "@/components/user/Profile/AddressSection"
 import { ProfileSection } from "@/components/user/Profile/ProfileSection"
 import { ProfileSidebar } from "@/components/user/Profile/ProfileSideBar"
 import { ReviewsSection } from "@/components/user/Profile/ReviewSection"
 import { ServicesSection } from "@/components/user/Profile/ServiceSection"
 import Header from "@/components/user/shared/Header"
+import { KeyRound } from "lucide-react"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 
 type Section = "profile" | "services-taken" | "booked-services" | "reviews" | "addresses"
 
 export function ProfilePage() {
   const [activeSection, setActiveSection] = useState<Section>("profile")
+  
 
   const renderContent = () => {
     switch (activeSection) {
@@ -43,7 +47,9 @@ export function ProfilePage() {
         <main className="flex-1 p-8 lg:p-12">
           <div className="max-w-4xl mx-auto">{renderContent()}</div>
         </main>
+       
       </div>
+       
     </div>
     </>
   )

@@ -10,11 +10,14 @@ import { MESSAGES } from "../../config/constants/message";
 import { updateUserProfileSchema } from "../validation/updateUserProfileDetails";
 import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
 import { addressSchema } from "../validation/addAddress.zod";
+import { changePasswordSchema } from "../validation/changePassword.zod";
+import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
 
 @injectable()
 export class UserController implements IUserController{
     constructor(
         @inject(TYPES.ProfileManagement) private _profileManage:IProfileManagement,
+         @inject(TYPES.ChangePasswordService) private _changePassword:IChangePasswordService,
        
     ) {}
     async userProfileDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -32,7 +35,8 @@ export class UserController implements IUserController{
     }
     async updateProfileDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            
+            console.log(req.body)
+
            const parsedData = updateUserProfileSchema.safeParse(req.body)
 
             if (!parsedData.success) {
@@ -105,6 +109,17 @@ export class UserController implements IUserController{
         } catch (error) {
             next(error)
         }
+    }
+    async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+         const parsed = changePasswordSchema.parse(req.body);
+              const userId = (req as CustomRequest).user?._id;
+              const result = await this._changePassword.changePassword("user", userId, parsed);
+              if(result.success){
+                res.status(STATUS_CODES.OK).json(result)
+              }else{
+                res.status(STATUS_CODES.CONFLICT).json(result)
+                
+              }
     }
 
 }

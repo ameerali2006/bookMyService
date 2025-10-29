@@ -1,3 +1,4 @@
+import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
 import userAxios from "@/config/axiosSevice/UserAxios";
     
     export interface  AddressForm {
@@ -84,4 +85,9 @@ export const userService={
     updatePaymentStatus: async (data: UpdatePaymentStatusInput) => {
         return await userAxios.post("/payment/webhook", data);
     },
-}   
+    changePassword:async (payload:ChangePasswordInput    ) => {
+    
+        return await userAxios.put(`/profile/changePassword`, payload)
+    },
+}
+ 

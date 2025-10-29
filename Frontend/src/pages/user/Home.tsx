@@ -61,10 +61,10 @@ export default function Homepage() {
             <h2 className="text-2xl font-bold text-gray-800 mb-8">Most Used Service</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { title: "CLEANING SERVICE", image: "/placeholder.svg?height=200&width=300" },
-                { title: "BEAUTY SERVICE", image: "/placeholder.svg?height=200&width=300" },
-                { title: "APPLIANCE REPAIRS", image: "/placeholder.svg?height=200&width=300" },
-                { title: "LAUNDRY SERVICES", image: "/placeholder.svg?height=200&width=300" },
+                { title: "CLEANING SERVICE", image: "https://res.cloudinary.com/dp1sx1dx2/image/upload/v1761568225/cleaning-services-web_1_cvs0dr.jpg" },
+                { title: "BEAUTY SERVICE", image: "https://res.cloudinary.com/dp1sx1dx2/image/upload/v1761568224/beauty-service-web_1_qfcfvn.jpg" },
+                { title: "APPLIANCE REPAIRS", image: "https://res.cloudinary.com/dp1sx1dx2/image/upload/v1761568225/home-appliances-repair-web_w80ck9.jpg" },
+                { title: "LAUNDRY SERVICES", image: "https://res.cloudinary.com/dp1sx1dx2/image/upload/v1761568225/laundry-service-web_2_jzc1jq.jpg" },
               ].map((service, index) => (
                 <div
                   key={index}

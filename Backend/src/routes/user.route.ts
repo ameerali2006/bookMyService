@@ -11,7 +11,7 @@ import {
     
 
  } from '../config/di/resolver.js' 
-import {  verifyAuth } from "../middleware/auth.middleware.js";
+import {  authorizeRole, verifyAuth } from "../middleware/auth.middleware.js";
 
  export class UserRoute extends BaseRoute{
     constructor (){
@@ -98,6 +98,10 @@ import {  verifyAuth } from "../middleware/auth.middleware.js";
           stripeController.createPaymentIntent(req, res,next)
                     
         );
+        this.router.put("/profile/changePassword", verifyAuth(),blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) =>
+                    userController.changePassword(req, res, next)
+                            
+                );
         
     }
  } 

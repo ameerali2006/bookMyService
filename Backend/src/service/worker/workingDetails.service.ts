@@ -5,7 +5,7 @@ import {
   IWorkingDetailsDocument,
   WeekDay,
 } from "../../interface/model/working-details.interface";
-import { IWorkingDetailsManagement } from "../../interface/service/worker/workingDetails.service.interface";
+import { IWorkingDetailsManagement, updateWorker } from "../../interface/service/worker/workingDetails.service.interface";
 import { TYPES } from "../../config/constants/types";
 import { IWorkingDetailsRepository } from "../../interface/repository/working-details.interface";
 import { IWorkerRepository } from "../../interface/repository/worker.repository.interface";
@@ -22,6 +22,8 @@ import { MESSAGES } from "../../config/constants/message";
 import { CustomError } from "../../utils/custom-error";
 import { STATUS_CODES } from "../../config/constants/status-code";
 import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
+import { WorkerProfileDTO } from "../../dto/worker/workingDetails.dto";
+import { WorkerMapper } from "../../utils/mapper/worker-mapper";
 @injectable()
 export class WorkingDetailsManagement implements IWorkingDetailsManagement {
   constructor(
@@ -159,6 +161,63 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
         message: MESSAGES.DATA_SENT_SUCCESS,
         data: details,
       };
+    } catch (error) {
+      throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);
+    }
+  }
+  async getProfileDetails(workerId: string): Promise<{ success: boolean; message: string; worker: WorkerProfileDTO|null; }> {
+    try {
+      if(!workerId){
+        return {
+          success:false,
+          message:"Worker is Not Found",
+          worker:null
+        }
+      }
+      const workerData = await this._workerRepo.findByIdAndPopulate(workerId,[{path:"category",select:"category"}])
+      if(!workerData){
+        return {
+          success:false,
+          message:"Worker is Not Found",
+          worker:null
+        }
+      }
+      const worker=WorkerMapper.mapWorkerToProfileDTO(workerData)
+      return {success:true,message:"fetch data successfully",worker}
+
+    } catch (error) {
+      throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);
+    }
+  }
+  async updateWorkerProfile(workerId: string, updateData: Partial<updateWorker>): Promise<{ success: boolean; message: string; worker: WorkerProfileDTO | null; }> {
+    try {
+       const worker = await this._workerRepo.findById(workerId)
+      if (!worker) {
+        return {
+          success: false,
+          message: MESSAGES.USER_NOT_FOUND,
+          worker: null,
+        }
+      }
+
+     
+      const updatedWorker = await this._workerRepo.updateById(workerId, updateData)
+      if (!updatedWorker) {
+        return {
+          success: false,
+          message: "Failed to update worker profile",
+          worker: null,
+        }
+      }
+
+      
+      const workerDTO = WorkerMapper.mapWorkerToProfileDTO(updatedWorker)
+
+      return {
+        success: true,
+        message: "Worker profile updated successfully",
+        worker: workerDTO,
+      }
     } catch (error) {
       throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);
     }

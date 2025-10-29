@@ -53,7 +53,7 @@ export class WorkerRoute extends BaseRoute{
             cloudinaryController.getServiceNames(req, res, next)
                     
         );
-        this.router.get("/isVerified", (req: Request, res: Response, next: NextFunction) =>
+        this.router.get("/isVerified",verifyAuth(),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
             authWorkerController.isVerified(req, res, next)
                     
         );
@@ -61,18 +61,31 @@ export class WorkerRoute extends BaseRoute{
             tokenController.handleTokenRefresh(req, res)
                             
         );
-        this.router.get("/profile/slot", (req: Request, res: Response, next: NextFunction) =>
+        this.router.get("/profile/slot",verifyAuth(),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
             workingDetailsController.getWorkingDetails(req, res, next)
                     
         );
-        this.router.post("/profile/slot/update", (req: Request, res: Response, next: NextFunction) =>
+        this.router.post("/profile/slot/update",verifyAuth(),authorizeRole(["worker"]), (req: Request, res: Response, next: NextFunction) =>
             workingDetailsController.updateWorkingDetails(req, res, next)
                     
         );
-        this.router.get("/appointments/requestService", (req: Request, res: Response, next: NextFunction) =>
+        this.router.get("/appointments/requestService", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
             workingDetailsController.getWorkingDetails(req, res, next)
                     
         );
-        
+        this.router.get("/profile/details", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.getProfileDetails(req, res, next)
+                    
+        );
+        this.router.put("/profile/update", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.updateProfileDetails(req, res, next)
+                    
+        );
+        this.router.put("/profile/changePassword", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.changePassword(req, res, next)
+                    
+        );
+
+
     }
 }

@@ -58,4 +58,17 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     const data = (await query.lean()) as TReturn[];
     return { data, total };
   }
+  async findByIdAndPopulate<TReturn = T>(
+    id: string,
+    populateFields: { path: string; select?: string; match?: any }[] = []
+  ): Promise<TReturn | null> {
+    let query = this.model.findById(id);
+
+    for (const { path, select, match } of populateFields) {
+      query = query.populate(path, select, match);
+    }
+
+    const data = (await query.lean()) as TReturn | null;
+    return data;
+  }
 }

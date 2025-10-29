@@ -8,7 +8,7 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true},
     password: { type: String, required: true },
-    profileImage: { type: String },
+    profileImage: { type: String ,default:""},
     googleId: { type: String, unique: true, sparse: true },
     location: {
     type: {

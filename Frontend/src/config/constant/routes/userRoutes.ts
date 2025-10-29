@@ -5,6 +5,7 @@ export const USER_ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password/:token",
   PROFILE: "/profile",
+  CHANGE_PASSWORD:"/profile/change-password",
   SERVICES: {
     LIST: "/services/:id",
     BOOK_DETAILS: "/services/bookDetails/:workerId",

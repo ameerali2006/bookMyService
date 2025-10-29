@@ -1,25 +1,31 @@
-import { ENV } from "@/config/env/env";
+import { authService } from "@/api/AuthService";
 import axios from "axios";
 
-const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
-
 export const uploadImageCloudinary = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-  const isImage = file.type.startsWith("image/");
-  const resourceType = isImage ? "image" : "raw";
-  const uploadUrl = `${CLOUDINARY_BASE_URL}/${resourceType}/upload`;
-
   try {
-    const response = await axios.post(uploadUrl, formData);
-    const fullUrl = response.data.secure_url;
-    const relativePath = fullUrl.split("/upload/")[1];
-    return relativePath;
-  } catch (error) {
-    console.error("Error while uploading to Cloudinary:", error);
+  
+    const { data } = await authService.workerCloudinory();
+
+    
+    const formDataPayload = new FormData();
+    formDataPayload.append("file", file);
+    formDataPayload.append("api_key", data.apiKey);
+    formDataPayload.append("timestamp", data.timestamp.toString());
+    formDataPayload.append("signature", data.signature);
+    formDataPayload.append("folder", data.folder);
+
+    
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${data.cloudName}/auto/upload`;
+
+   
+    const uploadRes = await axios.post(cloudinaryUrl, formDataPayload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    
+    return uploadRes.data.secure_url;
+  } catch (error: any) {
+    console.error("Error uploading image to Cloudinary:", error.response?.data || error.message);
     throw error;
   }
 };

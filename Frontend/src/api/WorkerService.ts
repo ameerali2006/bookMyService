@@ -1,3 +1,4 @@
+import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
 import workerAxios from "@/config/axiosSevice/WorkerAxios"
 type Break = {
   label: string;
@@ -24,5 +25,22 @@ export const  workerService={
     updateWorkingDetails:async (email:string,payload:PayLoad)=>{
        
         return await workerAxios.post(`/profile/slot/update`,{email,payload})
-    }
+    },
+    getProfileDetails:async ()=>{
+      return await workerAxios.get(`/profile/details`)
+    },
+    updateProfileDetails: async (payload: {
+    name?: string
+    phone?: string
+    experience?: string
+    fees?: number
+    image?: string
+  }) => {
+    console.log(payload)
+    return await workerAxios.put(`/profile/update`, payload)
+  },
+  changePassword:async (payload:ChangePasswordInput ) => {
+   
+    return await workerAxios.put(`/profile/changePassword`, payload)
+  },
 }

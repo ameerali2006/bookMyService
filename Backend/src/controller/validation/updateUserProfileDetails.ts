@@ -8,10 +8,8 @@ export const updateUserProfileSchema = z.object({
     .regex(/^[A-Za-z\s]+$/, { message: "Name can only contain alphabets and spaces" }),
 
   
-  email: z
-    .undefined()
-    .optional(), 
-
+  email: 
+     z.string().email().optional(),
   phone: z
     .string()
     .regex(/^[0-9]{10}$/, { message: "Phone number must be exactly 10 digits" })

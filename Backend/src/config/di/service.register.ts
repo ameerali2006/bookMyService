@@ -60,6 +60,8 @@ import { IStripeService } from "../../interface/service/stripe.service.interface
 import { StripeService } from "../../service/helper/stripe.service";
 import { IWorkerBookingService } from "../../interface/service/worker/worker-booking.service.interface";
 import { WorkerBookingService } from "../../service/worker/workerBooking.service";
+import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
+import { ChangePasswordService } from "../../service/shared/changePassword.service";
  
 
 
@@ -97,6 +99,7 @@ export class ServiceRegistery{
         container.register<IWorkingHelper>(TYPES.WorkingHelper,{useClass:WorkingHelper})
         container.register<IBookingService>(TYPES.BookingService,{useClass:BookingService})
         container.register<IStripeService>(TYPES.StripeService,{useClass:StripeService})
+        container.register<IChangePasswordService>(TYPES.ChangePasswordService,{useClass:ChangePasswordService})
 
     }
 } 

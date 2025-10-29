@@ -84,6 +84,8 @@ export function createAxiosClient({
             (error.response?.status === 403 &&
             error.response.data.message === "Token is blacklisted") ||
             (error.response?.status === 403 &&
+            error.response.data.message === "Unauthorized access. Please log in.") ||
+            (error.response?.status === 403 &&
             error.response.data.message === "Access denied: Your account has been blocked" &&
             !originalRequest._retry)
         ) {
