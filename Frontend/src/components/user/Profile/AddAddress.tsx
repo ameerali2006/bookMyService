@@ -2,7 +2,10 @@
 
 import { userService } from "@/api/UserService"
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
+import type { RootState } from "@/redux/store"
 import React from "react"
+import { useSelector } from "react-redux"
+
 
 type LabelOption = "Home" | "Work" | "Shop" | ""
 
@@ -14,7 +17,7 @@ type AddressForm = {
   city: string
   state: string
   country: string
-  phone:string
+  phone: string
   pinCode: string
   landmark: string
   latitude: string
@@ -35,7 +38,7 @@ const emptyForm: AddressForm = {
   city: "",
   state: "",
   country: "",
-  phone:"",
+  phone: "",
   pinCode: "",
   landmark: "",
   latitude: "",
@@ -43,12 +46,47 @@ const emptyForm: AddressForm = {
 }
 
 export default function AddAddressModal({ open, onClose, initialData }: Props) {
-  const [form, setForm] = React.useState<AddressForm>({ ...emptyForm, ...(initialData || {}) })
+  const { lat: savedLat, lng: savedLng } = useSelector(
+    (state: RootState) => state.userTokenSlice.user?.location as {lat:number,lng:number}
+  )
+
+  const [form, setForm] = React.useState<AddressForm>({
+    ...emptyForm,
+    ...(initialData || {}),
+  })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [geoLoading, setGeoLoading] = React.useState(false)
 
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const dialogRef = React.useRef<HTMLDivElement>(null)
+
+
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`
+      )
+      const data = await res.json()
+
+      if (data?.address) {
+        const addr = data.address
+        setForm((prev) => ({
+          ...prev,
+          latitude: String(lat),
+          longitude: String(lng),
+          area: addr.suburb || addr.neighbourhood || prev.area,
+          city: addr.city || addr.town || addr.village || prev.city,
+          state: addr.state || prev.state,
+          country: addr.country || prev.country,
+          pinCode: addr.postcode || prev.pinCode,
+          street: addr.road || prev.street,
+        }))
+      }
+    } catch (err) {
+      console.error("Reverse geocoding failed:", err)
+    }
+  }
+
 
   React.useEffect(() => {
     if (open) {
@@ -57,12 +95,18 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
       const id = setTimeout(() => dialogRef.current?.focus(), 0)
       const prev = document.body.style.overflow
       document.body.style.overflow = "hidden"
+
+      
+      if (savedLat && savedLng) {
+        reverseGeocode(Number(savedLat), Number(savedLng))
+      }
+
       return () => {
         clearTimeout(id)
         document.body.style.overflow = prev
       }
     }
-  }, [open, initialData])
+  }, [open, initialData, savedLat, savedLng])
 
   const isRequired = (val: string) => val.trim().length > 0
 
@@ -83,45 +127,41 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
   }
 
   const handleSave = async () => {
-  if (!validate()) return;
+    if (!validate()) return
 
-  const latitude = form.latitude.trim() ? Number(form.latitude) : undefined;
-  const longitude = form.longitude.trim() ? Number(form.longitude) : undefined;
+    const latitude = form.latitude.trim() ? Number(form.latitude) : undefined
+    const longitude = form.longitude.trim() ? Number(form.longitude) : undefined
 
-  const newAddress = {
-    label: form.label as Exclude<LabelOption, "">,
-    buildingName: form.buildingName.trim(),
-    street: form.street.trim(),
-    area: form.area.trim(),
-    city: form.city.trim(),
-    state: form.state.trim(),
-    country: form.country.trim(),
-    pinCode: form.pinCode.trim(),
-    landmark: form.landmark.trim(),
-    phone: form.phone.trim(),
-    latitude:latitude,
-    longitude:longitude
-  };
-
-  try {
-    console.log(newAddress)
-    
-
-    const res=await userService.addUserAddress(newAddress)
-
-    if (res.data.success) {
-      console.log("Address saved:", res.data.address);
-      SuccessToast("Address saved successfully!");
-      onClose();
-    } else {
-      ErrorToast(res.data.message || "Failed to save address");
+    const newAddress = {
+      label: form.label as Exclude<LabelOption, "">,
+      buildingName: form.buildingName.trim(),
+      street: form.street.trim(),
+      area: form.area.trim(),
+      city: form.city.trim(),
+      state: form.state.trim(),
+      country: form.country.trim(),
+      pinCode: form.pinCode.trim(),
+      landmark: form.landmark.trim(),
+      phone: form.phone.trim(),
+      latitude,
+      longitude,
     }
-  } catch (error) {
-    console.error("Error saving address:", error);
-    ErrorToast("Something went wrong while saving the address.");
-  }
-};
 
+    try {
+      const res = await userService.addUserAddress(newAddress)
+
+      if (res.data.success) {
+        console.log("Address saved:", res.data.address)
+        SuccessToast("Address saved successfully!")
+        onClose()
+      } else {
+        ErrorToast(res.data.message || "Failed to save address")
+      }
+    } catch (error) {
+      console.error("Error saving address:", error)
+      ErrorToast("Something went wrong while saving the address.")
+    }
+  }
 
   const onOverlayClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     if (e.target === overlayRef.current) onClose()
@@ -142,12 +182,10 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
     }
     setGeoLoading(true)
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setForm((prev) => ({
-          ...prev,
-          latitude: String(pos.coords.latitude),
-          longitude: String(pos.coords.longitude),
-        }))
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        await reverseGeocode(lat, lng)
         setGeoLoading(false)
       },
       (err) => {
@@ -158,7 +196,7 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
           longitude: err.message,
         }))
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
@@ -215,7 +253,9 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
               </label>
               <select
                 value={form.label}
-                onChange={(e) => setForm({ ...form, label: e.target.value as LabelOption })}
+                onChange={(e) =>
+                  setForm({ ...form, label: e.target.value as LabelOption })
+                }
                 className={inputClass}
                 aria-invalid={!!errors.label}
                 aria-describedby={errors.label ? "error-label" : undefined}
@@ -225,7 +265,11 @@ export default function AddAddressModal({ open, onClose, initialData }: Props) {
                 <option value="Work">Work</option>
                 <option value="Shop">Shop</option>
               </select>
-              {errors.label && <p id="error-label" className={errorClass}>{errors.label}</p>}
+              {errors.label && (
+                <p id="error-label" className={errorClass}>
+                  {errors.label}
+                </p>
+              )}
             </div>
 
             <Field
@@ -388,7 +432,8 @@ function Field(props: {
   labelClass: string
   errorClass: string
 }) {
-  const { label, value, onChange, required, error, placeholder, inputMode, inputClass, labelClass, errorClass } = props
+  const { label, value, onChange, required, error, placeholder, inputMode, inputClass, labelClass, errorClass } =
+    props
   const id = React.useId()
   return (
     <div>
@@ -406,7 +451,11 @@ function Field(props: {
         aria-describedby={error ? `${id}-error` : undefined}
         className={inputClass}
       />
-      {error && <p id={`${id}-error`} className={errorClass}>{error}</p>}
+      {error && (
+        <p id={`${id}-error`} className={errorClass}>
+          {error}
+        </p>
+      )}
     </div>
   )
 }

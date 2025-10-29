@@ -23,6 +23,7 @@ import { WorkerLayout } from "@/components/worker/Dashboard/WorkerLayout";
 import { workerService } from "@/api/WorkerService";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
+import { CalendarModal } from "@/components/worker/SlotManagement/Calender-modal";
 
 // ---------- Types ----------
 
@@ -67,6 +68,7 @@ const WorkManagementPage: React.FC = () => {
   );
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
+  const [calendarModalOpen, setCalendarModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSchedule();
@@ -638,12 +640,21 @@ const WorkManagementPage: React.FC = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   Work Schedule Management
                 </h1>
+                
                 <p className="text-gray-600 text-sm sm:text-base">
                   Configure your weekly working hours with custom breaks and
                   shift patterns
                 </p>
               </div>
             </div>
+            <Button
+                  variant="outline"
+                  onClick={() => setCalendarModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-5 w-5" />
+                  Manage Calendar
+                </Button>
 
             {/* Summary Stats */}
             <div className="flex flex-wrap gap-4 mt-4">
@@ -728,6 +739,13 @@ const WorkManagementPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+          <CalendarModal
+          open={calendarModalOpen}
+          onOpenChange={setCalendarModalOpen}
+          onSave={async (data) => {
+            console.log("🗓️ Calendar saved:", data)
+          }}
+        />
         </div>
       </div>
     </WorkerLayout>
