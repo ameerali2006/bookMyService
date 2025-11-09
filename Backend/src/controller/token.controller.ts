@@ -13,6 +13,7 @@ export class TokenController implements ITokenController{
         @inject(TYPES.TokenService) private _tokenService:ITokenservice,
     ){}
     async handleTokenRefresh(req: Request, res: Response): Promise<void> {
+		
         try {
 			const refreshToken = (req as CustomRequest).user.refresh_token;
 			const newTokens = await this._tokenService.refreshToken(refreshToken);

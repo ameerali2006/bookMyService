@@ -7,6 +7,8 @@ import {AdminRoute} from "./routes/admin.route"
 import {ENV} from './config/env/env'
 import { WorkerRoute } from "./routes/worker.route";
 import { stripeController } from "./config/di/resolver";
+import { morganLogger } from "./utils/morgon";
+
 const app=express()
  
 app.use(
@@ -20,6 +22,7 @@ app.post("/payment/webhook",express.raw({type: 'application/json'}),(req: Reques
         );
 app.use(express.json())
 app.use(cookieParser());
+app.use(morganLogger);
 
 
  

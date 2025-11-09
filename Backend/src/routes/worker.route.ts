@@ -85,7 +85,14 @@ export class WorkerRoute extends BaseRoute{
             workingDetailsController.changePassword(req, res, next)
                     
         );
-
+        this.router.get("/calender/getData", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.getCalenderDetails(req, res, next)
+                            
+        );
+        this.router.put("/calender/update", verifyAuth(),authorizeRole(["worker"]),(req: Request, res: Response, next: NextFunction) =>
+            workingDetailsController.updateCalenderDetails(req, res, next)
+                    
+        );
 
     }
 }

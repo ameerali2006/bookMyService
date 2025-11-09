@@ -23,7 +23,7 @@ import { WorkerLayout } from "@/components/worker/Dashboard/WorkerLayout";
 import { workerService } from "@/api/WorkerService";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
-import { CalendarModal } from "@/components/worker/SlotManagement/Calender-modal";
+import { CalendarModal } from "@/components/worker/SlotManagement/SlotCalender-modal";
 
 // ---------- Types ----------
 
@@ -742,9 +742,7 @@ const WorkManagementPage: React.FC = () => {
           <CalendarModal
           open={calendarModalOpen}
           onOpenChange={setCalendarModalOpen}
-          onSave={async (data) => {
-            console.log("🗓️ Calendar saved:", data)
-          }}
+         
         />
         </div>
       </div>

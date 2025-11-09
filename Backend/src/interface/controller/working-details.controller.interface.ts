@@ -6,4 +6,7 @@ export interface IWorkingDetailsController{
     getProfileDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
     updateProfileDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
     changePassword(req: Request, res: Response, next:NextFunction): Promise<void>;
+    getCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
+    updateCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
+    
 }

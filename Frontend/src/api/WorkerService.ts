@@ -13,7 +13,15 @@ type DaySchedule = {
   endTime: string;
   breaks: Break[];
 };
-
+interface ICustomSlot {
+  date: Date
+  startTime: string
+  endTime: string
+}
+interface IHoliday {
+  date: Date
+  reason?: string
+}
 export type PayLoad = {
   days: DaySchedule[];
 };
@@ -43,4 +51,12 @@ export const  workerService={
    
     return await workerAxios.put(`/profile/changePassword`, payload)
   },
+  getCalenderData:async ()=>{
+    return await workerAxios.get(`/calender/getData`)
+  },
+  updateCalenderData:async (data:{holidays:IHoliday[],customSlots:ICustomSlot[]})=>{
+    return await workerAxios.put('/calender/update',data)
+  }
+  
+
 }

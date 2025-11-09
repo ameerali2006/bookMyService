@@ -1,6 +1,8 @@
 import { inject, injectable } from "tsyringe";
 import {
+  ICustomSlot,
   IDaySchedule,
+  IHoliday,
   IWorkingDetails,
   IWorkingDetailsDocument,
   WeekDay,
@@ -217,6 +219,78 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
         success: true,
         message: "Worker profile updated successfully",
         worker: workerDTO,
+      }
+    } catch (error) {
+      throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);
+    }
+  }
+  async getCalenderDetails(workerId: string): Promise<{ success: boolean; message: string; customSlots: ICustomSlot[] | null; holidays: IHoliday[] | null; }> {
+    try {
+      if(!workerId){
+        return {
+          success:false,
+          message:MESSAGES.USER_NOT_FOUND,
+          customSlots:null,
+          holidays:null
+        }
+      }
+      const workingDetails=await this._workingRepo.findByWorkerId(workerId)
+      if(!workingDetails){
+        return {
+          success:false,
+          message:MESSAGES.USER_NOT_FOUND,
+          customSlots:null,
+          holidays:null
+        }
+      }
+      const holidays=workingDetails.holidays
+      const customSlots=workingDetails.customSlots
+
+      return {
+        success:true,
+        message:MESSAGES.DATA_SENT_SUCCESS,
+        customSlots,
+        holidays,
+      }
+
+
+    } catch (error) {
+      throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);
+    }
+  }
+  async updateCalenderDetails(workerId: string, customSlots: ICustomSlot[]|null, holidays: IHoliday[]|null): Promise<{ success: boolean; message: string; customSlots: ICustomSlot[] | null; holidays: IHoliday[] | null; }> {
+    try {
+      if(!workerId){
+        return {
+          success:false,
+          message:MESSAGES.USER_NOT_FOUND,
+          customSlots:null,
+          holidays:null
+        }
+      }
+      if(!customSlots||!holidays){
+        return {
+          success:false,
+          message:"Data not found",
+          customSlots:null,
+          holidays:null
+        }
+      }
+      const updated=await this._workingRepo.updateCalendar(workerId,holidays,customSlots)
+      if(!updated){
+         return {
+          success:false,
+          message:MESSAGES.ACTION_FAILED,
+          customSlots:null,
+          holidays:null
+        }
+      }else{
+        return {
+          success:true,
+          message:MESSAGES.UPDATE_SUCCESS,
+          customSlots:updated.customSlots,
+          holidays:updated.holidays
+        }
       }
     } catch (error) {
       throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES .BAD_REQUEST);

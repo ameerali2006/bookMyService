@@ -29,6 +29,7 @@ export default function BasicBookingDetails() {
         const response = await userService.getWorkerAvailability(
           workerId as string
         );
+        console.log(response)
         const { success, data } = response.data;
 
         if (success && data?.dates) {

@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
 import { BaseRepository } from "./base.repository";
-import { IWorkingDetails, IWorkingDetailsDocument } from "../../interface/model/working-details.interface";
+import { ICustomSlot, IHoliday, IWorkingDetails, IWorkingDetailsDocument } from "../../interface/model/working-details.interface";
 import { IWorkingDetailsRepository } from "../../interface/repository/working-details.interface";
 import { WorkingDetails } from "../../model/working-details.model";
 
@@ -125,6 +125,22 @@ export class WorkingDetailsRepository
     return await WorkingDetails.findOneAndUpdate(
       { workerId },
       { $set: { holidays: [], customSlots: [] } },
+      { new: true }
+    );
+  }
+  async updateCalendar(
+    workerId: string,
+    holidays?: IHoliday[],
+    customSlots?: ICustomSlot[]
+  ): Promise<IWorkingDetails | null> {
+    const updateData: { holidays?: IHoliday[],customSlots?: ICustomSlot[]} = {};
+    if (holidays) updateData.holidays = holidays;
+    if (customSlots) updateData.customSlots = customSlots;
+    console.log("from update ",updateData)
+
+    return await WorkingDetails.findOneAndUpdate(
+      { workerId },
+      { $set: updateData },
       { new: true }
     );
   }

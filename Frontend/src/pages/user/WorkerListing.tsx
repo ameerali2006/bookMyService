@@ -37,7 +37,7 @@ export default function WorkerListingPage() {
     const [totalWorkers, setTotalWorkers] = useState(0)
     const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const workersPerPage = 1
+    const workersPerPage = 6
     const [loading, setLoading] = useState(false)
     const param=useParams()
     const location=useSelector((state:RootState)=>state.userTokenSlice.user?.location)

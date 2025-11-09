@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Calendar, Plus, Trash2, Save, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card"
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
+import { workerService } from "@/api/WorkerService"
 
 
 
@@ -28,21 +29,17 @@ export interface ICustomSlot {
 interface CalendarModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (data: { holidays: IHoliday[]; customSlots: ICustomSlot[] }) => Promise<void>
-  initialHolidays?: IHoliday[]
-  initialCustomSlots?: ICustomSlot[]
+  
 }
 
 export function CalendarModal({
   open,
   onOpenChange,
-  onSave,
-  initialHolidays = [],
-  initialCustomSlots = [],
+  
 }: CalendarModalProps) {
  
-  const [holidays, setHolidays] = useState<IHoliday[]>(initialHolidays)
-  const [customSlots, setCustomSlots] = useState<ICustomSlot[]>(initialCustomSlots)
+  const [holidays, setHolidays] = useState<IHoliday[]>([])
+  const [customSlots, setCustomSlots] = useState<ICustomSlot[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [formMode, setFormMode] = useState<"holiday" | "slot" | null>(null)
   const [holidayReason, setHolidayReason] = useState("")
@@ -64,6 +61,28 @@ export function CalendarModal({
   // Get holiday for a specific date
   const getHolidayForDate = (date: Date) =>
     holidays.find((h) => format(h.date, "yyyy-MM-dd") === format(date, "yyyy-MM-dd"))
+
+  useEffect(()=>{
+    console.log("hllo")
+    if(open){
+      const fetchData=async ()=>{
+        try {
+          const response= await workerService.getCalenderData()
+          console.log(response)
+          if(response.data.success){
+            setHolidays(response.data.holidays || []);
+            setCustomSlots(response.data.customSlots || []);
+          }else{
+            onOpenChange(false)
+            ErrorToast("Failed to load calendar data");
+          }
+        } catch (error) {
+          ErrorToast("Failed to load calendar data");
+        }
+      }
+      fetchData()
+    }
+  },[open])
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date)
@@ -137,8 +156,13 @@ export function CalendarModal({
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      await onSave({ holidays, customSlots })
-      SuccessToast("Calendar updated successfully")
+      const response=await workerService.updateCalenderData({holidays,customSlots})
+      if(response.data.success){
+        SuccessToast("Calendar updated successfully")
+      }else{
+        ErrorToast("Calendar updatetion failed")
+      }
+      
       onOpenChange(false)
     } catch (error) {
       ErrorToast(error instanceof Error ? error.message : "Failed to save calendar")
@@ -161,7 +185,13 @@ export function CalendarModal({
           {/* Calendar Section */}
           <div className="lg:col-span-2">
             <div className="border rounded-lg p-4 bg-card">
-              <CalendarComponent mode="single" selected={selectedDate} onSelect={handleDateSelect} className="w-full" />
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                className="w-full"
+                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              />
 
               {/* Date Indicators */}
               <div className="mt-4 flex gap-4 text-sm">

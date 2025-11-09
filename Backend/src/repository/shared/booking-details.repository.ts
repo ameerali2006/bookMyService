@@ -115,6 +115,27 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         .populate("serviceId", "category")  
         .populate("userId", "name");   
     }
+    async findByWorkerAndRange(workerId: string, startDate: Date, endDate: Date) :Promise <Array<{
+        date: Date;
+        startTime: string;
+        endTime?: string | null;
+        advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+      }>>{
+    return Booking.find(
+      {
+        workerId,
+        date: { $gte: startDate, $lt: endDate },
+        status: { $ne: "cancelled" },
+      },
+      {
+        date: 1,
+        startTime: 1,
+        endTime: 1,
+        advancePaymentStatus: 1,
+        _id: 0,
+      }
+    ).sort({ date: 1, startTime: 1 }).lean();
+  }
     async updateAdvancePaymentStatus(
         bookingId: string,
         paymentIntentId: string,

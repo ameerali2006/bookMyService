@@ -11,6 +11,7 @@ import BasicBookingDetails from "./pages/user/BasicBookingDetails";
 import { USER_ROUTES } from "./config/constant/routes/userRoutes";
 import AdvancePaymentPage from "./pages/user/AdvancePaymentPage";
 import UserChangePasswordPage from "./pages/user/ChangeUserPassword";
+import PaymentSuccessPage from "./pages/user/SuccessPage";
 
 
 
@@ -66,6 +67,11 @@ const User = () => {
           path={USER_ROUTES.CHANGE_PASSWORD}
           element={<IsLogin><UserChangePasswordPage /></IsLogin>}
         />
+        <Route
+          path={"/booking/:bookingId/success"}
+          element={<IsLogin><PaymentSuccessPage /></IsLogin>}
+        />
+
       </Routes>
       
     </Suspense> 

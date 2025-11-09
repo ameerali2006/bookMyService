@@ -1,5 +1,5 @@
 import { FilterQuery } from "mongoose";
-import { IWorkingDetails } from "../model/working-details.interface";
+import { ICustomSlot, IHoliday, IWorkingDetails } from "../model/working-details.interface";
 import { IBaseRepository } from "./base.repository.interface";
 
 
@@ -47,4 +47,9 @@ export interface IWorkingDetailsRepository extends IBaseRepository<IWorkingDetai
     status: "active" | "inactive" | "paused"
   ): Promise<IWorkingDetails | null>;
   clearOverrides(workerId: string): Promise<IWorkingDetails | null>;
+  updateCalendar(
+      workerId: string,
+      holidays?: IHoliday[],
+      customSlots?: ICustomSlot[]
+    ): Promise<IWorkingDetails | null>
 }

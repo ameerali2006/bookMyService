@@ -146,5 +146,37 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       next(error)
     }
   }
+  async getCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const workerId=(req as CustomRequest).user._id
+      const response=  await this._workingManage.getCalenderDetails(workerId)
+      if(response.success){
+        res.status(STATUS_CODES.OK).json(response)
+      }else{
+        res.status(STATUS_CODES.CONFLICT).json(response)
+      }
+
+
+    } catch (error) {
+      next(error)
+    }
+  }
+  async updateCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const workerId=(req as CustomRequest).user._id
+      console.log(req.body)
+      const {holidays,customSlots}=req.body
+      const result =await this._workingManage.updateCalenderDetails(workerId,customSlots,holidays)
+      if(result.success){
+        res.status(STATUS_CODES.OK).json(result)
+      }else{
+        res.status(STATUS_CODES.CONFLICT).json(result)
+          
+      }
+    } catch (error) {
+      next(error)
+    }
+
+  }
 }
  

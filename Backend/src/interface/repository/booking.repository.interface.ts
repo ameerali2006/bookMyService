@@ -38,4 +38,16 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     paymentIntentId: string,
     status: PaymentStatus
   ): Promise<IBooking | null>;
+   findByWorkerAndRange(
+    workerId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<
+    Array<{
+      date: Date;
+      startTime: string;
+      endTime?: string | null;
+      advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+    }>
+  >;
 }
