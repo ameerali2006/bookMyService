@@ -1,4 +1,4 @@
-import { IUser } from "../../interface/model/user.model.interface";
+import { IUser } from '../../interface/model/user.model.interface';
 
 export interface IEmailService {
   sendEmail(toEmail: string, subject: string, content: string): Promise<void>;
@@ -8,5 +8,5 @@ export interface IEmailService {
 		subject: string,
 		resetLink: string
 	): Promise<void>
-  
+
 }

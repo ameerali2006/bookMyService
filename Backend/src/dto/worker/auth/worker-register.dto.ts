@@ -1,26 +1,25 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
 export interface WorkerRegisterDTO {
   name: string;
   email: string;
   phone: string;
   password?: string;
-  
 
   category: Types.ObjectId;
-  experience: "0-1" | "2-5" | "6-10" | "10+";
+  experience: '0-1' | '2-5' | '6-10' | '10+';
 
   zone: string;
-  latitude: string;  
+  latitude: string;
   longitude: string;
 
-  documents?: string; 
-  role:"worker"
-  
-  
+  documents?: string;
+  role:'worker'
+
 }
 
 export interface responseDto{
+  _id:string
   name:string,
   email:string,
   image?:string
@@ -36,7 +35,7 @@ export interface GoogleLoginResponseDTO {
     email: string;
     googleId: string;
     image: string | null;
-  }|null;   
+  }|null;
   isNew: boolean;
 }
 interface ServiceRequest {
@@ -46,7 +45,7 @@ interface ServiceRequest {
   date: string;
   time: string;
   location: string;
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
   userLocation: { lat: number; lng: number };
   notes: string;
   phone: string;

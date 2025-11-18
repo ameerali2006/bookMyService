@@ -1,105 +1,96 @@
-import { container } from "tsyringe";
+import { container } from 'tsyringe';
 
+import { TYPES } from '../../config/constants/types';
 
-import { TYPES } from "../../config/constants/types";
+import { HashService } from '../../service/helper/hash.service';
+import { IHashService } from '../../interface/helpers/hash.interface';
+import { EmailService } from '../../service/helper/email-service.service';
+import { IEmailService } from '../../interface/helpers/email-service.service.interface';
+import { IJwtService } from '../../interface/helpers/jwt-service.service.interface';
+import { JwtService } from '../../service/helper/jwt-auth.service';
+import { TokenService } from '../../service/shared/token.service';
+import { ITokenservice } from '../../interface/service/token.service.interface';
 
-import { HashService } from "../../service/helper/hash.service";
-import { IHashService } from "../../interface/helpers/hash.interface";
-import { EmailService } from "../../service/helper/email-service.service";
-import { IEmailService } from "../../interface/helpers/email-service.service.interface";
-import {IJwtService} from "../../interface/helpers/jwt-service.service.interface"
-import {JwtService} from '../../service/helper/jwt-auth.service'
-import {TokenService} from '../../service/shared/token.service'
-import {ITokenservice} from '../../interface/service/token.service.interface'
+import { LoginService } from '../../service/auth/login.service';
+import { ILoginService } from '../../interface/service/auth/login.service.interface';
 
-import { LoginService } from "../../service/auth/login.service";
-import { ILoginService } from "../../interface/service/auth/login.service.interface";
+import { AuthAdminService } from '../../service/admin/auth-admin.service';
+import { IAuthAdminService } from '../../interface/service/auth-admin.service.interface';
+import { ICloudinaryService } from '../../interface/helpers/cloudinary.service.interface';
+import { CloudinaryService } from '../../service/helper/cloudinary.service';
+import { IGoogleAuthService } from '../../interface/service/googleAuth.service.interface';
+import { GoogleAuthService } from '../../service/shared/googleAuth.service';
+import { IManagementAdminService } from '../../interface/service/managementAdmin.service.interface';
+import { ManagementAdminService } from '../../service/admin/managementAdmin.service';
+import { IResetPassword } from '../../interface/service/resetPassword.service.interface';
+import { ResetPassword } from '../../service/shared/resetPassword.service';
+import { IWorkerHelperService } from '../../interface/service/helper-service.service.interface';
+import { WorkerHelperService } from '../../service/worker/helper.service';
+import { IRegisterService } from '../../interface/service/auth/register.service.interface';
+import { RegisterService } from '../../service/auth/register.service';
+import { IOtpService } from '../../interface/service/auth/otp.service.interface';
+import { OtpService } from '../../service/auth/otp.service';
+import { IGoogleService } from '../../interface/service/auth/google.service.interface';
+import { GoogleService } from '../../service/auth/googleAuth.service';
 
+import { IIsVerified } from '../../interface/service/auth/isVerified.service.interface';
+import { IsVerified } from '../../service/auth/isVerified.service';
 
+import { IDateConversionService } from '../../interface/service/date-convertion.service.interface';
+import { DateConversionService } from '../../service/helper/date-convertion.service';
 
-import {AuthAdminService} from "../../service/admin/auth-admin.service"
-import {IAuthAdminService} from "../../interface/service/auth-admin.service.interface"
-import { ICloudinaryService } from "../../interface/helpers/cloudinary.service.interface";
-import { CloudinaryService } from "../../service/helper/cloudinary.service";
-import { IGoogleAuthService } from "../../interface/service/googleAuth.service.interface";
-import {GoogleAuthService} from '../../service/shared/googleAuth.service'
-import { IManagementAdminService } from "../../interface/service/managementAdmin.service.interface";
-import { ManagementAdminService } from "../../service/admin/managementAdmin.service";
-import { IResetPassword } from "../../interface/service/resetPassword.service.interface";
-import { ResetPassword } from "../../service/shared/resetPassword.service";
-import {  IWorkerHelperService } from "../../interface/service/helper-service.service.interface";
-import { WorkerHelperService } from "../../service/worker/helper.service";
-import { IRegisterService } from "../../interface/service/auth/register.service.interface";
-import { RegisterService } from "../../service/auth/register.service";
-import { IOtpService } from "../../interface/service/auth/otp.service.interface";
-import { OtpService } from "../../service/auth/otp.service";
-import { IGoogleService } from "../../interface/service/auth/google.service.interface";
-import { GoogleService } from "../../service/auth/googleAuth.service";
+import { IServiceDetails } from '../../interface/service/services/ServiceDetails.service.interface';
+import { ServiceDetails } from '../../service/services/serviceDetails.service';
+import { IProfileManagement } from '../../interface/service/user/profileManagement.serice.interface';
+import { ProfileManagement } from '../../service/user/profileManagement.service';
+import { IWorkingDetailsManagement } from '../../interface/service/worker/workingDetails.service.interface';
+import { WorkingDetailsManagement } from '../../service/worker/workingDetails.service';
+import { IWorkingHelper } from '../../interface/service/working-helper.service.interface';
+import { WorkingHelper } from '../../service/helper/working-helper.service';
+import { IAddressRepository } from '../../interface/repository/address.repository.interface';
+import { AddressRepository } from '../../repository/shared/address.repository';
+import { IBookingService } from '../../interface/service/services/bookingService.sevice.interface';
+import { BookingService } from '../../service/services/bookingService.service';
+import { IStripeService } from '../../interface/service/stripe.service.interface';
+import { StripeService } from '../../service/helper/stripe.service';
+import { IWorkerBookingService } from '../../interface/service/worker/worker-booking.service.interface';
+import { WorkerBookingService } from '../../service/worker/workerBooking.service';
+import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { ChangePasswordService } from '../../service/shared/changePassword.service';
+import { BookingSocketHandler } from '../../service/helper/bookingSocket.service';
+import { ISocketHandler } from '../../interface/service/socketHandler.service.interface';
 
-import { IIsVerified } from "../../interface/service/auth/isVerified.service.interface";
-import { IsVerified } from "../../service/auth/isVerified.service";
+export class ServiceRegistery {
+  static registerService():void {
+    container.register<IHashService>(TYPES.PasswordService, { useClass: HashService });
+    container.register<IEmailService>(TYPES.EmailService, { useClass: EmailService });
+    container.register<IJwtService>(TYPES.JwtService, { useClass: JwtService });
+    container.register<IAuthAdminService>(TYPES.AuthAdminService, { useClass: AuthAdminService });
+    container.register<ITokenservice>(TYPES.TokenService, { useClass: TokenService });
+    container.register<ICloudinaryService>(TYPES.CloudinaryService, { useClass: CloudinaryService });
+    container.register<IGoogleAuthService>(TYPES.GoogleAuthService, { useClass: GoogleAuthService });
+    container.register<IManagementAdminService>(TYPES.ManagementAdminService, { useClass: ManagementAdminService });
+    container.register<IResetPassword>(TYPES.ResetPassword, { useClass: ResetPassword });
+    container.register<IWorkerHelperService>(TYPES.WorkerHelperService, { useClass: WorkerHelperService });
 
-import { IDateConversionService } from "../../interface/service/date-convertion.service.interface";
-import { DateConversionService } from "../../service/helper/date-convertion.service";
+    container.register<ILoginService>(TYPES.LoginService, { useClass: LoginService });
+    container.register<IRegisterService>(TYPES.RegisterService, { useClass: RegisterService });
+    container.register<IOtpService>(TYPES.OtpService, { useClass: OtpService });
+    container.register<IGoogleService>(TYPES.GoogleService, { useClass: GoogleService });
+    container.register<IAddressRepository>(TYPES.AddressRepository, { useClass: AddressRepository });
 
+    container.register<IIsVerified>(TYPES.IsVerified, { useClass: IsVerified });
 
+    container.register<IDateConversionService>(TYPES.DateConversionService, { useClass: DateConversionService });
+    container.register<IWorkerBookingService>(TYPES.WorkerBookingService, { useClass: WorkerBookingService });
+    container.register<IProfileManagement>(TYPES.ProfileManagement, { useClass: ProfileManagement });
+    container.register<IServiceDetails>(TYPES.ServiceDetails, { useClass: ServiceDetails });
+    container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement, { useClass: WorkingDetailsManagement });
+    container.register<IWorkingHelper>(TYPES.WorkingHelper, { useClass: WorkingHelper });
+    container.register<IBookingService>(TYPES.BookingService, { useClass: BookingService });
+    container.register<IStripeService>(TYPES.StripeService, { useClass: StripeService });
+    container.register<IChangePasswordService>(TYPES.ChangePasswordService, { useClass: ChangePasswordService });
 
-import { IServiceDetails } from "../../interface/service/services/ServiceDetails.service.interface";
-import { ServiceDetails } from "../../service/services/serviceDetails.service";
-import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
-import { ProfileManagement } from "../../service/user/profileManagement.service";
-import { IWorkingDetailsManagement } from "../../interface/service/worker/workingDetails.service.interface";
-import { WorkingDetailsManagement } from "../../service/worker/workingDetails.service";
-import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
-import { WorkingHelper } from "../../service/helper/working-helper.service";
-import { IAddressRepository } from "../../interface/repository/address.repository.interface";
-import { AddressRepository } from "../../repository/shared/address.repository";
-import { IBookingService } from "../../interface/service/services/bookingService.sevice.interface";
-import { BookingService } from "../../service/services/bookingService.service";
-import { IStripeService } from "../../interface/service/stripe.service.interface";
-import { StripeService } from "../../service/helper/stripe.service";
-import { IWorkerBookingService } from "../../interface/service/worker/worker-booking.service.interface";
-import { WorkerBookingService } from "../../service/worker/workerBooking.service";
-import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
-import { ChangePasswordService } from "../../service/shared/changePassword.service";
- 
-
-
-
-
-
-
-export class ServiceRegistery{
-    static registerService():void{
-
-        container.register<IHashService>(TYPES.PasswordService, { useClass: HashService,});
-        container.register<IEmailService>(TYPES.EmailService,{useClass:EmailService})
-        container.register<IJwtService>(TYPES.JwtService,{useClass:JwtService})
-        container.register<IAuthAdminService>(TYPES.AuthAdminService,{useClass:AuthAdminService})
-        container.register<ITokenservice>(TYPES.TokenService,{useClass:TokenService})
-        container.register<ICloudinaryService>(TYPES.CloudinaryService,{useClass:CloudinaryService})
-        container.register<IGoogleAuthService>(TYPES.GoogleAuthService,{useClass:GoogleAuthService})
-        container.register<IManagementAdminService>(TYPES.ManagementAdminService,{useClass:ManagementAdminService})
-        container.register<IResetPassword>(TYPES.ResetPassword,{useClass:ResetPassword})
-        container.register<IWorkerHelperService>(TYPES.WorkerHelperService,{useClass:WorkerHelperService})
-
-        container.register<ILoginService>(TYPES.LoginService,{useClass:LoginService})
-        container.register<IRegisterService>(TYPES.RegisterService,{useClass:RegisterService})
-        container.register<IOtpService>(TYPES.OtpService,{useClass:OtpService})
-        container.register<IGoogleService>(TYPES.GoogleService,{useClass:GoogleService})
-        container.register<IAddressRepository>(TYPES.AddressRepository,{useClass:AddressRepository})
-
-        container.register<IIsVerified>(TYPES.IsVerified,{useClass:IsVerified})
-        
-        container.register<IDateConversionService>(TYPES.DateConversionService,{useClass:DateConversionService})
-        container.register<IWorkerBookingService>(TYPES.WorkerBookingService,{useClass:WorkerBookingService})
-        container.register<IProfileManagement>(TYPES.ProfileManagement,{useClass:ProfileManagement})
-        container.register<IServiceDetails>(TYPES.ServiceDetails,{useClass:ServiceDetails})
-        container.register<IWorkingDetailsManagement>(TYPES.WorkingDetailsManagement,{useClass:WorkingDetailsManagement})
-        container.register<IWorkingHelper>(TYPES.WorkingHelper,{useClass:WorkingHelper})
-        container.register<IBookingService>(TYPES.BookingService,{useClass:BookingService})
-        container.register<IStripeService>(TYPES.StripeService,{useClass:StripeService})
-        container.register<IChangePasswordService>(TYPES.ChangePasswordService,{useClass:ChangePasswordService})
-
-    }
-} 
+    container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler });
+  }
+}

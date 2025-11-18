@@ -1,10 +1,7 @@
-import { injectable } from "tsyringe";
-import { IWorkerBookingController } from "../../interface/controller/worker-booking.controller.interface";
+import { injectable } from 'tsyringe';
+import { IWorkerBookingController } from '../../interface/controller/worker-booking.controller.interface';
 
 @injectable()
-export class WorkerBookingController implements IWorkerBookingController{
-    constructor(
-
-    ){}
-
+export class WorkerBookingController implements IWorkerBookingController {
+  constructor() {}
 }

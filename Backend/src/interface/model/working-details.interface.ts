@@ -1,18 +1,18 @@
-import { Document, Schema } from "mongoose";
+import { Document, Schema } from 'mongoose';
 
 export interface IBreak {
   label: string;
-  breakStart: string; 
-  breakEnd: string;  
+  breakStart: string;
+  breakEnd: string;
 }
 export enum WeekDay {
-  MONDAY = "Monday",
-  TUESDAY = "Tuesday",
-  WEDNESDAY = "Wednesday",
-  THURSDAY = "Thursday",
-  FRIDAY = "Friday",
-  SATURDAY = "Saturday",
-  SUNDAY = "Sunday",
+  MONDAY = 'Monday',
+  TUESDAY = 'Tuesday',
+  WEDNESDAY = 'Wednesday',
+  THURSDAY = 'Thursday',
+  FRIDAY = 'Friday',
+  SATURDAY = 'Saturday',
+  SUNDAY = 'Sunday',
 }
 
 export interface IDaySchedule {
@@ -31,13 +31,13 @@ export interface IHoliday {
 
 export interface ICustomSlot {
   date: Date;
-  startTime: string; 
-  endTime: string;  
+  startTime: string;
+  endTime: string;
 }
 
 export interface IWorkingDetails extends Document {
   workerId: Schema.Types.ObjectId;
-  status: "active" | "inactive" | "paused";
+  status: 'active' | 'inactive' | 'paused';
   maxAppointmentsPerDay?: number;
   breakEnforced: boolean;
   weekStartDay: WeekDay;

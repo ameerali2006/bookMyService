@@ -1,7 +1,7 @@
-import { Document, Types } from "mongoose";
-import { IService } from "./service.model.interface";
+import { Document, Types } from 'mongoose';
+import { IService } from './service.model.interface';
 
-export interface IWorker  extends Document{
+export interface IWorker extends Document{
   _id: Types.ObjectId;
   name: string;
   email: string;
@@ -10,16 +10,16 @@ export interface IWorker  extends Document{
   profileImage?: string;
   googleId?: string;
   location: {
-    type: "Point";
-    coordinates: [number, number]; 
+    type: 'Point';
+    coordinates: [number, number];
   }
   zone: string;
-  experience: "0-1" | "2-5" | "6-10" | "10+";
+  experience: '0-1' | '2-5' | '6-10' | '10+';
   category: Types.ObjectId
   fees: number;
   isBlocked: boolean;
   isActive: boolean;
-  isVerified: "pending"|"approved"| "rejected";
+  isVerified: 'pending'|'approved'| 'rejected';
   documents?: string;
   createdAt: Date;
   updatedAt: Date;

@@ -21,17 +21,15 @@ export interface workerManageDto {
   createdAt: Date
 }
 export interface serviceCreateDto{
-  
+
   category: string;
   description: string;
   price: number;
-  priceUnit: "per hour"| "per job"| "per item"; 
-  duration: number; 
+  priceUnit: 'per hour'| 'per job'| 'per item';
+  duration: number;
   image: string;
-  
-  status: "active" | "inactive";
-  
-  
+
+  status: 'active' | 'inactive';
 
 }
 export interface serviceManageDto extends serviceCreateDto {

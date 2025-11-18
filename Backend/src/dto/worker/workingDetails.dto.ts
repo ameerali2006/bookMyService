@@ -1,4 +1,3 @@
-  
 export interface WorkerProfileDTO {
   id: string;
   name: string;
@@ -10,10 +9,22 @@ export interface WorkerProfileDTO {
   category: string;
   fees: number;
   isActive: boolean;
-  isVerified: "pending" | "approved" | "rejected";
+  isVerified: 'pending' | 'approved' | 'rejected';
   location: {
     lat: number;
     lng: number;
   };
   documents?: string;
+}
+export interface ServiceRequest {
+  id: string;
+  serviceName: string;
+  userName: string;
+  date: string;
+  time: string;
+  location?: string;
+  status?: 'pending' | 'accepted' | 'rejected';
+  userLocation: { lat: number; lng: number };
+  notes?: string;
+  phone: string;
 }

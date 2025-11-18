@@ -1,3 +1,5 @@
+import { IBooking } from '../../model/booking.model.interface';
+
 export interface BookingDetails {
     workerName: string;
     serviceName: string;
@@ -6,6 +8,15 @@ export interface BookingDetails {
     description: string;
     advance: number;}
 export interface IBookingService{
-    setBasicBookingDetails(userId:string,workerId:string,time:string,date:Date,description:string):Promise<{success:boolean,message:string,bookingId:string|null}>
-    getBookingDetails(bookingId:string):Promise<{success:boolean ,message:string,details:BookingDetails|null}>
+    setBasicBookingDetails(userId:string, workerId:string, time:string, date:Date, description:string):Promise<{success:boolean, message:string, bookingId:string|null}>
+    getBookingDetails(bookingId:string):Promise<{success:boolean, message:string, details:BookingDetails|null}>
+    updateWorkerDetails(
+  data: {
+    bookingId: string;
+    workerId: string;
+    endingTime: string;
+    itemsRequired: Array<{ name: string; price: number; description?: string }>;
+    additionalNotes?: string;
+  }
+): Promise<{success:boolean, message:string, booking?:IBooking}>;
 }

@@ -7,6 +7,7 @@ interface LocationData {
   pincode?: string;
 }
 interface WorkerData {
+  _id:string
   name: string;
   email: string;
   image?: string;

@@ -1,8 +1,8 @@
-import { serviceCreateDto } from "../../../dto/admin/management.dto";
-import { IWorker } from "../../model/worker.model.interface";
+import { serviceCreateDto } from '../../../dto/admin/management.dto';
+import { IWorker } from '../../model/worker.model.interface';
 
 export interface IServiceDetails{
-    getServices(lat:number,lng:number,maxDistance:number):Promise<{status:number,success:boolean,message:string,services?: serviceCreateDto[]}>
+    getServices(lat:number, lng:number, maxDistance:number):Promise<{status:number, success:boolean, message:string, services?: serviceCreateDto[]}>
     getWorkerAvailablity(workerId: string): Promise<{
         status: number;
         success: boolean;
@@ -15,7 +15,7 @@ export interface IServiceDetails{
                 availableTimes: {
                 start: string;
                 end: string;
-                status: "available" | "unavailable" | "break" | "booked";
+                status: 'available' | 'unavailable' | 'break' | 'booked';
                 }[];
             }[];
         };
@@ -28,5 +28,5 @@ export interface IServiceDetails{
         sort: string,
         page: number,
         pageSize: number
-      ):Promise<{success:boolean,message:string,data:{workers:IWorker[],totalCount:number}|null}>
+      ):Promise<{success:boolean, message:string, data:{workers:IWorker[], totalCount:number}|null}>
 }

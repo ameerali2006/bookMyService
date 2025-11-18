@@ -38,6 +38,8 @@ export default function WorkerDashboard() {
 
   const fetchWorker=async()=>{
     try {
+      console.log(worker)
+
        const res = await  authService.workerIsVerified(String(worker?.email))
        console.log(res)
        if(res.status==400){

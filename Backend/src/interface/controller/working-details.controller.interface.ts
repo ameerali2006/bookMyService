@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
 export interface IWorkingDetailsController{
     getWorkingDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
@@ -8,5 +8,5 @@ export interface IWorkingDetailsController{
     changePassword(req: Request, res: Response, next:NextFunction): Promise<void>;
     getCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
     updateCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
-    
+
 }

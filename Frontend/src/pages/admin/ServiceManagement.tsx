@@ -25,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
+import CreateServiceModal from "@/components/admin/Service/AddServiceModal";
 
 // ✅ Match backend fields
 interface Service {
@@ -108,10 +109,17 @@ export default function ServiceManagement() {
     }
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (data:{
+    category: string;
+    description: string;
+    price: number;
+    priceUnit: "per job" | "per hour" | "per item";
+    duration: number;
+    image: string;
+  }) => {
     try {
-      console.log(formData)
-      const res=await adminManagement.createService(formData)
+      console.log(data)
+      const res=await adminManagement.createService(data)
       console.log(res)
       setOpen(false);
       setFormData({
@@ -202,86 +210,18 @@ export default function ServiceManagement() {
 
               {/* ✅ Create Service Modal */}
               <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button className="flex items-center gap-2">
-                    <Plus size={16} /> Create Service
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Create New Service</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <Input
-                      placeholder="Category"
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                    />
-                    <Input
-                      placeholder="Description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Price"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) =>
-                          setFormData({ ...formData, price: Number(e.target.value) })
-                        }
-                      />
-                      <Select
-                        value={formData.priceUnit}
-                        onValueChange={(v) =>
-                          setFormData({ ...formData, priceUnit: v as "per job" | "per hour" | "per item" })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Price Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="per hour">Per Hour</SelectItem>
-                          <SelectItem value="per job">Per Job</SelectItem>
-                          <SelectItem value="per item">Per Item</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Input
-                      placeholder="Duration (hours)"
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: Number(e.target.value) })
-                      }
-                    />
-                    <input type="file" accept="image/*" onChange={handleImage} />
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <Plus size={16} /> Create Service
+                </Button>
+              </DialogTrigger>
 
-                    {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
-
-                    {formData.image && (
-                      <img
-                        src={formData.image}
-                        alt="preview"
-                        className="w-24 h-24 rounded-md border mt-2"
-                      />
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreate}>Create</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <CreateServiceModal
+                open={open}
+                setOpen={setOpen}
+                onCreate={handleCreate}
+              />
+            </Dialog>
             </div>
 
             {/* Service Grid */}

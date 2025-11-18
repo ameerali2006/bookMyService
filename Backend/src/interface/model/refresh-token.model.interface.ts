@@ -1,11 +1,9 @@
-import { ObjectId, Document, HydratedDocument } from "mongoose";
-
-
+import { ObjectId, Document, HydratedDocument } from 'mongoose';
 
 export interface IRefreshTokenDocument extends Document {
   token: string;
   user: ObjectId;
-  userType: "admin" | "user" | "worker";
+  userType: 'admin' | 'user' | 'worker';
   expiresAt: Date;
   createdAt?: Date;
   updatedAt?: Date;

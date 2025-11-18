@@ -1,11 +1,12 @@
-import nodemailer, { Transporter } from "nodemailer";
-import chalk from "chalk";
-import { IEmailService } from "../../interface/helpers/email-service.service.interface";
+import nodemailer, { Transporter } from 'nodemailer';
+import chalk from 'chalk';
+import { injectable } from 'tsyringe';
+import { IEmailService } from '../../interface/helpers/email-service.service.interface';
 
-import { injectable } from "tsyringe";
-import { VERIFICATION_MAIL_CONTENT, PASSWORD_RESET_MAIL_CONTENT, SENT_REJECTION_EMAIL, GOOGLE_REGISTRATION_MAIL_CONTENT } from "../../config/constants/email";
-import {ENV} from '../../config/env/env'
-
+import {
+  VERIFICATION_MAIL_CONTENT, PASSWORD_RESET_MAIL_CONTENT, SENT_REJECTION_EMAIL, GOOGLE_REGISTRATION_MAIL_CONTENT,
+} from '../../config/constants/email';
+import { ENV } from '../../config/env/env';
 
 @injectable()
 export class EmailService implements IEmailService {
@@ -13,23 +14,23 @@ export class EmailService implements IEmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         user: ENV.EMAIL_USER,
         pass: ENV.EMAIL_PASS,
       },
-      tls: { rejectUnauthorized: false }
+      tls: { rejectUnauthorized: false },
     });
 
     // verify transporter at startup
     this.transporter.verify((error) => {
       if (error) {
         console.error(
-          chalk.redBright("❌ Email transporter verification failed:"),
-          error
+          chalk.redBright('❌ Email transporter verification failed:'),
+          error,
         );
       } else {
-        console.log(chalk.greenBright("✅ Email transporter ready to send emails."));
+        console.log(chalk.greenBright('✅ Email transporter ready to send emails.'));
       }
     });
   }
@@ -58,13 +59,13 @@ export class EmailService implements IEmailService {
   async sendResetEmail(
     to: string,
     subject: string,
-    resetLink: string
+    resetLink: string,
   ): Promise<void> {
     const html = PASSWORD_RESET_MAIL_CONTENT(resetLink);
     await this.sendEmail(to, subject, html);
     console.log(
-      chalk.bgYellowBright.bold(`🔁 Reset Password Link:`),
-      chalk.cyanBright.bold(resetLink)
+      chalk.bgYellowBright.bold('🔁 Reset Password Link:'),
+      chalk.cyanBright.bold(resetLink),
     );
   }
 
@@ -72,23 +73,23 @@ export class EmailService implements IEmailService {
     to: string,
     reason: string,
     retryUrl: string,
-    entityLabel: string
+    entityLabel: string,
   ): Promise<void> {
     const subject = `${entityLabel} Application Rejected - bookMyService`;
     const html = SENT_REJECTION_EMAIL(entityLabel, reason, retryUrl);
     await this.sendEmail(to, subject, html);
     console.log(
-      chalk.bgRedBright.bold(`❌ Rejection Email Sent:`),
-      chalk.yellowBright(`${entityLabel} - ${to}`)
+      chalk.bgRedBright.bold('❌ Rejection Email Sent:'),
+      chalk.yellowBright(`${entityLabel} - ${to}`),
     );
   }
 
   async sendGoogleRegistrationEmail(
     to: string,
     fullName: string,
-    tempPassword: string
+    tempPassword: string,
   ): Promise<void> {
-    const subject = `Welcome to bookMyService 🎉`;
+    const subject = 'Welcome to bookMyService 🎉';
     const html = GOOGLE_REGISTRATION_MAIL_CONTENT(fullName, tempPassword);
     await this.sendEmail(to, subject, html);
   }
@@ -101,6 +102,6 @@ export class EmailService implements IEmailService {
     html: string;
   }) {
     const info = await this.transporter.sendMail(mailOptions);
-    console.log(chalk.bgGreenBright.bold(`📧 Email sent:`), info.response);
+    console.log(chalk.bgGreenBright.bold('📧 Email sent:'), info.response);
   }
 }

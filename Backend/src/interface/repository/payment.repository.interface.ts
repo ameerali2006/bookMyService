@@ -1,6 +1,5 @@
-
-import { IPayment, PaymentStatus } from "../model/payement.model.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { IPayment, PaymentStatus } from '../model/payement.model.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IPaymentRepository extends IBaseRepository<IPayment> {
     createPayment(data: Partial<IPayment>): Promise<IPayment>;

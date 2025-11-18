@@ -1,7 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { IOtp } from "../interface/model/otp.model.interface";
-
-
+import mongoose, { Document, Schema } from 'mongoose';
+import { IOtp } from '../interface/model/otp.model.interface';
 
 const OtpSchema = new Schema<IOtp>(
   {
@@ -10,8 +8,8 @@ const OtpSchema = new Schema<IOtp>(
     expireAt: { type: Date, required: true },
     createdAt: { type: Date, default: Date.now, expires: 120 }, // Auto-delete after 120s
   },
-  { collection: "otp" } 
+  { collection: 'otp' },
 );
 
-const OtpModel = mongoose.model<IOtp>("Otp", OtpSchema);
+const OtpModel = mongoose.model<IOtp>('Otp', OtpSchema);
 export default OtpModel;

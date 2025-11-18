@@ -1,6 +1,6 @@
-import { IBooking } from "../model/booking.model.interface";
-import { PaymentStatus } from "../model/payement.model.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { IBooking } from '../model/booking.model.interface';
+import { PaymentStatus } from '../model/payement.model.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>): Promise<IBooking>;
@@ -47,7 +47,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
       date: Date;
       startTime: string;
       endTime?: string | null;
-      advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+      advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
     }>
   >;
+   findPendingAdvanceBookings(workerId: string): Promise<IBooking[]>;
 }

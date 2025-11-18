@@ -1,7 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { IAdmin } from "../interface/model/admin.model.interface";
-
-
+import mongoose, { Document, Schema } from 'mongoose';
+import { IAdmin } from '../interface/model/admin.model.interface';
 
 const AdminSchema = new Schema<IAdmin>(
   {
@@ -9,8 +7,8 @@ const AdminSchema = new Schema<IAdmin>(
     password: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
   },
-  { collection: "admin" }
+  { collection: 'admin' },
 );
 
-const AdminModel = mongoose.model<IAdmin>("Admin", AdminSchema);
+const AdminModel = mongoose.model<IAdmin>('Admin', AdminSchema);
 export default AdminModel;

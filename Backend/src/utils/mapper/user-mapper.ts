@@ -1,12 +1,9 @@
-
-import { Address, ProfileDetails } from "../../dto/user/auth/profile.dto";
-import { UserRegisterDTO, userResponse } from "../../dto/user/auth/user-register.dto";
-import { IAddress } from "../../interface/model/address.model.interface";
-import { IUser } from "../../interface/model/user.model.interface";
-
+import { Address, ProfileDetails } from '../../dto/user/auth/profile.dto';
+import { UserRegisterDTO, userResponse } from '../../dto/user/auth/user-register.dto';
+import { IAddress } from '../../interface/model/address.model.interface';
+import { IUser } from '../../interface/model/user.model.interface';
 
 export class UserMapper {
-
   static toRegistrationModel(userDto: UserRegisterDTO): Partial<IUser> {
     return {
       googleId: userDto.googleId,
@@ -15,22 +12,27 @@ export class UserMapper {
       password: userDto.password,
     };
   }
-  static resposeWorkerDto(user:IUser):userResponse{
+
+  static resposeWorkerDto(user:IUser):userResponse {
     return {
-      name:user.name,
-      email:user.email,
-      image:user?.image
-    }
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      image: user?.image,
+    };
   }
-  static responseuserProfileDetails(user:IUser):ProfileDetails{
+
+  static responseuserProfileDetails(user:IUser):ProfileDetails {
     return {
-      name:user.name,
-      email:user.email,
-      phone:user.phone,
-      image:user?.image
-    }
+
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      image: user?.image,
+    };
   }
-  static toDTOAddress(address: IAddress): Address{
+
+  static toDTOAddress(address: IAddress): Address {
     return {
       _id: address._id?.toString() as string,
       label: address.label,
@@ -50,5 +52,4 @@ export class UserMapper {
   static toDTOAddressList(addresses: IAddress[]): Address[] {
     return addresses.map((addr) => this.toDTOAddress(addr));
   }
-  
 }

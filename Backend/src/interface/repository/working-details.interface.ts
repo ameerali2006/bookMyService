@@ -1,9 +1,8 @@
-import { FilterQuery } from "mongoose";
-import { ICustomSlot, IHoliday, IWorkingDetails } from "../model/working-details.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { FilterQuery } from 'mongoose';
+import { ICustomSlot, IHoliday, IWorkingDetails } from '../model/working-details.interface';
+import { IBaseRepository } from './base.repository.interface';
 
-
-export interface IWorkingDetailsRepository extends IBaseRepository<IWorkingDetails>  {
+export interface IWorkingDetailsRepository extends IBaseRepository<IWorkingDetails> {
 
   findByWorkerId(workerId: string): Promise<IWorkingDetails | null>;
   upsertByWorkerId(
@@ -13,7 +12,7 @@ export interface IWorkingDetailsRepository extends IBaseRepository<IWorkingDetai
   updateDaySchedule(
     workerId: string,
     day: string,
-    daySchedule: Partial<IWorkingDetails["days"][0]>
+    daySchedule: Partial<IWorkingDetails['days'][0]>
   ): Promise<IWorkingDetails | null>;
   addHoliday(
     workerId: string,
@@ -44,7 +43,7 @@ export interface IWorkingDetailsRepository extends IBaseRepository<IWorkingDetai
   ): Promise<IWorkingDetails | null>;
   updateStatus(
     workerId: string,
-    status: "active" | "inactive" | "paused"
+    status: 'active' | 'inactive' | 'paused'
   ): Promise<IWorkingDetails | null>;
   clearOverrides(workerId: string): Promise<IWorkingDetails | null>;
   updateCalendar(

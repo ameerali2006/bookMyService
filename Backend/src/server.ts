@@ -1,25 +1,22 @@
-import "reflect-metadata"; 
-import { createServer } from "http";
-import app from "./app";
-import { connectRedis } from "./config/redis";
-import { connectDB } from "./config/db";
-import {ENV} from './config/env/env'
+import 'reflect-metadata';
+import { connectDB } from './config/db';
+import { connectRedis } from './config/redis';
+import { ENV } from './config/env/env';
+import { socketServer } from './config/socketServer'; // ✅ Use shared instance
 
-const port:number|string=ENV.PORT
+const port = ENV.PORT || 5000;
 
-const startServer=async ():Promise<void>=>{
-    try {
-        await connectDB()
-        await connectRedis()
-        const server=createServer(app)
+const startServer = async (): Promise<void> => {
+  try {
+    await connectDB();
+    await connectRedis();
 
-        server.listen(port,()=>{
-            console.log('server is running')
-        })
-    } catch (error) {
-        console.error('server Error',error)
-         
-    }  
- 
-}   
-startServer()        
+    socketServer.listen(port, () => {
+      console.log(`🚀 Server running on port ${port}`);
+    });
+  } catch (error) {
+    console.error('❌ Server startup error:', error);
+  }
+};
+
+startServer();

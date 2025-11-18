@@ -1,4 +1,8 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
+import { IWorker } from './worker.model.interface';
+import { IUser } from './user.model.interface';
+import { IService } from './service.model.interface';
+import { IAddress } from './address.model.interface';
 
 export interface IAdditionalItem{
   name: string;
@@ -23,32 +27,29 @@ export interface IBooking extends Document{
   endTime?: string;
   description?: string;
 
-  
   advanceAmount: number;
   totalAmount?: number;
   remainingAmount?: number;
 
   advancePaymentId?: string;
-  advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+  advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
 
   finalPaymentId?: string;
-  finalPaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+  finalPaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
 
-  paymentMethod?: "stripe" | "upi" | "cash";
+  paymentMethod?: 'stripe' | 'upi' | 'cash';
 
- 
   additionalItems?: IAdditionalItem[];
 
-  
   status:
-    | "pending"                
-    | "confirmed"             
-    | "in-progress"            
-    | "awaiting-final-payment" 
-    | "completed"            
-    | "cancelled";
+    | 'pending'
+    | 'confirmed'
+    | 'in-progress'
+    | 'awaiting-final-payment'
+    | 'completed'
+    | 'cancelled';
 
-  workerResponse?: "accepted" | "rejected" | "pending";
+  workerResponse?: 'accepted' | 'rejected' | 'pending';
 
   otp?: string;
 
@@ -57,3 +58,9 @@ export interface IBooking extends Document{
   createdAt?: Date;
   updatedAt?: Date;
 }
+export type IBookingPopulated = Omit<IBooking, 'workerId' | 'userId' | 'serviceId'|'address'> & {
+  workerId: IWorker;
+  userId: IUser;
+  serviceId: IService;
+  address:IAddress
+};

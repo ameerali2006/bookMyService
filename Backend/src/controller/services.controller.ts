@@ -1,43 +1,46 @@
-import { NextFunction, Request, Response } from "express";
-import { IServiceConroller } from "../interface/controller/services.controller.interface";
-import { inject, injectable } from "tsyringe";
-import { TYPES } from "../config/constants/types";
-import { STATUS_CODES } from "../config/constants/status-code";
+import { NextFunction, Request, Response } from 'express';
+import { inject, injectable } from 'tsyringe';
+import { IServiceConroller } from '../interface/controller/services.controller.interface';
+import { TYPES } from '../config/constants/types';
+import { STATUS_CODES } from '../config/constants/status-code';
 
-import { IServiceDetails } from "../interface/service/services/ServiceDetails.service.interface";
+import { IServiceDetails } from '../interface/service/services/ServiceDetails.service.interface';
+
 @injectable()
-export class ServiceController implements IServiceConroller{
-    constructor(
-        @inject(TYPES.ServiceDetails) private _serviceDetails:IServiceDetails
-    ){}
-    async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
-      try {
-        const { lat, lng, maxDistance = 2000000 } = req.query;
+export class ServiceController implements IServiceConroller {
+  constructor(
+        @inject(TYPES.ServiceDetails) private _serviceDetails:IServiceDetails,
+  ) {}
 
-        const response = await this._serviceDetails.getServices(
-          parseFloat(lat as string),
-          parseFloat(lng as string),
-          parseFloat(maxDistance as string)
-        );
-        console.log(response)
+  async getServices(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { lat, lng, maxDistance = 2000000 } = req.query;
 
-        res.status(response.status).json(response);
-      } catch (error) {
-        next(error)
-      }
+      const response = await this._serviceDetails.getServices(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        parseFloat(maxDistance as string),
+      );
+      console.log(response);
+
+      res.status(response.status).json(response);
+    } catch (error) {
+      next(error);
     }
-    async getNearByWorkers(req: Request, res: Response, next: NextFunction): Promise<void> {
-      try {
+  }
+
+  async getNearByWorkers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
       const {
-        search = "",
-        sort = "asc",
+        search = '',
+        sort = 'asc',
         page = 1,
         pageSize = 10,
         serviceId,
         lat,
         lng,
       } = req.query;
-      console.log(req.query)
+      console.log(req.query);
 
       const response = await this._serviceDetails.getNearByWorkers(
         serviceId as string,
@@ -46,44 +49,43 @@ export class ServiceController implements IServiceConroller{
         search as string,
         sort as string,
         Number(page),
-        Number(pageSize)
+        Number(pageSize),
       );
 
-      if(response.success){
+      if (response.success) {
         res.status(STATUS_CODES.OK).json({
           success: true,
           message: response.message,
-          workers:response.data?.workers,
-          totalCount:response.data?.totalCount,
+          workers: response.data?.workers,
+          totalCount: response.data?.totalCount,
           totalPages: Math.ceil(response.data?.totalCount as number / Number(pageSize)),
           currentPage: Number(page),
         });
-      }else{
-         res.status(STATUS_CODES.BAD_REQUEST).json({
+      } else {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: response.message || "Failed to fetch nearby workers",
+          message: response.message || 'Failed to fetch nearby workers',
         });
       }
-     
     } catch (error: any) {
       res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: error.message || "Failed to fetch nearby workers",
+        message: error.message || 'Failed to fetch nearby workers',
       });
     }
   }
+
   async getWorkerAvailability(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { workerId } = req.query;
-      console.log(workerId)
-      if (!workerId)  res.status(STATUS_CODES.BAD_REQUEST).json({ error: "Missing workerId" });
+      console.log(workerId);
+      if (!workerId) res.status(STATUS_CODES.BAD_REQUEST).json({ error: 'Missing workerId' });
 
       const data = await this._serviceDetails.getWorkerAvailablity(workerId as string);
-      console.log(data.data?.dates)
+      console.log(data.data?.dates);
       res.status(STATUS_CODES.OK).json(data);
     } catch (err: any) {
       res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
     }
   }
-    
 }

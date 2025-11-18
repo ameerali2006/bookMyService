@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 export interface IWorkerAuthController {
   register(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -8,7 +8,7 @@ export interface IWorkerAuthController {
   verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void>;
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   logout(req: Request, res: Response, next: NextFunction): Promise<void>;
-  forgotPassword(req: Request, res: Response,next: NextFunction): Promise<void>;
+  forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void>;
 	resetPassword(req: Request, res: Response, next: NextFunction): Promise<void>;
-  
+
 }

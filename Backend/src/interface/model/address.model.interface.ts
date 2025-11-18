@@ -1,8 +1,8 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface IAddress extends Document {
-  
-  label?: string; 
+
+  label?: string;
   userId?:string
   street?: string;
   buildingName?:string;
@@ -16,10 +16,10 @@ export interface IAddress extends Document {
   phone:string;
   isPrimary?: boolean;
   location: {
-    type: "Point";
+    type: 'Point';
     coordinates: [number, number];
   };
-  
+
   createdAt: Date;
   updatedAt: Date;
 }

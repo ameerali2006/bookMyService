@@ -1,4 +1,4 @@
-import { Document, FilterQuery } from "mongoose";
+import { Document, FilterQuery } from 'mongoose';
 
 export interface IBaseRepository<T extends Document> {
   create(data: Partial<T>): Promise<T>;
@@ -22,6 +22,6 @@ export interface IBaseRepository<T extends Document> {
   ): Promise<{ data: TReturn[]; total: number }>;
   findByIdAndPopulate<TReturn = T>(
     id: string,
-    populateFields: { path: string; select?: string; match?: any }[] 
+    populateFields: { path: string; select?: string; match?: any }[]
   ): Promise<TReturn | null>
 }

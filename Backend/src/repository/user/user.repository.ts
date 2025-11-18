@@ -1,13 +1,13 @@
-import { IUserRepository } from "../../interface/repository/user.repository.interface";
-import { UserModel,  } from "../../model/user.model";
-import {  injectable } from "inversify";
-import { BaseRepository } from "../../repository/shared/base.repository";
-import { IUser } from "../../interface/model/user.model.interface";
+import { injectable } from 'inversify';
+import { IUserRepository } from '../../interface/repository/user.repository.interface';
+import { UserModel } from '../../model/user.model';
+import { BaseRepository } from '../../repository/shared/base.repository';
+import { IUser } from '../../interface/model/user.model.interface';
+
 @injectable()
-export class UserRepository 
+export class UserRepository
   extends BaseRepository<IUser>
-  implements IUserRepository
-{
+  implements IUserRepository {
   constructor() {
     super(UserModel);
   }
@@ -15,6 +15,4 @@ export class UserRepository
   async findByEmail(email: string): Promise<IUser | null> {
     return await UserModel.findOne({ email });
   }
-  
-
 }

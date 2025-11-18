@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface IUser extends Document{
     _id:Types.ObjectId;
@@ -11,8 +11,5 @@ export interface IUser extends Document{
     address:Types.ObjectId[];
     isBlocked:boolean;
     createdAt: Date;
-    
-
-
 
 }

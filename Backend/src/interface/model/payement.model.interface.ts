@@ -1,22 +1,22 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
-export type CreatorType = "Client" | "Worker" | "Admin";
+export type CreatorType = 'Client' | 'Worker' | 'Admin';
 
 export type PaymentStatus =
-  | "pending"
-  | "processing"
-  | "succeeded"
-  | "failed"
-  | "refunded"
-  | "partially_refunded";
+  | 'pending'
+  | 'processing'
+  | 'succeeded'
+  | 'failed'
+  | 'refunded'
+  | 'partially_refunded';
 
 export type Purpose =
-  | "vendor-booking"
-  | "refund-amount"
-  | "wallet-credit"
-  | "commission-credit"
-  | "advance-payment"
-  | "final-payment";
+  | 'vendor-booking'
+  | 'refund-amount'
+  | 'wallet-credit'
+  | 'commission-credit'
+  | 'advance-payment'
+  | 'final-payment';
 
 export interface IPayment extends Document {
   userId: Types.ObjectId;

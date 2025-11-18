@@ -1,27 +1,28 @@
-import { Request, Response, NextFunction } from "express";
-import { IWorkingDetailsController } from "../../interface/controller/working-details.controller.interface";
-import { TYPES } from "../../config/constants/types";
-import { inject, injectable } from "tsyringe";
-import { STATUS_CODES } from "../../config/constants/status-code";
-import { MESSAGES } from "../../config/constants/message";
-import { CustomError } from "../../utils/custom-error";
-import { IWorkingDetailsManagement, updateWorker } from "../../interface/service/worker/workingDetails.service.interface";
-import { CustomRequest } from "../../middleware/auth.middleware";
-import { workerProfileUpdateSchema } from "../validation/updateWorkerprofile";
-import { changePasswordSchema } from "../validation/changePassword.zod";
-import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
+import { Request, Response, NextFunction } from 'express';
+import { inject, injectable } from 'tsyringe';
+import { IWorkingDetailsController } from '../../interface/controller/working-details.controller.interface';
+import { TYPES } from '../../config/constants/types';
+import { STATUS_CODES } from '../../config/constants/status-code';
+import { MESSAGES } from '../../config/constants/message';
+import { CustomError } from '../../utils/custom-error';
+import { IWorkingDetailsManagement, updateWorker } from '../../interface/service/worker/workingDetails.service.interface';
+import { CustomRequest } from '../../middleware/auth.middleware';
+import { workerProfileUpdateSchema } from '../validation/updateWorkerprofile';
+import { changePasswordSchema } from '../validation/changePassword.zod';
+import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
 
 @injectable()
 export class WorkingDetailsController implements IWorkingDetailsController {
   constructor(
     @inject(TYPES.WorkingDetailsManagement)
     private _workingManage: IWorkingDetailsManagement,
-    @inject(TYPES.ChangePasswordService) private _changePassword:IChangePasswordService
+    @inject(TYPES.ChangePasswordService) private _changePassword:IChangePasswordService,
   ) {}
+
   async getWorkingDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const email = req.query.email as string;
@@ -44,18 +45,19 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       next(error);
     }
   }
+
   async updateWorkingDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const email = req.body.email as string;
-      const payload = req.body.payload;
+      const { payload } = req.body;
       console.log(email);
       const details = await this._workingManage.updateWorkingDetails(
         email,
-        payload
+        payload,
       );
       if (details.success) {
         res
@@ -74,10 +76,11 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       next(error);
     }
   }
+
   async getProfileDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const workerId = (req as CustomRequest).user._id;
@@ -93,10 +96,11 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       next(error);
     }
   }
+
   async updateProfileDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const workerId = (req as CustomRequest).user._id;
@@ -114,12 +118,12 @@ export class WorkingDetailsController implements IWorkingDetailsController {
         const errors = parsed.error.format();
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: "Validation failed",
+          message: 'Validation failed',
           errors,
         });
       }
-      console.log(parsed.data)
-      const response=await this._workingManage.updateWorkerProfile(workerId,parsed.data as updateWorker)
+      console.log(parsed.data);
+      const response = await this._workingManage.updateWorkerProfile(workerId, parsed.data as updateWorker);
       console.log(response);
       if (response.success) {
         res.status(STATUS_CODES.OK).json(response);
@@ -127,56 +131,52 @@ export class WorkingDetailsController implements IWorkingDetailsController {
         res.status(STATUS_CODES.CONFLICT).json(response);
       }
     } catch (error) {
-        next(error)
+      next(error);
     }
   }
+
   async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-       const parsed = changePasswordSchema.parse(req.body);
+      const parsed = changePasswordSchema.parse(req.body);
       const userId = (req as CustomRequest).user?._id;
-      const result = await this._changePassword.changePassword("worker", userId, parsed);
-      if(result.success){
-        res.status(STATUS_CODES.OK).json(result)
-      }else{
-        res.status(STATUS_CODES.CONFLICT).json(result)
-        
+      const result = await this._changePassword.changePassword('worker', userId, parsed);
+      if (result.success) {
+        res.status(STATUS_CODES.OK).json(result);
+      } else {
+        res.status(STATUS_CODES.CONFLICT).json(result);
       }
-
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
+
   async getCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const workerId=(req as CustomRequest).user._id
-      const response=  await this._workingManage.getCalenderDetails(workerId)
-      if(response.success){
-        res.status(STATUS_CODES.OK).json(response)
-      }else{
-        res.status(STATUS_CODES.CONFLICT).json(response)
+      const workerId = (req as CustomRequest).user._id;
+      const response = await this._workingManage.getCalenderDetails(workerId);
+      if (response.success) {
+        res.status(STATUS_CODES.OK).json(response);
+      } else {
+        res.status(STATUS_CODES.CONFLICT).json(response);
       }
-
-
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
+
   async updateCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const workerId=(req as CustomRequest).user._id
-      console.log(req.body)
-      const {holidays,customSlots}=req.body
-      const result =await this._workingManage.updateCalenderDetails(workerId,customSlots,holidays)
-      if(result.success){
-        res.status(STATUS_CODES.OK).json(result)
-      }else{
-        res.status(STATUS_CODES.CONFLICT).json(result)
-          
+      const workerId = (req as CustomRequest).user._id;
+      console.log(req.body);
+      const { holidays, customSlots } = req.body;
+      const result = await this._workingManage.updateCalenderDetails(workerId, customSlots, holidays);
+      if (result.success) {
+        res.status(STATUS_CODES.OK).json(result);
+      } else {
+        res.status(STATUS_CODES.CONFLICT).json(result);
       }
     } catch (error) {
-      next(error)
+      next(error);
     }
-
   }
 }
- 

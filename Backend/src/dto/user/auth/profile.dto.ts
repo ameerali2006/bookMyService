@@ -6,7 +6,7 @@ export interface ProfileDetails{
 }
 export interface Address{
     _id:string
-    label?: string; 
+    label?: string;
     street?: string;
     buildingName?:string;
     area: string;
@@ -17,11 +17,9 @@ export interface Address{
     landmark?: string;
     phone:string;
     isPrimary?: boolean;
-    
+
 }
-export interface AddAddressDto extends Omit<Address,'_id'>{
+export interface AddAddressDto extends Omit<Address, '_id'>{
     latitude?:number;
     longitude?:number;
 }
-
-

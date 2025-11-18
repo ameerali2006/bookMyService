@@ -1,8 +1,8 @@
-import { ENV } from "../../config/env/env";
+import { ENV } from '../../config/env/env';
 
 export const GOOGLE_REGISTRATION_MAIL_CONTENT = (
   fullName: string,
-  tempPassword: string
+  tempPassword: string,
 ) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; background: #fff;">
   <!-- Logo Section -->
@@ -40,7 +40,7 @@ export const GOOGLE_REGISTRATION_MAIL_CONTENT = (
 
   <!-- Change Password Button -->
   <div style="text-align: center; margin-bottom: 30px;">
-    <a href="${process.env.FRONTEND_URL || "https://bookmyservice.in"}"
+    <a href="${process.env.FRONTEND_URL || 'https://bookmyservice.in'}"
        style="background-color: #2563eb; color: white; padding: 14px 32px;
               text-decoration: none; border-radius: 8px; font-weight: 500;
               display: inline-block; margin: 10px 0; font-size: 16px;
@@ -159,13 +159,13 @@ export const SENT_REJECTION_EMAIL = (entityLabel: string, reason: string, retryU
    <p style="text-align: center; color: #dc3545;">Unfortunately, your application was rejected.</p>
    <p style="text-align: center; color: #555;">Reason: ${reason}</p>
    ${
-     retryUrl
-       ? `<div style="text-align: center; margin-top: 20px;">
+  retryUrl
+    ? `<div style="text-align: center; margin-top: 20px;">
             <a href="${retryUrl}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px;">
               Retry Application
             </a>
           </div>`
-       : ""
-   }
+    : ''
+}
 </div>
 `;
