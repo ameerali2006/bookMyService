@@ -7,5 +7,5 @@ import { IUser } from '../../model/user.model.interface';
 import { IWorker } from '../../model/worker.model.interface';
 
 export interface ILoginService{
-    execute(user:LoginDto):Promise<{success:boolean, message:string, accessToken: string|null; refreshToken: string|null, user:IUser |IWorker|IAdmin| null}>
+    execute(user:LoginDto):Promise<{success:boolean, message:string, accessToken: string|null; refreshToken: string|null, user:UserDataDTO | responseDto|IAdmin| null}>
 }

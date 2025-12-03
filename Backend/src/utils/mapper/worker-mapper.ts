@@ -11,6 +11,11 @@ export class WorkerMapper {
       name: worker.name,
       email: worker.email,
       image: worker?.profileImage,
+      location:{
+        lat:worker.location.coordinates[1],
+        lng:worker.location.coordinates[0],
+        address:worker.zone,
+      }
     };
   }
 

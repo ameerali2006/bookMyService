@@ -21,18 +21,21 @@ import {
 
 import { Navbar } from '@/components/worker/Dashboard/WorkerNavbar';
 import type { RootState } from '@/redux/store';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { authService } from '@/api/AuthService';
 import { ErrorToast } from '@/components/shared/Toaster';
+import { updateLocation } from '@/redux/slice/userTokenSlice';
 
 export default function WorkerDashboard() {
   const [data, setData] = useState<any>(null);
+  const dispatch=useDispatch()
 
 
   const worker = useSelector((state: RootState) => state.workerTokenSlice.worker);
 
   useEffect(()=>{
+    autoUpdateLocation()
     fetchWorker()
   },[])
 
@@ -51,6 +54,50 @@ export default function WorkerDashboard() {
       ErrorToast("Something Went Wrong")
     }
   }
+  const autoUpdateLocation = () => {
+    if (!navigator.geolocation) {
+      console.log("Geolocation not available");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+
+      try {
+        // Reverse GEO API (OpenStreetMap)
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+        );
+        const data = await res.json();
+
+        const address = data.display_name;
+        const pincode =
+          data.address.postcode || data.address.pincode || "";
+
+        // Dispatch to Redux
+        dispatch(
+          updateLocation({
+            lat: latitude,
+            lng: longitude,
+            address,
+            city: data.address.city || data.address.town || "",
+            pincode
+          })
+        );
+
+        console.log("Auto Location Updated",{
+            lat: latitude,
+            lng: longitude,
+            address,
+            city: data.address.city || data.address.town || "",
+            pincode
+          });
+      } catch (err) {
+        console.log("Failed to fetch address");
+      }
+    });
+  };
+
   if (!data) {
     return (
       

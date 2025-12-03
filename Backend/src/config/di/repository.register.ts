@@ -23,6 +23,10 @@ import { IBookingRepository } from '../../interface/repository/booking.repositor
 import { BookingRepository } from '../../repository/shared/booking-details.repository';
 import { IPaymentRepository } from '../../interface/repository/payment.repository.interface';
 import { PaymentRepository } from '../../repository/shared/payment.repository';
+import { IWalletRepository } from '../../interface/repository/wallet.repository.interface';
+import { WalletRepository } from '../../repository/shared/wallet.respository';
+import { IWalletTransactionRepository } from '../../interface/repository/walletTransaction.repository.interface';
+import { WalletTransactionRepository } from '../../repository/shared/walletTransaction.repository';
 
 export class RepositoryRegistery {
   static registerRepository():void {
@@ -37,5 +41,9 @@ export class RepositoryRegistery {
     container.register<IWorkerAggregation>(TYPES.WorkerAggregation, { useClass: WorkerAggregation });
     container.register<IBookingRepository>(TYPES.BookingRepository, { useClass: BookingRepository });
     container.register<IPaymentRepository>(TYPES.PaymentRepository, { useClass: PaymentRepository });
+    container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
+    container.register<IWalletTransactionRepository>(TYPES.WalletTransactionRepository, { useClass: WalletTransactionRepository });
+
+  
   }
 }

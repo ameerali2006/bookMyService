@@ -10,22 +10,17 @@ import {
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { userService } from "@/api/UserService";
-import { useParams } from "react-router-dom";
+
 import { ErrorToast, SuccessToast } from "../shared/Toaster";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/redux/store";
 
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "");
 
 /* -------------------------- Payment Form Component -------------------------- */
 const PaymentForm = ({
-  totalAmount,
   bookingId,
   paymentType,
 }: {
-  totalAmount: number;
   bookingId: string;
   paymentType: "advance" | "final";
 }) => {
@@ -33,41 +28,42 @@ const PaymentForm = ({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [isPaymentValid, setIsPaymentValid] = useState(false);
-  const user = useSelector((state: RootState) => state.userTokenSlice.user);
 
   const handlePayment = async () => {
     if (!stripe || !elements) return;
-    if (!user?.email) {
-      ErrorToast("Please login to continue payment");
-      return;
-    }
 
     setLoading(true);
 
     try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
+      const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.origin,
+          // ⭐ IMPORTANT: Redirect to SUCCESS PAGE
+          return_url: `${window.location.origin}/payment-success`,
         },
         redirect: "if_required",
       });
 
+      const { error, paymentIntent } = result;
+
       if (error) {
         ErrorToast(error.message || "Payment failed");
-      } else if (paymentIntent?.status === "succeeded") {
+        return;
+      }
+
+      if (paymentIntent?.status === "succeeded") {
         SuccessToast(
           `${paymentType === "advance" ? "Advance" : "Final"} payment successful!`
         );
 
-        // 👇 Different redirect based on payment type
+        // ⭐ Redirect WITH booking info
         setTimeout(() => {
           window.location.href = `/booking/${bookingId}/success?type=${paymentType}`;
-        }, 1500);
+        }, 1200);
       }
     } catch (err) {
       console.error(err);
-      ErrorToast("Something went wrong while processing your payment");
+      ErrorToast("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -77,11 +73,8 @@ const PaymentForm = ({
     <Card className="max-w-md mx-auto mt-10">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-center">
-          {paymentType === "advance" ? "Advance Payment" : "Final Payment"}
+          Complete Payment
         </CardTitle>
-        <p className="text-sm text-muted-foreground text-center mt-1">
-          Amount to pay: ₹{totalAmount.toFixed(2)}
-        </p>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -95,12 +88,10 @@ const PaymentForm = ({
 
         <Button
           onClick={handlePayment}
-          disabled={loading || !stripe || !elements || !isPaymentValid}
+          disabled={!stripe || !elements || !isPaymentValid || loading}
           className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg"
         >
-          {loading
-            ? "Processing..."
-            : `Pay ₹${totalAmount} (${paymentType === "advance" ? "Advance" : "Final"})`}
+          {loading ? "Processing..." : "Pay Now"}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
@@ -111,58 +102,16 @@ const PaymentForm = ({
   );
 };
 
-
 /* -------------------------- Payment Wrapper Component -------------------------- */
 export const PaymentWrapper = ({
-  totalAmount,
+  clientSecret,
+  bookingId,
   paymentType,
 }: {
-  totalAmount: number;
+  clientSecret: string;
+  bookingId: string;
   paymentType: "advance" | "final";
 }) => {
-  const { bookingId } = useParams<{ bookingId: string }>();
-  const user = useSelector((state: RootState) => state.userTokenSlice.user);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initPayment = async () => {
-      try {
-        if (!user?.email || !bookingId) {
-          ErrorToast("Missing user or booking information");
-          return;
-        }
-
-        // 👇 Custom description based on paymentType
-        const description =
-          paymentType === "advance"
-            ? `Advance payment for booking ${bookingId}`
-            : `Final payment for booking ${bookingId}`;
-
-        const res = await userService.createPaymentIntent({
-          amount: totalAmount * 100,
-          currency: "inr",
-          description,
-          receiptEmail: user.email,
-          metadata: { bookingId, paymentType },
-        });
-
-        if (res.data?.clientSecret) {
-          setClientSecret(res.data.clientSecret);
-        } else {
-          ErrorToast("Failed to initialize payment");
-        }
-      } catch (err) {
-        console.error(err);
-        ErrorToast("Error creating payment intent");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initPayment();
-  }, [totalAmount, bookingId, user?.email, paymentType]);
-
   const appearance = {
     theme: "stripe" as const,
     variables: {
@@ -171,29 +120,10 @@ export const PaymentWrapper = ({
     },
   };
 
-  if (loading) {
-    return (
-      <div className="text-center mt-10 text-muted-foreground">
-        Initializing payment...
-      </div>
-    );
-  }
-
-  if (!clientSecret) {
-    return (
-      <div className="text-center mt-10 text-red-500">
-        Payment could not be initialized. Please try again.
-      </div>
-    );
-  }
-
   return (
     <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-      <PaymentForm
-        totalAmount={totalAmount}
-        bookingId={bookingId!}
-        paymentType={paymentType}
-      />
+      {/* ⭐ Pass required props */}
+      <PaymentForm bookingId={bookingId} paymentType={paymentType} />
     </Elements>
   );
 };

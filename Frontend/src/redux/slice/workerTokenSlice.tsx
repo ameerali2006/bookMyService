@@ -4,6 +4,7 @@ interface LocationData {
   lat: number;
   lng: number;
   address?: string;
+  city?:string;
   pincode?: string;
 }
 interface WorkerData {

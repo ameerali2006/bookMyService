@@ -2,14 +2,25 @@ export type Interval = { start: number; end: number };
 export type LabeledStatus = 'available' | 'break' | 'booked' | 'unavailable';
 
 export const toMinutes = (t: string): number => {
-  // Supports "24:00" as 1440
+  
   if (t === '24:00') return 1440;
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
 };
-
+export const isTimeGreater = (t1: string, t2: string): boolean => {
+  const time1=toMinutes(t1)
+  const time2=toMinutes(t2)
+  return time1 > time2;
+};
+export const doTimesOverlap = (startA: string, endA: string, startB: string, endB: string): boolean => {
+  const aStart = toMinutes(startA);
+  const aEnd   = toMinutes(endA);
+  const bStart = toMinutes(startB);
+  const bEnd   = toMinutes(endB);
+  return aStart < bEnd && aEnd > bStart;
+};
 export const fromMinutes = (n: number): string => {
-  // Clamp to [0,1440] and format "HH:MM"
+  
   if (n <= 0) return '00:00';
   if (n >= 1440) return '24:00';
   const h = Math.floor(n / 60).toString().padStart(2, '0');
@@ -18,7 +29,7 @@ export const fromMinutes = (n: number): string => {
 };
 
 export const dateKey = (d: Date): string => {
-  // Local midnight key "YYYY-MM-DD"
+  
   const dd = new Date(d);
   dd.setHours(0, 0, 0, 0);
   const y = dd.getFullYear();
@@ -28,7 +39,7 @@ export const dateKey = (d: Date): string => {
 };
 
 export const dayBounds = (d: Date): { start: Date; end: Date } => {
-  // [startOfDay, nextDay)
+  
   const s = new Date(d);
   s.setHours(0, 0, 0, 0);
   const e = new Date(s);
@@ -51,20 +62,19 @@ export const mergeIntervals = (arr: Interval[]): Interval[] => {
 };
 
 export const subtractIntervals = (base: Interval[], cuts: Interval[]): Interval[] => {
-  // ((base) - union(cuts))
+  
   let res = mergeIntervals(base);
   const cc = mergeIntervals(cuts);
   for (const c of cc) {
     const next: Interval[] = [];
     for (const b of res) {
       if (c.end <= b.start || c.start >= b.end) {
-        // no overlap
         next.push(b);
         continue;
       }
-      // left remainder
+      
       if (c.start > b.start) next.push({ start: b.start, end: Math.min(c.start, b.end) });
-      // right remainder
+      
       if (c.end < b.end) next.push({ start: Math.max(c.end, b.start), end: b.end });
     }
     res = next;
@@ -77,15 +87,14 @@ export const buildLabeledTimeline = (
   breaks: Interval[],
   booked: Interval[],
 ): Array<{ start: number; end: number; status: LabeledStatus }> => {
-  // Build a 00:00–24:00 non-overlapping labeled line with priority:
-  // booked > break > available > unavailable
+  
   const points = new Set<number>([0, 1440]);
   for (const v of available) { points.add(v.start); points.add(v.end); }
   for (const v of breaks) { points.add(v.start); points.add(v.end); }
   for (const v of booked) { points.add(v.start); points.add(v.end); }
   const xs = [...points].sort((a, b) => a - b);
 
-  const contains = (iv: Interval[], s: number, e: number) => iv.some((v) => s < v.end && e > v.start); // overlap test
+  const contains = (iv: Interval[], s: number, e: number) => iv.some((v) => s < v.end && e > v.start);
 
   const raw: Array<{ start: number; end: number; status: LabeledStatus }> = [];
   for (let i = 0; i < xs.length - 1; i++) {
@@ -99,7 +108,7 @@ export const buildLabeledTimeline = (
     raw.push({ start: s, end: e, status });
   }
 
-  // Merge neighbors with same status
+  
   const merged: typeof raw = [];
   for (const seg of raw) {
     const last = merged[merged.length - 1];

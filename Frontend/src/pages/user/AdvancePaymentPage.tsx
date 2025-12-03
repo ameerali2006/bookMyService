@@ -11,6 +11,8 @@ import AddAddressModal from "@/components/user/Profile/AddAddress";
 
 import { useParams } from "react-router-dom";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
+import { ErrorToast } from "@/components/shared/Toaster";
+import NotFoundPage from "@/components/shared/PageNotFound";
 
 export type AddressLabel = "Home" | "Work" | "Shop";
 type Address = {
@@ -30,21 +32,14 @@ type Address = {
   isPrimary: boolean;
 };
 
-const bookingDetails = {
-  workerName: "John Doe",
-  serviceName: "AC Repair",
-  date: "Mon, 20 Oct 2025",
-  time: "10:00 AM – 12:00 PM",
-  description: "AC not cooling properly, need gas refill.",
-  totalPrice: 500,
-  advance: 100,
-};
+
 
 export default function AdvancePaymentPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [showStripePayment, setShowStripePayment] = useState(false);
+  const [clientSecret,setClientSecret]=useState<string>("")
   const [bookingDetails, setBookingDetails] = useState<{
     workerName: string;
     serviceName: string;
@@ -55,6 +50,20 @@ export default function AdvancePaymentPage() {
     advance: number;
   } | null>(null);
   const param=useParams()
+  const bookingId=param.bookingId
+
+  if(!bookingId){
+    return (
+      <>
+       <div className="w-full border-b border-border bg-background">
+        <Header />
+      </div>
+      <NotFoundPage/>
+      <Footer />
+      </>
+
+    )
+  }
   
   useEffect(() => {
     fetchAddresses();
@@ -63,7 +72,7 @@ export default function AdvancePaymentPage() {
 
   const fetchBookingDetails = async () => {
     try {
-        const bookingId=param.bookingId
+        
         console.log(bookingId)
       const res = await userService.getBookingDetails(bookingId as string);
       console.log(res)
@@ -95,8 +104,32 @@ export default function AdvancePaymentPage() {
     console.log("Selected address:", selectedAddress);
   };
 
-  const handleStripePay = () => {
-    setShowStripePayment(true);
+  const handleStripePay = async () => {
+    try {
+      const bookingId = param.bookingId;
+      if(!bookingId){
+        ErrorToast("booking detalils not fount ")
+        return 
+      }
+
+      const res = await userService.createPaymentIntent({
+        amount: bookingDetails.advance * 100,
+        currency: "inr",
+        description: "Advance payment",
+        metadata: {
+          bookingId,
+          addressId: selectedAddressId,
+          paymentType: "advance",
+        }
+      });
+
+      setClientSecret(res.data.clientSecret);
+      setShowStripePayment(true);
+
+    } catch (err) {
+      console.log(err);
+      ErrorToast("Failed to initialize Stripe payment");
+    }
   };
 
   return (
@@ -244,22 +277,21 @@ export default function AdvancePaymentPage() {
                   <Button
                     type="button"
                     className="w-full bg-blue-900 hover:bg-blue-800"
-                    onClick={() => setShowStripePayment(true)}
+                    onClick={handleStripePay}  // <── FIXED
                     disabled={!selectedAddressId}
                   >
                     Pay ₹{bookingDetails.advance} via Stripe
                   </Button>
+
                 </div>
               )}
             </Card>
           ) : (
             // Replace Bill Summary with Stripe Payment
-            <PaymentWrapper
-              totalAmount={100}
-              paymentType="advance"
-            />
+            clientSecret && <PaymentWrapper clientSecret={clientSecret} paymentType="advance" bookingId={bookingId}/>
+
           )}
-        </div>
+        </div> 
       </section>
 
       {showAddAddressModal && (

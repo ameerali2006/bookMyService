@@ -23,6 +23,12 @@ export interface responseDto{
   name:string,
   email:string,
   image?:string
+  location:{
+    lat:number,
+    lng:number,
+    address?:string,
+    pincode?:string
+  }
 }
 export interface GoogleLoginResponseDTO {
   success: boolean;
@@ -38,7 +44,7 @@ export interface GoogleLoginResponseDTO {
   }|null;
   isNew: boolean;
 }
-interface ServiceRequest {
+export interface ServiceRequest {
   id: string;
   serviceName: string;
   userName: string;

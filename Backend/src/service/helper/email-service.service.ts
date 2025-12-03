@@ -1,10 +1,11 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import chalk from 'chalk';
 import { injectable } from 'tsyringe';
-import { IEmailService } from '../../interface/helpers/email-service.service.interface';
+import { IEmailService, IServiceRejectedPayload } from '../../interface/helpers/email-service.service.interface';
 
 import {
   VERIFICATION_MAIL_CONTENT, PASSWORD_RESET_MAIL_CONTENT, SENT_REJECTION_EMAIL, GOOGLE_REGISTRATION_MAIL_CONTENT,
+  SERVICE_REJECTED_MAIL_CONTENT,
 } from '../../config/constants/email';
 import { ENV } from '../../config/env/env';
 
@@ -35,7 +36,19 @@ export class EmailService implements IEmailService {
     });
   }
 
-  /** Generic email sender (interface-required) */
+  async sendServiceRejectedEmail(payload: IServiceRejectedPayload): Promise<void> {
+    const { email, userName, serviceName, reason, refundAmount } = payload;
+
+    const subject = `Service Rejected — ${serviceName} — bookMyService`;
+    const html = SERVICE_REJECTED_MAIL_CONTENT(userName, serviceName, reason, refundAmount);
+
+    await this.sendEmail(email, subject, html);
+
+    // optional logs for audit / debugging
+    console.log(
+      `📨 Service rejection email sent to ${email} for service ${serviceName}. Refund: ${typeof refundAmount === "number" ? refundAmount : "N/A"}`
+    );
+  }
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
     const mailOptions = {
       from: `"bookMyService" <${ENV.EMAIL_USER}>`,

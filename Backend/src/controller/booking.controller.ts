@@ -46,4 +46,24 @@ export class BookingController implements IBookingController {
       next(error);
     }
   }
+  async verifyPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { bookingId, paymentType } = req.query;
+
+      const response = await this._bookingService.verifyPayment(
+        bookingId as string,
+        paymentType as "advance" | "final"
+      );
+
+      if (!response.success) {
+        res.status(STATUS_CODES.BAD_REQUEST).json(response);
+      } else {
+        res.status(STATUS_CODES.OK).json(response);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
 }

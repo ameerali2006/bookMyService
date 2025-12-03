@@ -172,7 +172,7 @@ export class ProfileManagement implements IProfileManagement {
         // Unset the old primary first
         await this._addressRepo.updateById(existingPrimary._id as string, { isPrimary: false });
       }
-      console.log('existing dataaaaa222', existingPrimary);
+      console.log('existing dataaaaa', existingPrimary);
       // Now set the new primary
       await this._addressRepo.updateById(setId, { isPrimary: true });
 

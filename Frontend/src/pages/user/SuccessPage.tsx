@@ -1,83 +1,106 @@
-import React, { useEffect, useRef } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import React, { useEffect, useRef, useState } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { CheckCircle } from "lucide-react"
 import confetti from "canvas-confetti"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { userService } from "@/api/UserService"
+import { ErrorToast } from "@/components/shared/Toaster"
+
 
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate()
   const { bookingId } = useParams<{ bookingId: string }>()
-  const location = useLocation()
+  const [searchParams] = useSearchParams();
+  const rawType = searchParams.get("type");
+  const type: "advance" | "final" = rawType === "advance" ? "advance" : "final";
+  const [loading, setLoading] = useState(true)
+  const [paymentData, setPaymentData] = useState<any>(null)
   const confettiRef = useRef(false)
 
-  // Extract query params
-  const searchParams = new URLSearchParams(location.search)
-  const paymentType = searchParams.get("type") || "advance"
-  const amountPaid = searchParams.get("amount") || "$100.00"
+  useEffect(() => {
+    if (!bookingId) return
 
-  const messages = {
-    advance: {
-      title: "🎉 Advance Payment Successful!",
-      subtitle: "Your advance has been received. The worker will confirm your service soon.",
-    },
-    final: {
-      title: "✅ Final Payment Successful!",
-      subtitle: "Your booking is now fully paid. Thank you for trusting our service.",
-    },
-  }
+    const fetchPaymentData = async () => {
+      try {
+        const res = await userService.verifyPayment(bookingId,type)
+        console.log(res)
+        if(res.data.success){
+          setPaymentData(res.data.data)
+        }else{
+          ErrorToast(res.data.message||"Something went wrong")
+        }
+        
+      } catch (error) {
+        console.error("Payment fetch error:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const currentMessage = messages[paymentType as keyof typeof messages] || messages.advance
+    fetchPaymentData()
+  }, [bookingId])
 
   useEffect(() => {
-    if (confettiRef.current) return
+    if (confettiRef.current || loading) return
     confettiRef.current = true
 
     confetti({
-      particleCount: 100,
+      particleCount: 120,
       spread: 70,
       origin: { y: 0.6 },
     })
-  }, [])
+  }, [loading])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-lg font-semibold">
+        Verifying payment...
+      </div>
+    )
+  }
+
+  if (!paymentData) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500 font-bold">
+        Payment verification failed.
+      </div>
+    )
+  }
+
+  const msg =
+    paymentData.type === "advance"
+      ? {
+          title: "🎉 Advance Payment Successful!",
+          subtitle: "Your advance has been received!",
+        }
+      : {
+          title: "✅ Final Payment Successful!",
+          subtitle: "Your booking is now fully paid.",
+        }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md animate-in fade-in zoom-in duration-500 shadow-lg">
         <CardHeader className="text-center space-y-4 pb-6">
-          <div className="flex justify-center mb-2">
-            <div className="animate-in zoom-in duration-700 delay-100">
-              <CheckCircle className="w-16 h-16 text-green-500" />
-            </div>
-          </div>
-
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{currentMessage.title}</h1>
-          <p className="text-muted-foreground text-sm md:text-base">{currentMessage.subtitle}</p>
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+          <h1 className="text-2xl md:text-3xl font-bold">{msg.title}</h1>
+          <p className="text-muted-foreground">{msg.subtitle}</p>
         </CardHeader>
 
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground text-sm">Booking ID</span>
-              <span className="font-mono font-semibold text-foreground text-sm">{bookingId}</span>
-            </div>
-            <div className="border-t border-border pt-3" />
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground text-sm">Amount Paid</span>
-              <span className="font-semibold text-foreground">{amountPaid}</span>
-            </div>
-            <div className="border-t border-border pt-3" />
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground text-sm">Payment Type</span>
-              <span className="font-semibold text-foreground capitalize">{paymentType}</span>
-            </div>
+            <Info label="Booking ID" value={bookingId} />
+            <Info label="Amount Paid" value={paymentData.amountPaid} />
+            <Info label="Payment Type" value={paymentData.type} />
           </div>
 
           <div className="flex flex-col gap-3 pt-4">
-            <Button onClick={() => navigate(`/booking/${bookingId}`)} className="w-full" size="lg">
+            <Button onClick={() => navigate(`/booking/${bookingId}`)} size="lg">
               View Booking Details
             </Button>
-            <Button onClick={() => navigate("/dashboard")} variant="outline" className="w-full" size="lg">
-              Go to Dashboard
+            <Button onClick={() => navigate("/")} variant="outline" size="lg">
+              Go to Home
             </Button>
           </div>
         </CardContent>
@@ -85,5 +108,12 @@ const PaymentSuccessPage: React.FC = () => {
     </div>
   )
 }
+
+const Info = ({ label, value }: { label: string; value: any }) => (
+  <div className="flex justify-between items-center">
+    <span className="text-muted-foreground text-sm">{label}</span>
+    <span className="font-semibold">{value}</span>
+  </div>
+)
 
 export default PaymentSuccessPage

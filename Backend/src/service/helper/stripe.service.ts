@@ -75,7 +75,7 @@ export class StripeService implements IStripeService {
   ): Promise<void> {
     const paymentIntent = await this._stripe.paymentIntents.retrieve(paymentIntentId);
 
-    const { bookingId, paymentType } = paymentIntent.metadata || {};
+    const { bookingId,addressId, paymentType } = paymentIntent.metadata || {};
     if (!bookingId || !paymentType) {
       console.warn(' Missing bookingId or paymentType in metadata');
       return;
@@ -95,6 +95,7 @@ export class StripeService implements IStripeService {
         bookingId,
         paymentIntentId,
         status,
+        addressId,
       );
     } else if (paymentType === 'final') {
       await this._bookingRepository.updateFinalPaymentStatus(

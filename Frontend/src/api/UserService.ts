@@ -20,8 +20,9 @@ import userAxios from "@/config/axiosSevice/UserAxios";
         description: string; 
         receiptEmail?: string; 
         metadata: {
-            bookingId?: string; 
-            paymentType?:"advance" | "final"
+            bookingId: string; 
+            paymentType:"advance" | "final";
+            addressId:string
         };
     }
     export interface UpdatePaymentStatusInput {
@@ -88,6 +89,9 @@ export const userService={
     changePassword:async (payload:ChangePasswordInput    ) => {
     
         return await userAxios.put(`/profile/changePassword`, payload)
+    },
+    verifyPayment:async (bookingId:string,type:"advance"|"final")=>{
+        return await userAxios.get(`/payment/verify?bookingId=${bookingId}&paymentType=${type}`)
     },
 }
  

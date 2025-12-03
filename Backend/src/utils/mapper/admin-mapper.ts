@@ -1,9 +1,23 @@
+import { AdminDataDTO } from '../../dto/admin/admin.dto';
 import { serviceManageDto, userManageDto, workerManageDto } from '../../dto/admin/management.dto';
+import { IAdmin } from '../../interface/model/admin.model.interface';
 import { IService } from '../../interface/model/service.model.interface';
 import { IUser } from '../../interface/model/user.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 
 export class AdminMapper {
+   static resAdminData(admin:IAdmin): AdminDataDTO {
+    return {
+      _id: admin._id.toString(),
+      name: admin.name,
+      email: admin.email,
+     
+      
+      
+      
+    };
+  }
+
   static resUserDetails(users: IUser[]): userManageDto[] {
     return users.map((user) => ({
       _id: user._id.toString(),

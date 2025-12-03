@@ -152,7 +152,53 @@ export const PASSWORD_RESET_MAIL_CONTENT = (resetLink: string) => `
    </div>
 </div>
 `;
+export const SERVICE_REJECTED_MAIL_CONTENT = (
+  userName: string,
+  serviceName: string,
+  reason?: string,
+  refundAmount?: number
+) => {
+  const reasonHtml = reason ? `<p><strong>Reason:</strong> ${reason}</p>` : "";
+  const refundHtml = typeof refundAmount === "number"
+    ? `<p><strong>Refund processed:</strong> ₹${refundAmount.toFixed(2)}</p>`
+    : "";
 
+  return `
+    <div style="font-family: Arial, sans-serif; line-height:1.5; color:#333;">
+      <h2 style="color:#d9534f;">Service Request Rejected</h2>
+      <p>Hello ${escapeHtml(userName)},</p>
+
+      <p>
+        We’re sorry to inform you that your service request
+        <strong>${escapeHtml(serviceName)}</strong> has been rejected.
+      </p>
+
+      ${reasonHtml}
+
+      ${refundHtml}
+
+      <p>
+        If you believe this is a mistake or want help rebooking, please contact our support team.
+      </p>
+
+      <hr/>
+      <p style="font-size:0.9em; color:#666;">
+        Regards,<br/>
+        <strong>bookMyService</strong>
+      </p>
+    </div>
+  `;
+};
+
+
+function escapeHtml(str: string) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 export const SENT_REJECTION_EMAIL = (entityLabel: string, reason: string, retryUrl?: string) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
    <h1 style="text-align: center; color: #FEBA43;">${entityLabel} Application Status</h1>

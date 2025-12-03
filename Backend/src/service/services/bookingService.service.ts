@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { BookingDetails, IBookingService } from '../../interface/service/services/bookingService.sevice.interface';
+import { BookingDetails, IBookingService, VerifiedPaymentResult } from '../../interface/service/services/bookingService.sevice.interface';
 import { TYPES } from '../../config/constants/types';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
 import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
@@ -206,6 +206,74 @@ export class BookingService implements IBookingService {
       return {
         success: false,
         message: 'Internal server error while updating details',
+      };
+    }
+  }
+  async verifyPayment(
+    bookingId: string,
+    paymentType: "advance" | "final"
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data: VerifiedPaymentResult | null;
+  }> {
+    try {
+      if (!bookingId || !paymentType) {
+        return { success: false, message: "Missing bookingId or paymentType", data: null };
+      }
+
+      const booking = await this._bookingRepo.findById(bookingId);
+      if (!booking) {
+        return { success: false, message: "Booking not found", data: null };
+      }
+
+      // -------------------------
+      // ADVANCE PAYMENT CHECK
+      // -------------------------
+      if (paymentType === "advance") {
+        if (booking.advancePaymentStatus !== "paid") {
+          return { success: false, message: "Advance payment not completed", data: null };
+        }
+
+        return {
+          success: true,
+          message: "Advance payment verified",
+          data: {
+            bookingId,
+            amountPaid: booking.advanceAmount,
+            type: "advance",
+            
+          }
+        };
+      }
+
+      // -------------------------
+      // FINAL PAYMENT CHECK
+      // -------------------------
+      if (paymentType === "final") {
+        if (booking.finalPaymentStatus !== "paid") {
+          return { success: false, message: "Final payment not completed", data: null };
+        }
+
+        return {
+          success: true,
+          message: "Final payment verified",
+          data: {
+            bookingId,
+            amountPaid: booking.totalAmount as number,
+            type: "final",
+            
+          }
+        };
+      }
+
+      return { success: false, message: "Invalid payment type", data: null };
+    } catch (err) {
+      console.error("Error verifying payment:", err);
+      return {
+        success: false,
+        message: "Internal server error",
+        data: null
       };
     }
   }

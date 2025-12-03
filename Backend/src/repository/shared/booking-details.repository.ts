@@ -1,7 +1,7 @@
 // src/repository/implementation/booking.repository.ts
 import { injectable } from 'inversify';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
-import { IBooking } from '../../interface/model/booking.model.interface';
+import { IBooking, IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { BaseRepository } from './base.repository';
 import { Booking } from '../../model/booking.model';
 import { PaymentStatus } from '../../interface/model/payement.model.interface';
@@ -18,32 +18,41 @@ export class BookingRepository
     return await Booking.create(data);
   }
 
-  async findById(id: string): Promise<IBooking | null> {
-    return await Booking.findById(id)
+  async findByIdPopulated(id: string): Promise<IBookingPopulated | null> {
+    const result = await Booking.findById(id)
       .populate('userId', 'name email phone')
       .populate('workerId', 'name email phone category')
       .populate('serviceId', 'category price')
       .populate('address')
       .exec();
+
+    return result as unknown as IBookingPopulated | null;
   }
 
-  async findByUserId(userId: string): Promise<IBooking[]> {
-    return await Booking.find({ userId })
+
+  async findByUserId(userId: string): Promise<IBookingPopulated[]> {
+    const result = await Booking.find({ userId })
       .sort({ createdAt: -1 })
       .populate('workerId', 'name category')
-      .populate('serviceId', 'catgory price')
+      .populate('serviceId', 'category price')
       .populate('address')
       .exec();
+
+    return result as unknown as IBookingPopulated[];
   }
 
-  async findByWorkerId(workerId: string): Promise<IBooking[]> {
-    return await Booking.find({ workerId })
+
+  async findByWorkerId(workerId: string): Promise<IBookingPopulated[]> {
+    const result = await Booking.find({ workerId })
       .sort({ createdAt: -1 })
       .populate('userId', 'name email phone')
       .populate('serviceId', 'category price')
       .populate('address')
       .exec();
+
+    return result as unknown as IBookingPopulated[];
   }
+
 
   async updateStatus(id: string, status: string): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(id, { status }, { new: true });
@@ -165,11 +174,13 @@ export class BookingRepository
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus,
+    addressId:string,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, {
       advancePaymentId: paymentIntentId,
       advancePaymentStatus: status === 'succeeded' ? 'paid' : status,
       status: status === 'succeeded' ? 'awaiting-final-payment' : 'pending',
+      address:addressId
     });
   }
 
@@ -192,4 +203,6 @@ export class BookingRepository
       workerResponse: 'pending',
     }).populate('userId serviceId workerId');
   }
+  
+  
 }

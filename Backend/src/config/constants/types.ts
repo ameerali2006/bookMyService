@@ -1,4 +1,7 @@
 export const TYPES = {
+  WalletService:Symbol.for('WalletService'),
+  WalletTransactionRepository:Symbol.for('WalletTransactionRepository'),
+  WalletRepository:Symbol.for('WalletRepository'),
   BookingSocketHandler: Symbol.for('BookingSocketHandler'),
   ChangePasswordService: Symbol.for('ChangePasswordService'),
   WorkerBookingService: Symbol.for('WorkerBookingService'),

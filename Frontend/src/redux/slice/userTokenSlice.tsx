@@ -31,6 +31,7 @@ const userSlice = createSlice({
       localStorage.setItem("userData", JSON.stringify(action.payload));
     },
     updateLocation: (state, action: PayloadAction<LocationData>) => {
+      console.log(action.payload)
       if (state.user) {
         state.user.location = action.payload;
         localStorage.setItem("userData", JSON.stringify(state.user));

@@ -1,12 +1,15 @@
-import { IBooking } from '../model/booking.model.interface';
+import { IBooking, IBookingPopulated } from '../model/booking.model.interface';
 import { PaymentStatus } from '../model/payement.model.interface';
 import { IBaseRepository } from './base.repository.interface';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>): Promise<IBooking>;
-  findById(id: string): Promise<IBooking | null>;
-  findByUserId(userId: string): Promise<IBooking[]>;
-  findByWorkerId(workerId: string): Promise<IBooking[]>;
+  // findById(id: string): Promise<IBooking | null>;
+  // findByUserId(userId: string): Promise<IBooking[]>;
+  // findByWorkerId(workerId: string): Promise<IBooking[]>;
+  findByIdPopulated(id: string): Promise<IBookingPopulated | null>
+  findByUserId(userId: string): Promise<IBookingPopulated[]>
+  findByWorkerId(workerId: string): Promise<IBookingPopulated[]>
   updateStatus(id: string, status: string): Promise<IBooking | null>;
   updateWorkerResponse(id: string, response: string): Promise<IBooking | null>;
   updatePaymentStatus(
@@ -31,7 +34,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   updateAdvancePaymentStatus(
     bookingId: string,
     paymentIntentId: string,
-    status: PaymentStatus
+    status: PaymentStatus,
+    addressId:string
   ): Promise<IBooking | null>;
    updateFinalPaymentStatus(
     bookingId: string,

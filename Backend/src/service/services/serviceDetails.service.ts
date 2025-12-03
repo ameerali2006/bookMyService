@@ -14,7 +14,7 @@ import { IWorkingHelper } from '../../interface/service/working-helper.service.i
 import { IWorkingDetails } from '../../interface/model/working-details.interface';
 import {
   buildLabeledTimeline, dateKey, dayBounds, fromMinutes, Interval, LabeledStatus, mergeIntervals, subtractIntervals, toMinutes,
-} from '../../utils/mapper/time&Intervals';
+} from '../../utils/time&Intervals';
 
 @injectable()
 export class ServiceDetails implements IServiceDetails {

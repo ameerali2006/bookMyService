@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label"
 import { MapPin, Phone, Clock, Calendar, Trash2, Plus } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import RejectionConfirmationModal from "./RejectModal"
+import { useSelector } from "react-redux"
+import type { RootState } from "@/redux/store"
+import workerAxios from "@/config/axiosSevice/WorkerAxios"
+import { workerService } from "@/api/WorkerService"
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
+// import WorkerCustomerRoute from "./WorkerCustomerRoute"
 
 interface ServiceRequest {
   id: string
@@ -21,6 +27,18 @@ interface ServiceRequest {
   userLocation: { lat: number; lng: number }
   notes: string
   phone: string
+}
+interface AdditionalItem {
+  name: string;
+ price: number;
+}
+
+interface ApprovalData {
+  bookingId: string;
+  serviceName: string;
+  endTime: string;
+  additionalItems?: AdditionalItem[];
+  additionalNotes?: string;
 }
 
 interface RequiredItem {
@@ -36,7 +54,7 @@ interface RequestDetailsModalProps {
 }
 
 const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-  const R = 6371 // Earth's radius in km
+  const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
   const dLng = ((lng2 - lng1) * Math.PI) / 180
   const a =
@@ -47,7 +65,7 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
 }
 
 const calculateEstimatedArrival = (distanceKm: number): string => {
-  const avgSpeedKmh = 40 // Average speed in km/h
+  const avgSpeedKmh = 30 // Average speed in km/h
   const timeMinutes = Math.round((distanceKm / avgSpeedKmh) * 60)
   return `${timeMinutes} min`
 }
@@ -57,8 +75,10 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
   const [itemsRequired, setItemsRequired] = useState<RequiredItem[]>([])
   const [additionalNotes, setAdditionalNotes] = useState("")
   const [showRejectionModal, setShowRejectionModal] = useState(false)
-
-  const workerLocation = { lat: 40.7505, lng: -73.9972 }
+  const workerLocation=useSelector((state:RootState)=>state.workerTokenSlice.worker?.location)
+  if(!workerLocation){
+    return(<></>)
+  }
   const distance = calculateDistance(
     workerLocation.lat,
     workerLocation.lng,
@@ -66,6 +86,10 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
     request.userLocation.lng,
   )
   const estimatedArrival = calculateEstimatedArrival(distance)
+  const customerLocation={
+    lat:request.userLocation.lat,
+    lng:request.userLocation.lng,
+  }
 
   const addItem = () => {
     setItemsRequired([
@@ -88,25 +112,28 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
   }
 
   const handleApprove = async () => {
-    const approvalData = {
-      requestId: request.id,
-      serviceName: request.serviceName,
-      endingTime,
-      itemsRequired,
-      additionalNotes,
-      timestamp: new Date().toISOString(),
-    }
+     const additionalItems: AdditionalItem[] = itemsRequired.map((item) => ({
+        name: item.name,
+        price: Number(item.price),
+      }))
 
+    const approvalData:ApprovalData = {
+      bookingId: request.id,
+      serviceName: request.serviceName,
+      endTime:endingTime,
+      additionalItems,
+      additionalNotes,
+    }
+    
+ 
     console.log("Service Approved:", approvalData)
 
     try {
-      const response = await fetch("/api/worker/approve-service", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(approvalData),
-      })
-      if (response.ok) {
-        console.log("Approval submitted successfully")
+      const response =await workerService.serviceApprove(approvalData)
+      if(response.data.success){
+        SuccessToast(response.data.message)
+      }else{
+        ErrorToast(response.data.message)
       }
     } catch (error) {
       console.error("Error submitting approval:", error)
@@ -121,21 +148,16 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
 
   const handleConfirmRejection = async (reason: string) => {
     const rejectionData = {
-      requestId: request.id,
-      serviceName: request.serviceName,
-      reason,
-      timestamp: new Date().toISOString(),
+      bookingId: request.id,
+      description:reason,
+     
     }
 
     console.log("Service Rejected:", rejectionData)
 
     try {
-      const response = await fetch("/api/worker/reject-service", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rejectionData),
-      })
-      if (response.ok) {
+      const response = await workerService.serviceReject(rejectionData)
+      if (response.data.success) {
         console.log("Rejection submitted successfully")
       }
     } catch (error) {
@@ -160,7 +182,7 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle className="text-2xl">{request.serviceName}</DialogTitle>
           </DialogHeader>

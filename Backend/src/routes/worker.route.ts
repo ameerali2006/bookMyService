@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express';
 import { BaseRoute } from './base.route.js';
 import {
-  authWorkerController, cloudinaryController, tokenController, workingDetailsController,
+  authWorkerController, bookingController, cloudinaryController, tokenController, workerbookingController, workingDetailsController,
 } from '../config/di/resolver.js';
 import { authorizeRole, verifyAuth } from '../middleware/auth.middleware.js';
 
@@ -33,5 +33,8 @@ export class WorkerRoute extends BaseRoute {
     this.router.put('/profile/changePassword', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.changePassword(req, res, next));
     this.router.get('/calender/getData', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getCalenderDetails(req, res, next));
     this.router.put('/calender/update', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.updateCalenderDetails(req, res, next));
+    this.router.put('/service/approve', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.approveService(req, res, next));
+    this.router.put('/service/reject', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.rejectService(req, res, next));
+
   }
 }

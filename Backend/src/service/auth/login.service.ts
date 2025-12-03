@@ -16,6 +16,9 @@ import { IAdmin } from '../../interface/model/admin.model.interface';
 import { IHashService } from '../../interface/helpers/hash.interface';
 import { IJwtService } from '../../interface/helpers/jwt-service.service.interface';
 import { AdminDataDTO } from '../../dto/admin/admin.dto';
+import { UserMapper } from '../../utils/mapper/user-mapper';
+import { WorkerMapper } from '../../utils/mapper/worker-mapper';
+import { AdminMapper } from '../../utils/mapper/admin-mapper';
 
 @injectable()
 export class LoginService implements ILoginService {
@@ -30,7 +33,7 @@ export class LoginService implements ILoginService {
 
   }
 
-  async execute(user: LoginDto): Promise<{success:boolean, message:string, accessToken: string|null; refreshToken: string|null; user: IUser |IWorker|IAdmin| null; }> {
+  async execute(user: LoginDto): Promise<{success:boolean, message:string, accessToken: string|null; refreshToken: string|null; user: UserDataDTO | responseDto|IAdmin| null; }> {
     try {
       let repository;
       if (user.role == 'admin') {
@@ -96,9 +99,23 @@ export class LoginService implements ILoginService {
           STATUS_CODES.UNAUTHORIZED,
         );
       }
+      let data
+      if(user.role=="user"){
+        data=UserMapper.resposeWorkerDto(userData as IUser)
+      }else if(user.role=="worker"){
+        data=WorkerMapper.responseWorkerDto(userData as IWorker)
+      }else if(user.role=="admin"){
+        data=AdminMapper.resAdminData(userData as IAdmin)
+      }else{
+        throw new CustomError(
+        MESSAGES.INVALID_CREDENTIALS,
+        STATUS_CODES.UNAUTHORIZED,
+      );
+      }
+      
 
       return {
-        success: true, message: MESSAGES.LOGIN_SUCCESS, accessToken, refreshToken, user: userData,
+        success: true, message: MESSAGES.LOGIN_SUCCESS, accessToken, refreshToken, user: data,
       };
     } catch (error) {
       console.error(error);

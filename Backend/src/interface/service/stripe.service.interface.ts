@@ -8,8 +8,8 @@ export interface CreatePaymentIntenServicetInput {
   receiptEmail: string;
   metadata : {
     bookingId : string;
-    workerId : string;
-    userId : string;
+    addressId : string;
+    paymentType : string;
   }
 }
 export interface IStripeService {

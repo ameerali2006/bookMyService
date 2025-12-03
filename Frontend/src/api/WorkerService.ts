@@ -5,6 +5,18 @@ type Break = {
   breakStart: string;
   breakEnd: string;
 };
+interface AdditionalItem {
+  name: string;
+  price: number;
+}
+
+interface ApprovalData {
+  bookingId: string;
+  serviceName: string;
+  endTime: string;
+  additionalItems?: AdditionalItem[];
+  additionalNotes?: string;
+}
 
 type DaySchedule = {
   day: string;
@@ -56,7 +68,13 @@ export const  workerService={
   },
   updateCalenderData:async (data:{holidays:IHoliday[],customSlots:ICustomSlot[]})=>{
     return await workerAxios.put('/calender/update',data)
-  }
+  },
+  serviceApprove:async (data:ApprovalData)=>{
+    return await workerAxios.put('/service/approve',data)
+  },
+  serviceReject:async (data:{description:string,bookingId:string})=>{
+    return await workerAxios.put('/service/reject',data)
+  },
   
 
 }
