@@ -117,7 +117,7 @@ export class StripeService implements IStripeService {
 
         await this.updatePaymentStatus(successfulPayment.id!, 'succeeded');
         if (paymentType === 'advance') {
-          const booking = await this._bookingRepository.findById(bookingId) as IBookingPopulated|null;
+          const booking = await this._bookingRepository.findByIdPopulated(bookingId) as IBookingPopulated|null;
           console.log(`booking${booking}`);
 
           if (booking && booking.workerId) {

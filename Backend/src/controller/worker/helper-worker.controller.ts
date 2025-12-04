@@ -18,7 +18,7 @@ export class CloudinaryController implements ICloudinaryController {
   async getSignature(req: Request, res: Response, next: NextFunction):Promise<void> {
     try {
       const signatureData = this.cloudinaryService.generateSignature();
-      res.status(200).json(signatureData);
+      res.status(STATUS_CODES.OK).json(signatureData);
     } catch (err) {
       next(err);
     }

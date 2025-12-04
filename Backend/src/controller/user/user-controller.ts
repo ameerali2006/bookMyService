@@ -41,7 +41,7 @@ export class UserController implements IUserController {
 
       if (!parsedData.success) {
         const errors = parsedData.error.format();
-        res.status(400).json({
+        res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
           message: 'Validation failed',
           errors,

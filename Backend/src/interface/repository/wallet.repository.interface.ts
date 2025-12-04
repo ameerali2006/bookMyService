@@ -1,7 +1,8 @@
 // src/interface/repository/wallet.repository.interface.ts
 import { IWallet } from "../model/wallet.model.interface";
+import { IBaseRepository } from "./base.repository.interface";
 
-export interface IWalletRepository {
+export interface IWalletRepository extends IBaseRepository<IWallet>{
   createWallet(data: Partial<IWallet>): Promise<IWallet>;
   findById(id: string): Promise<IWallet | null>;
   findByUser(userId: string, role: string): Promise<IWallet | null>;

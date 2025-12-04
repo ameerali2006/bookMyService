@@ -1,6 +1,6 @@
 export interface IAddBalanceInput {
   userId: string;
-  role?: "User" | "Worker" | "Admin";
+  role: "User" | "Worker" | "Admin";
   amount: number;
   description?: string;
 }

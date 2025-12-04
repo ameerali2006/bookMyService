@@ -43,7 +43,5 @@ export class RepositoryRegistery {
     container.register<IPaymentRepository>(TYPES.PaymentRepository, { useClass: PaymentRepository });
     container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
     container.register<IWalletTransactionRepository>(TYPES.WalletTransactionRepository, { useClass: WalletTransactionRepository });
-
-  
   }
 }

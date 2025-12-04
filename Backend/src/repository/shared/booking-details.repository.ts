@@ -5,6 +5,7 @@ import { IBooking, IBookingPopulated } from '../../interface/model/booking.model
 import { BaseRepository } from './base.repository';
 import { Booking } from '../../model/booking.model';
 import { PaymentStatus } from '../../interface/model/payement.model.interface';
+import { IRequestFilters } from '../../interface/service/worker/worker-booking.service.interface';
 
 @injectable()
 export class BookingRepository
@@ -202,6 +203,40 @@ export class BookingRepository
       advancePaymentStatus: 'succeeded',
       workerResponse: 'pending',
     }).populate('userId serviceId workerId');
+  }
+  async findServiceRequests(
+    filters: IRequestFilters
+  ): Promise<{ data: IBookingPopulated[], total: number }> {
+    const { workerId, search, status, date, page, limit } = filters;
+
+    const query: Record<string, unknown> = { workerId };
+
+    if (status) query.workerResponse = status;
+    if (date) query.date = date;
+
+    if (search) {
+      query.$or = [
+        
+        { "userId.name": { $regex: search, $options: "i" } },
+        
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const booking = await Booking.find(query)
+      .populate("userId", "name phone location")
+      .populate("serviceId", "name")
+      .populate("workerId", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean<IBookingPopulated[]>() 
+      .exec();
+
+    const total = await Booking.countDocuments(query);
+
+    return { data:booking, total };
   }
   
   

@@ -52,6 +52,7 @@ export class BookingSocketHandler implements ISocketHandler {
   ) {
     const worker = onlineWorkers.get(workerId._id.toString());
     if (worker) {
+      console.log(booking)
       const service = WorkerMapper.serviceRequest(booking);
       console.log(service);
       io.to(worker.socketId).emit('receive-pending-booking', service);

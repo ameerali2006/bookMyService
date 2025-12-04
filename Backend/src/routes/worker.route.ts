@@ -35,6 +35,7 @@ export class WorkerRoute extends BaseRoute {
     this.router.put('/calender/update', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.updateCalenderDetails(req, res, next));
     this.router.put('/service/approve', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.approveService(req, res, next));
     this.router.put('/service/reject', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.rejectService(req, res, next));
+    this.router.get('/service/requests', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.getServiceRequests(req, res, next));
 
   }
 }

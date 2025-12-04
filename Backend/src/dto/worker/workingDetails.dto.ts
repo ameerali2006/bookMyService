@@ -28,3 +28,11 @@ export interface ServiceRequest {
   notes?: string;
   phone: string;
 }
+
+
+export interface IWorkerRequestResponse {
+  
+  data: ServiceRequest[];
+  page: number;
+  total: number;
+}

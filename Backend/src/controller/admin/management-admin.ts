@@ -29,7 +29,7 @@ export class ManagementAdmin implements IAdminManagementController {
       console.log(data);
       res.status(STATUS_CODES.OK).json({ success: true, ...data });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to get users', error });
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: 'Failed to get users', error });
       next(error);
     }
   }
@@ -76,7 +76,7 @@ export class ManagementAdmin implements IAdminManagementController {
       console.log(data);
       res.status(STATUS_CODES.OK).json({ success: true, ...data });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to get users', error });
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: 'Failed to get users', error });
       next(error);
     }
   }
@@ -134,7 +134,7 @@ export class ManagementAdmin implements IAdminManagementController {
       console.log({ workerId });
 
       if (!['approved', 'rejected'].includes(status)) {
-        res.status(400).json({ success: false, message: 'Invalid status' });
+        res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: 'Invalid status' });
       }
       console.log('kjhdk');
       const worker = await this._adminManagement.verifyWorker(workerId, status as 'approved' | 'rejected');

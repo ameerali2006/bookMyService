@@ -17,7 +17,13 @@ interface ApprovalData {
   additionalItems?: AdditionalItem[];
   additionalNotes?: string;
 }
-
+export interface IRequestFilters {
+  search?: string;
+  status: "pending" | "approved" | "rejected" ;
+  date?: string;
+  page?: number;
+  limit?: number;
+}
 type DaySchedule = {
   day: string;
   enabled: boolean;
@@ -75,6 +81,9 @@ export const  workerService={
   serviceReject:async (data:{description:string,bookingId:string})=>{
     return await workerAxios.put('/service/reject',data)
   },
+  serviceRequest:async (data:IRequestFilters)=>{
+    return await workerAxios.get(`/service/requests`,{params:data})
+  },
   
-
+ 
 }

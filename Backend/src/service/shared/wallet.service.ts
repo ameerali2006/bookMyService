@@ -10,15 +10,27 @@ export class WalletService implements IWalletService{
         @inject(TYPES.WalletRepository) private walletRepo:IWalletRepository,
         @inject(TYPES.WalletTransactionRepository) private walletTransaction:IWalletTransactionRepository
     ){}
+    private async getOrCreateWallet(userId: string, role: "User" | "Worker" | "Admin") {
+        
+        let wallet = await this.walletRepo.findByUser(userId, role);
+
+       
+        if (!wallet) {
+        wallet = await this.walletRepo.create({
+            userId,
+            role,
+            balance: 0,
+            isFrozen: false,
+        });
+        }
+
+        return wallet;
+    }
     async addBalance(data: IAddBalanceInput): Promise<{success:boolean,message:string}> {
         try {
-            const { userId, amount, description } = data;
-            const wallet =
-            (await this.walletRepo.findByUser(userId, "User")) ||
-            (await this.walletRepo.findByUser(userId, "Worker")) ||
-            (await this.walletRepo.findByUser(userId, "Admin"));
-
-            if (!wallet) return {success:false,message:"Wallet not found"}
+            const { userId,role, amount, description } = data;
+           
+             const wallet = await this.getOrCreateWallet(userId, role);
 
             if (wallet.isFrozen) return {success:false,message:"Wallet is frozen"}
 

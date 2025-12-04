@@ -62,7 +62,7 @@ export class StripeController implements IStripeController {
       const sig = req.headers['stripe-signature'] as string;
       if (!sig) {
         console.error('❌ Missing Stripe signature header');
-        res.status(400).send('Missing stripe-signature header');
+        res.status(STATUS_CODES.BAD_REQUEST).send('Missing stripe-signature header');
         return;
       }
 
@@ -78,10 +78,10 @@ export class StripeController implements IStripeController {
         await this.stripeService.handleWebhookEvent(event);
       }
 
-      res.status(200).json({ received: true });
+      res.status(STATUS_CODES.OK).json({ received: true });
     } catch (err: any) {
       console.error('⚠️ Webhook Error:', err.message);
-      res.status(400).json({ received: false, error: err.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ received: false, error: err.message });
     }
   }
 }

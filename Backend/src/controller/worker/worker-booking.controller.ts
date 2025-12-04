@@ -6,6 +6,7 @@ import { IWorkerBookingService } from '../../interface/service/worker/worker-boo
 import { ApprovalSchema } from '../validation/serviceApproval.zod';
 import { MESSAGES } from '../../config/constants/message';
 import { STATUS_CODES } from '../../config/constants/status-code';
+import { CustomRequest } from '../../middleware/auth.middleware';
 
 @injectable()
 export class WorkerBookingController implements IWorkerBookingController {
@@ -40,6 +41,26 @@ export class WorkerBookingController implements IWorkerBookingController {
 
       res.status(result.success?STATUS_CODES.OK:STATUS_CODES.BAD_REQUEST).json(result);
 
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getServiceRequests(req: Request, res: Response, next: NextFunction) :Promise<void>{
+    try {
+      const workerId = (req as CustomRequest).user._id; // from auth middleware
+
+      const filters = {
+        workerId,
+        search: req.query.search?.toString() || "",
+        status: (req.query.status as "pending"|"accepted"|"rejected") || "pending",
+        date: req.query.date?.toString() || "",
+        page: Number(req.query.page) || 1,
+        limit: Number(req.query.limit) || 20,
+      };
+
+      const response = await this.bookingService.getServiceRequests(filters);
+
+      res.json(response);
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,6 @@
 import { IBooking, IBookingPopulated } from '../model/booking.model.interface';
 import { PaymentStatus } from '../model/payement.model.interface';
+import { IRequestFilters } from '../service/worker/worker-booking.service.interface';
 import { IBaseRepository } from './base.repository.interface';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
@@ -7,6 +8,9 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   // findById(id: string): Promise<IBooking | null>;
   // findByUserId(userId: string): Promise<IBooking[]>;
   // findByWorkerId(workerId: string): Promise<IBooking[]>;
+  findServiceRequests(
+      filters: IRequestFilters
+    ): Promise<{ data: IBookingPopulated[]; total: number }>
   findByIdPopulated(id: string): Promise<IBookingPopulated | null>
   findByUserId(userId: string): Promise<IBookingPopulated[]>
   findByWorkerId(workerId: string): Promise<IBookingPopulated[]>

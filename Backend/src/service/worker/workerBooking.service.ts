@@ -1,11 +1,14 @@
 import { inject, injectable } from 'tsyringe';
-import { IWorkerBookingService, serviceData } from '../../interface/service/worker/worker-booking.service.interface';
+import { IRequestFilters, IWorkerBookingService, serviceData } from '../../interface/service/worker/worker-booking.service.interface';
 import { TYPES } from '../../config/constants/types';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
 import { doTimesOverlap, isTimeGreater } from '../../utils/time&Intervals';
 import { IWalletService } from '../../interface/service/wallet.service.interface';
 import { IUserRepository } from '../../interface/repository/user.repository.interface';
 import { IEmailService } from '../../interface/helpers/email-service.service.interface';
+import { IBooking } from '../../interface/model/booking.model.interface';
+import { IWorkerRequestResponse } from '../../dto/worker/workingDetails.dto';
+import { WorkerMapper } from '../../utils/mapper/worker-mapper';
 
 @injectable()
 export class WorkerBookingService implements IWorkerBookingService {
@@ -81,27 +84,32 @@ export class WorkerBookingService implements IWorkerBookingService {
 
      
       let refundAmount = 0;
-
+      const updateBooking: Partial<IBooking> = {
+        status: "cancelled",
+        workerResponse: "rejected",
+        description,
+      };
       if (booking.advanceAmount > 0 && booking.advancePaymentStatus === "paid") {
         refundAmount = booking.advanceAmount;
 
-        await this.walletService.addBalance({
+        const wallet=await this.walletService.addBalance({
           userId: booking.userId as string,
           amount: refundAmount,
+          role:'User',
           description: `Refund for rejected service (${booking.serviceId})`
-        });
 
-        booking.advancePaymentStatus = "refunded";
+        });
+        if(!wallet)return{success:false,message:"user wallet error"}
+
+        updateBooking.advancePaymentStatus = "refunded";
       }
 
       
-      booking.status = "cancelled";
-      booking.workerResponse = "rejected";
-      booking.description =  description;
+     
+       const updatedBooking=await this.bookingRepo.updateById(bookingId, updateBooking);
 
-      await booking.save();
+      if(!updatedBooking)return{success:false,message:"user booking updation failed"}
 
-      
       const user = await this.userRepo.findById(booking.userId as string);
 
       if (user && user.email) {
@@ -112,6 +120,7 @@ export class WorkerBookingService implements IWorkerBookingService {
           reason:description,
           refundAmount
         });
+        
       }
 
       return {
@@ -123,6 +132,30 @@ export class WorkerBookingService implements IWorkerBookingService {
       return {
         success:false,
         message:"something went wrong"
+      }
+    }
+  }
+  async getServiceRequests(filter: IRequestFilters): Promise<{ success: boolean; message: string; data?: IWorkerRequestResponse; }> {
+    try {
+      const { data: bookings, total } =
+      await this.bookingRepo.findServiceRequests(filter);
+
+    const mapped = WorkerMapper.mapServiceRequest(bookings);
+
+    return {
+      success: true,
+      message: "Requests fetched successfully",
+      data: {
+        
+        data: mapped,
+        page: filter.page,
+        total,
+      },
+    };
+    } catch (error) {
+      return {
+        success:false,
+        message:"internal error"
       }
     }
   }

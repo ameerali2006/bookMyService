@@ -37,6 +37,9 @@ export class WorkerMapper {
 
     };
   }
+  static mapServiceRequest(booking:IBookingPopulated[]):ServiceRequest[] {
+    return booking.map(b=>this.serviceRequest(b))
+  }
 
   static mapWorkerToProfileDTO = (worker: IWorker): WorkerProfileDTO => ({
     id: worker._id?.toString(),
