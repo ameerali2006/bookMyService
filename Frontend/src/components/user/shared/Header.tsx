@@ -82,13 +82,14 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <Link
+                  // variant="ghost"
+                  // size="icon"
+                  to="/bookings"
                   className="flex items-center justify-center w-8 h-8 text-white hover:text-blue-200 transition-colors"
                 >
                   <Calendar className="h-5 w-5" />
-                </Button>
+                </Link>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

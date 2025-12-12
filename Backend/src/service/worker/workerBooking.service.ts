@@ -9,6 +9,7 @@ import { IEmailService } from '../../interface/helpers/email-service.service.int
 import { IBooking } from '../../interface/model/booking.model.interface';
 import { IWorkerRequestResponse } from '../../dto/worker/workingDetails.dto';
 import { WorkerMapper } from '../../utils/mapper/worker-mapper';
+import { IWorkerHelperService } from '../../interface/service/helper-service.service.interface';
 
 @injectable()
 export class WorkerBookingService implements IWorkerBookingService {
@@ -16,11 +17,14 @@ export class WorkerBookingService implements IWorkerBookingService {
     @inject(TYPES.BookingRepository) private bookingRepo:IBookingRepository,
     @inject(TYPES.WalletService) private walletService:IWalletService,
     @inject(TYPES.AuthUserRepository) private userRepo:IUserRepository,
-    @inject(TYPES.EmailService) private emailService:IEmailService
+    @inject(TYPES.EmailService) private emailService:IEmailService,
+    @inject(TYPES.WorkerHelperService) private workerHelper:IWorkerHelperService,
+
   ) {}
   async approveService(data: serviceData): Promise<{ success: boolean; message: string; }> {
     try {
       const { bookingId, endTime, additionalItems, additionalNotes } = data;
+      console.log(data)
 
       const booking = await this.bookingRepo.findById(bookingId);
 
@@ -37,10 +41,12 @@ export class WorkerBookingService implements IWorkerBookingService {
       if (!isTimeGreater(endTime,booking.startTime)) {
         return { success: false, message: "End time must be greater than start time" };
       }
-      const workerBooking=await this.bookingRepo.findByWorkerId(booking.workerId.toString())
+      const workerBooking=await this.bookingRepo.findByWorkerAndDate(booking.workerId.toString(),booking.date)
+      console.log(workerBooking)
       const conflict=workerBooking.some(b=>{
         if(b.endTime){return doTimesOverlap(b.startTime,b.endTime,booking.startTime,endTime)}}
       )
+      console.log(conflict)
       if(conflict){
         return { success: false, message: "Time conflict with another approved booking" };
       }
@@ -139,19 +145,21 @@ export class WorkerBookingService implements IWorkerBookingService {
     try {
       const { data: bookings, total } =
       await this.bookingRepo.findServiceRequests(filter);
+      console.log(bookings)
+      
 
-    const mapped = WorkerMapper.mapServiceRequest(bookings);
+      const mapped = WorkerMapper.mapServiceRequest(bookings);
 
-    return {
-      success: true,
-      message: "Requests fetched successfully",
-      data: {
-        
-        data: mapped,
-        page: filter.page,
-        total,
-      },
-    };
+      return {
+        success: true,
+        message: "Requests fetched successfully",
+        data: {
+          
+          data: mapped,
+          page: filter.page,
+          total,
+        },
+      };
     } catch (error) {
       return {
         success:false,

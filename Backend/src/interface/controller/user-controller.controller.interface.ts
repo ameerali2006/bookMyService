@@ -7,5 +7,7 @@ export interface IUserController{
     addUserAddress(req:Request, res:Response, next:NextFunction):Promise<void>
     setPrimaryAddress(req:Request, res:Response, next:NextFunction):Promise<void>
     changePassword(req:Request, res:Response, next:NextFunction):Promise<void>
+    ongoingBookings(req:Request, res:Response, next:NextFunction):Promise<void>
+    bookingDetailData(req:Request, res:Response, next:NextFunction):Promise<void>
 
 }

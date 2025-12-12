@@ -44,12 +44,12 @@ export interface IBooking extends Document{
   status:
     | 'pending'
     | 'confirmed'
-    | 'in-progress'
+    | 'in-progress' 
     | 'awaiting-final-payment'
     | 'completed'
     | 'cancelled';
 
-  workerResponse?: 'accepted' | 'rejected' | 'pending';
+  workerResponse: 'accepted' | 'rejected' | 'pending';
 
   otp?: string;
 

@@ -1,4 +1,5 @@
 export const TYPES = {
+  BookingDetailsService:Symbol.for('BookingDetailsService'),
   WalletService:Symbol.for('WalletService'),
   WalletTransactionRepository:Symbol.for('WalletTransactionRepository'),
   WalletRepository:Symbol.for('WalletRepository'),

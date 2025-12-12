@@ -1,5 +1,6 @@
 import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
 import userAxios from "@/config/axiosSevice/UserAxios";
+import type { Numerals } from "react-day-picker";
     
     export interface  AddressForm {
         label: "Home" | "Work" | "Shop"
@@ -93,5 +94,11 @@ export const userService={
     verifyPayment:async (bookingId:string,type:"advance"|"final")=>{
         return await userAxios.get(`/payment/verify?bookingId=${bookingId}&paymentType=${type}`)
     },
-}
- 
+    getBookingList:async (limit:number, page:number,search:string)=>{
+        return await userAxios.get(`/bookings/ongoing`,{params:{limit,page,search}})
+    },
+    bookingDetailData:async (bookingId:string)=>{
+        return await userAxios.get(`/bookings/ongoing/${bookingId}`)
+    },
+} 
+  

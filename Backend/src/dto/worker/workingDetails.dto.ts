@@ -22,6 +22,7 @@ export interface ServiceRequest {
   userName: string;
   date: string;
   time: string;
+  availableTime:string;
   location?: string;
   status?: 'pending' | 'accepted' | 'rejected';
   userLocation: { lat: number; lng: number };

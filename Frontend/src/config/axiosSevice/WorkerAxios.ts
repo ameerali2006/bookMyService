@@ -1,6 +1,7 @@
+import { PUBLIC_ROUTES } from "../constant/publicRoute";
 import { createAxiosClient } from "./AxiosService";
 import { removeWorker } from "@/redux/slice/workerTokenSlice";
-import { PUBLIC_ROUTES } from "../constant/apiRoutes";
+
 
 const workerAxios = createAxiosClient({
   baseURL: "/worker",

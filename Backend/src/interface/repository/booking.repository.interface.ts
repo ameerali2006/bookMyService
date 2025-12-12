@@ -1,7 +1,7 @@
-import { IBooking, IBookingPopulated } from '../model/booking.model.interface';
-import { PaymentStatus } from '../model/payement.model.interface';
-import { IRequestFilters } from '../service/worker/worker-booking.service.interface';
-import { IBaseRepository } from './base.repository.interface';
+import { IBooking, IBookingPopulated } from "../model/booking.model.interface";
+import { PaymentStatus } from "../model/payement.model.interface";
+import { IRequestFilters } from "../service/worker/worker-booking.service.interface";
+import { IBaseRepository } from "./base.repository.interface";
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>): Promise<IBooking>;
@@ -9,11 +9,11 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   // findByUserId(userId: string): Promise<IBooking[]>;
   // findByWorkerId(workerId: string): Promise<IBooking[]>;
   findServiceRequests(
-      filters: IRequestFilters
-    ): Promise<{ data: IBookingPopulated[]; total: number }>
-  findByIdPopulated(id: string): Promise<IBookingPopulated | null>
-  findByUserId(userId: string): Promise<IBookingPopulated[]>
-  findByWorkerId(workerId: string): Promise<IBookingPopulated[]>
+    filters: IRequestFilters
+  ): Promise<{ data: IBookingPopulated[]; total: number }>;
+  findByIdPopulated(id: string): Promise<IBookingPopulated | null>;
+  findByUserId(userId: string): Promise<IBookingPopulated[]>;
+  findByWorkerId(workerId: string): Promise<IBookingPopulated[]>;
   updateStatus(id: string, status: string): Promise<IBooking | null>;
   updateWorkerResponse(id: string, response: string): Promise<IBooking | null>;
   updatePaymentStatus(
@@ -39,14 +39,14 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus,
-    addressId:string
+    addressId: string
   ): Promise<IBooking | null>;
-   updateFinalPaymentStatus(
+  updateFinalPaymentStatus(
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus
   ): Promise<IBooking | null>;
-   findByWorkerAndRange(
+  findByWorkerAndRange(
     workerId: string,
     startDate: Date,
     endDate: Date
@@ -55,8 +55,16 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
       date: Date;
       startTime: string;
       endTime?: string | null;
-      advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+      advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
     }>
   >;
-   findPendingAdvanceBookings(workerId: string): Promise<IBooking[]>;
+  findPendingAdvanceBookings(workerId: string): Promise<IBooking[]>;
+  findBookingListByUserId(
+    userId: string,
+    status: string[],
+    workerResponse: string[],
+    limit: number,
+    skip: number,
+    search: string
+  ): Promise<{ bookings: IBookingPopulated[] | null; total: number }>;
 }

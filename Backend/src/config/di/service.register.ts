@@ -61,6 +61,8 @@ import { BookingSocketHandler } from '../../service/helper/bookingSocket.service
 import { ISocketHandler } from '../../interface/service/socketHandler.service.interface';
 import { IWalletService } from '../../interface/service/wallet.service.interface';
 import { WalletService } from '../../service/shared/wallet.service';
+import { IBookingDetailsService } from '../../interface/service/user/bookingDetails.service.interface';
+import { BookingDetailsService } from '../../service/user/bookingDetails.service';
 
 export class ServiceRegistery {
   static registerService():void {
@@ -93,6 +95,7 @@ export class ServiceRegistery {
     container.register<IStripeService>(TYPES.StripeService, { useClass: StripeService });
     container.register<IChangePasswordService>(TYPES.ChangePasswordService, { useClass: ChangePasswordService });
     container.register<IWalletService>(TYPES.WalletService, { useClass: WalletService });
+    container.register<IBookingDetailsService>(TYPES.BookingDetailsService, { useClass: BookingDetailsService });
 
     container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler });
   }

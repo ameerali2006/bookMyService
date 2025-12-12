@@ -14,9 +14,10 @@ import { Search, MapPin, Clock } from "lucide-react";
 import RequestDetailsModal from "@/components/worker/RequestService/DetailsModal";
 import { Navbar } from "@/components/worker/Dashboard/WorkerNavbar";
 import { WorkerLayout } from "@/components/worker/Dashboard/WorkerLayout";
-import workerAxios from "@/config/axiosSevice/WorkerAxios";
 import { ErrorToast } from "@/components/shared/Toaster";
 import { workerService } from "@/api/WorkerService";
+import { Pagination } from "@/components/ui/Pagination";
+
 
 interface ServiceRequest {
   id: string;
@@ -37,14 +38,14 @@ export default function WorkerRequestsPage() {
     useState<ServiceRequest | null>(null);
 
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [status] = useState<"pending" | "approved" | "rejected">("pending");
   const [date, setDate] = useState("");
 
   const [loading, setLoading] = useState(true);
 
   // Pagination
   const [page, setPage] = useState(1);
-  const limit = 9;
+  const [pageSize, setPageSize] = useState(9);
   const [total, setTotal] = useState(0);
 
   // -------------------------------
@@ -55,21 +56,20 @@ export default function WorkerRequestsPage() {
       setLoading(true);
 
       const response = await workerService.serviceRequest({
-          search,
-          status,
-          date,
-          page,
-          limit,
-        });
-        console.log(response)
+        search,
+        status,
+        date,
+        page,
+        limit: pageSize,
+      });
+
       if (response.data.success) {
         setRequests(response.data.data.data);
-        setTotal(response.data.total);
+        setTotal(response.data.data.total);
       } else {
         ErrorToast(response.data.message);
       }
     } catch (err) {
-      console.log(err);
       ErrorToast("Failed to load service requests");
     } finally {
       setLoading(false);
@@ -78,7 +78,7 @@ export default function WorkerRequestsPage() {
 
   useEffect(() => {
     fetchRequests();
-  }, [search, status, date, page]);
+  }, [search, status, date, page, pageSize]);
 
   const getStatusColor = (status: ServiceRequest["status"]) => {
     switch (status) {
@@ -99,7 +99,6 @@ export default function WorkerRequestsPage() {
 
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
-          {/* Title */}
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Service Requests
           </h1>
@@ -109,7 +108,6 @@ export default function WorkerRequestsPage() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-
             {/* Search Bar */}
             <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-4 py-2 col-span-2">
               <Search className="w-5 h-5 text-muted-foreground" />
@@ -124,21 +122,6 @@ export default function WorkerRequestsPage() {
                 className="flex-1 bg-transparent outline-none text-foreground placeholder-muted-foreground"
               />
             </div>
-
-            {/* Status Filter */}
-            {/* <select
-              className="border border-border rounded-lg px-3 py-2 bg-card"
-              value={status}
-              onChange={(e) => {
-                setPage(1);
-                setStatus(e.target.value);
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select> */}
 
             {/* Date Filter */}
             <input
@@ -178,9 +161,7 @@ export default function WorkerRequestsPage() {
                       </div>
 
                       <Badge
-                        className={`${getStatusColor(
-                          request.status
-                        )} border`}
+                        className={`${getStatusColor(request.status)} border`}
                       >
                         {request.status}
                       </Badge>
@@ -224,26 +205,29 @@ export default function WorkerRequestsPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          {total > limit && (
-            <div className="flex justify-center mt-6 gap-4">
-              <Button
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                Prev
-              </Button>
-
-              <Button
-                variant="outline"
-                disabled={page * limit >= total}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          {/* Pagination Component */}
+          <div className="mt-6">
+            <Pagination
+              current={page}
+              total={total}
+              pageSize={pageSize}
+              onChange={(newPage, newSize) => {
+                if (newSize && newSize !== pageSize) {
+                  setPageSize(newSize);
+                  setPage(1);
+                } else {
+                  setPage(newPage);
+                }
+              }}
+              showSizeChanger={true}
+              showQuickJumper={true}
+              showTotal={(total, range) => (
+                <span>
+                  Showing {range[0]} to {range[1]} of {total} requests
+                </span>
+              )}
+            />
+          </div>
         </div>
 
         {/* Modal */}

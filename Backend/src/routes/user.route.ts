@@ -49,7 +49,9 @@ export class UserRoute extends BaseRoute {
     this.router.post('/payment/create-payment-intent', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => stripeController.createPaymentIntent(req, res, next));
     this.router.put('/profile/changePassword', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.changePassword(req, res, next));
     this.router.get('/payment/verify', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>bookingController.verifyPayment(req, res, next));
-  
+    this.router.get('/bookings/ongoing', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.ongoingBookings(req, res, next));
+    this.router.get('/bookings/ongoing/:bookingId', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.bookingDetailData(req, res, next));
+
   
   
   

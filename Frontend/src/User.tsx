@@ -12,6 +12,9 @@ import { USER_ROUTES } from "./config/constant/routes/userRoutes";
 import AdvancePaymentPage from "./pages/user/AdvancePaymentPage";
 import UserChangePasswordPage from "./pages/user/ChangeUserPassword";
 import PaymentSuccessPage from "./pages/user/SuccessPage";
+import UserBookingsPage from "./pages/user/BookingList";
+import { BookingDetailPage } from "./pages/user/BookingDetail";
+
 
 
 
@@ -25,6 +28,7 @@ const User = () => {
   return (
     <Suspense fallback={<Loader message="loading..."/>}>
         <Routes>
+          
        
         <Route index element={<Homepage />} />
 
@@ -66,6 +70,14 @@ const User = () => {
         <Route
           path={USER_ROUTES.CHANGE_PASSWORD}
           element={<IsLogin><UserChangePasswordPage /></IsLogin>}
+        />
+        <Route
+          path={"/bookings"}
+          element={<IsLogin><UserBookingsPage /></IsLogin>}
+        />
+        <Route
+          path={"/bookings/:bookingId"}
+          element={<IsLogin><BookingDetailPage /></IsLogin>}
         />
         <Route
           path={"/booking/:bookingId/success"}

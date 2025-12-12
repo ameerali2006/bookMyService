@@ -1,16 +1,21 @@
 // src/repository/implementation/booking.repository.ts
-import { injectable } from 'inversify';
-import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
-import { IBooking, IBookingPopulated } from '../../interface/model/booking.model.interface';
-import { BaseRepository } from './base.repository';
-import { Booking } from '../../model/booking.model';
-import { PaymentStatus } from '../../interface/model/payement.model.interface';
-import { IRequestFilters } from '../../interface/service/worker/worker-booking.service.interface';
+import { injectable } from "tsyringe";
+import { FilterQuery } from "mongoose";
+import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
+import {
+  IBooking,
+  IBookingPopulated,
+} from "../../interface/model/booking.model.interface";
+import { BaseRepository } from "./base.repository";
+import { Booking } from "../../model/booking.model";
+import { PaymentStatus } from "../../interface/model/payement.model.interface";
+import { IRequestFilters } from "../../interface/service/worker/worker-booking.service.interface";
 
 @injectable()
 export class BookingRepository
   extends BaseRepository<IBooking>
-  implements IBookingRepository {
+  implements IBookingRepository
+{
   constructor() {
     super(Booking);
   }
@@ -21,39 +26,36 @@ export class BookingRepository
 
   async findByIdPopulated(id: string): Promise<IBookingPopulated | null> {
     const result = await Booking.findById(id)
-      .populate('userId', 'name email phone')
-      .populate('workerId', 'name email phone category')
-      .populate('serviceId', 'category price')
-      .populate('address')
+      .populate("userId", "name email phone")
+      .populate("workerId", "name email phone category")
+      .populate("serviceId", "category price")
+      .populate("address")
       .exec();
 
     return result as unknown as IBookingPopulated | null;
   }
 
-
   async findByUserId(userId: string): Promise<IBookingPopulated[]> {
     const result = await Booking.find({ userId })
       .sort({ createdAt: -1 })
-      .populate('workerId', 'name category')
-      .populate('serviceId', 'category price')
-      .populate('address')
+      .populate("workerId", "name category")
+      .populate("serviceId", "category price")
+      .populate("address")
       .exec();
 
     return result as unknown as IBookingPopulated[];
   }
-
 
   async findByWorkerId(workerId: string): Promise<IBookingPopulated[]> {
     const result = await Booking.find({ workerId })
       .sort({ createdAt: -1 })
-      .populate('userId', 'name email phone')
-      .populate('serviceId', 'category price')
-      .populate('address')
+      .populate("userId", "name email phone")
+      .populate("serviceId", "category price")
+      .populate("address")
       .exec();
 
     return result as unknown as IBookingPopulated[];
   }
-
 
   async updateStatus(id: string, status: string): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(id, { status }, { new: true });
@@ -61,44 +63,44 @@ export class BookingRepository
 
   async updateWorkerResponse(
     id: string,
-    response: string,
+    response: string
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { workerResponse: response },
-      { new: true },
+      { new: true }
     );
   }
 
   async updatePaymentStatus(
     id: string,
     paymentStatus: string,
-    paymentId?: string,
+    paymentId?: string
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { paymentStatus, paymentId },
-      { new: true },
+      { new: true }
     );
   }
 
   async addRating(
     id: string,
     score: number,
-    review?: string,
+    review?: string
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
-      { rating: { score, review }, status: 'completed' },
-      { new: true },
+      { rating: { score, review }, status: "completed" },
+      { new: true }
     );
   }
 
   async cancelBooking(id: string): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
-      { status: 'cancelled' },
-      { new: true },
+      { status: "cancelled" },
+      { new: true }
     );
   }
 
@@ -111,9 +113,9 @@ export class BookingRepository
     return await Booking.find({
       workerId,
       date: { $gte: startOfDay, $lte: endOfDay },
-      status: { $ne: 'cancelled' },
+      status: { $ne: "cancelled" },
     })
-      .select('startTime endTime date status')
+      .select("startTime endTime date status")
       .lean();
   }
 
@@ -121,7 +123,7 @@ export class BookingRepository
     workerId: string,
     date: Date,
     startTime: Date,
-    endTime: Date,
+    endTime: Date
   ): Promise<IBooking | null> {
     return await Booking.findOne({
       workerId,
@@ -130,34 +132,34 @@ export class BookingRepository
       },
       startTime: { $lt: endTime },
       endTime: { $gt: startTime },
-      status: { $nin: ['cancelled', 'completed'] },
+      status: { $nin: ["cancelled", "completed"] },
     });
   }
 
   async findByIdWithDetails(id: string): Promise<IBooking | null> {
     return await Booking.findById(id)
-      .populate('workerId', 'name')
-      .populate('serviceId', 'category')
-      .populate('userId', 'name');
+      .populate("workerId", "name")
+      .populate("serviceId", "category")
+      .populate("userId", "name");
   }
 
   async findByWorkerAndRange(
     workerId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<
     Array<{
       date: Date;
       startTime: string;
       endTime?: string | null;
-      advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+      advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
     }>
   > {
     return Booking.find(
       {
         workerId,
         date: { $gte: startDate, $lt: endDate },
-        status: { $ne: 'cancelled' },
+        status: { $ne: "cancelled" },
       },
       {
         date: 1,
@@ -165,7 +167,7 @@ export class BookingRepository
         endTime: 1,
         advancePaymentStatus: 1,
         _id: 0,
-      },
+      }
     )
       .sort({ date: 1, startTime: 1 })
       .lean();
@@ -175,38 +177,38 @@ export class BookingRepository
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus,
-    addressId:string,
+    addressId: string
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, {
       advancePaymentId: paymentIntentId,
-      advancePaymentStatus: status === 'succeeded' ? 'paid' : status,
-      status: status === 'succeeded' ? 'awaiting-final-payment' : 'pending',
-      address:addressId
+      advancePaymentStatus: status === "succeeded" ? "paid" : status,
+      status: status === "succeeded" ? "confirmed" : "pending",
+      address: addressId,
     });
   }
 
   async updateFinalPaymentStatus(
     bookingId: string,
     paymentIntentId: string,
-    status: PaymentStatus,
+    status: PaymentStatus
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, {
       finalPaymentId: paymentIntentId,
-      finalPaymentStatus: status === 'succeeded' ? 'paid' : status,
-      status: status === 'succeeded' ? 'completed' : 'awaiting-final-payment',
+      finalPaymentStatus: status === "succeeded" ? "paid" : status,
+      status: status === "succeeded" ? "completed" : "awaiting-final-payment",
     });
   }
 
   async findPendingAdvanceBookings(workerId: string): Promise<IBooking[]> {
     return await Booking.find({
       workerId,
-      advancePaymentStatus: 'succeeded',
-      workerResponse: 'pending',
-    }).populate('userId serviceId workerId');
+      advancePaymentStatus: "succeeded",
+      workerResponse: "pending",
+    }).populate("userId serviceId workerId");
   }
   async findServiceRequests(
     filters: IRequestFilters
-  ): Promise<{ data: IBookingPopulated[], total: number }> {
+  ): Promise<{ data: IBookingPopulated[]; total: number }> {
     const { workerId, search, status, date, page, limit } = filters;
 
     const query: Record<string, unknown> = { workerId };
@@ -215,29 +217,54 @@ export class BookingRepository
     if (date) query.date = date;
 
     if (search) {
-      query.$or = [
-        
-        { "userId.name": { $regex: search, $options: "i" } },
-        
-      ];
+      query.$or = [{ "userId.name": { $regex: search, $options: "i" } }];
     }
 
     const skip = (page - 1) * limit;
 
     const booking = await Booking.find(query)
-      .populate("userId", "name phone location")
-      .populate("serviceId", "name")
+      .populate("userId", "name phone ")
+      .populate("serviceId", "category")
       .populate("workerId", "name")
+      .populate("address")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean<IBookingPopulated[]>() 
+      .lean<IBookingPopulated[]>()
       .exec();
 
     const total = await Booking.countDocuments(query);
 
-    return { data:booking, total };
+    return { data: booking, total };
   }
-  
-  
+  async findBookingListByUserId(userId:string,status:string[]=[],workerResponse:string[]=[],limit:number,skip:number,search:string):Promise<{bookings:IBookingPopulated[]|null,total:number}>{
+    let query:FilterQuery<IBooking> ={}
+    query.userId=userId
+    if(status.length>0){
+      query.status={$in:status}
+    }
+    if(workerResponse.length){
+      query.workerResponse={$in:workerResponse}
+    }
+    if (search && search.trim() !== "") {
+      query.$or = [
+        { "serviceId.category": { $regex: search, $options: "i" } },
+        { "workerId.name": { $regex: search, $options: "i" } },
+       
+      ] 
+    }
+    console.log(query)
+
+    const total = await Booking.countDocuments(query);
+    const bookings = await Booking.find(query)
+    .populate("workerId")
+    .populate("serviceId")
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean<IBookingPopulated[]>();
+    console.log({bookings,total})
+
+    return {bookings,total};
+  }
 }

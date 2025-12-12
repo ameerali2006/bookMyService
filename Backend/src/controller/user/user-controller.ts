@@ -1,27 +1,35 @@
-import { Request, Response, NextFunction } from 'express';
-import { inject, injectable } from 'tsyringe';
-import { IUserController } from '../../interface/controller/user-controller.controller.interface';
-import { CustomRequest } from '../../middleware/auth.middleware';
-import { TYPES } from '../../config/constants/types';
-import { STATUS_CODES } from '../../config/constants/status-code';
+import { Request, Response, NextFunction } from "express";
+import { inject, injectable } from "tsyringe";
+import { IUserController } from "../../interface/controller/user-controller.controller.interface";
+import { CustomRequest } from "../../middleware/auth.middleware";
+import { TYPES } from "../../config/constants/types";
+import { STATUS_CODES } from "../../config/constants/status-code";
 
-import { CustomError } from '../../utils/custom-error';
-import { MESSAGES } from '../../config/constants/message';
-import { updateUserProfileSchema } from '../validation/updateUserProfileDetails';
-import { IProfileManagement } from '../../interface/service/user/profileManagement.serice.interface';
-import { addressSchema } from '../validation/addAddress.zod';
-import { changePasswordSchema } from '../validation/changePassword.zod';
-import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { CustomError } from "../../utils/custom-error";
+import { MESSAGES } from "../../config/constants/message";
+import { updateUserProfileSchema } from "../validation/updateUserProfileDetails";
+import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
+import { addressSchema } from "../validation/addAddress.zod";
+import { changePasswordSchema } from "../validation/changePassword.zod";
+import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
+import { IBookingDetailsService } from "../../interface/service/user/bookingDetails.service.interface";
+import { success } from "zod";
 
 @injectable()
 export class UserController implements IUserController {
   constructor(
-        @inject(TYPES.ProfileManagement) private _profileManage:IProfileManagement,
-         @inject(TYPES.ChangePasswordService) private _changePassword:IChangePasswordService,
-
+    @inject(TYPES.ProfileManagement) private _profileManage: IProfileManagement,
+    @inject(TYPES.ChangePasswordService)
+    private _changePassword: IChangePasswordService,
+    @inject(TYPES.BookingDetailsService)
+    private _bookingDetailsService: IBookingDetailsService
   ) {}
 
-  async userProfileDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async userProfileDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       console.log((req as CustomRequest).user);
       const userId = (req as CustomRequest).user._id;
@@ -33,7 +41,11 @@ export class UserController implements IUserController {
     }
   }
 
-  async updateProfileDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateProfileDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       console.log(req.body);
 
@@ -43,7 +55,7 @@ export class UserController implements IUserController {
         const errors = parsedData.error.format();
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors,
         });
         throw new CustomError(MESSAGES.VALIDATION_ERROR, STATUS_CODES.CONFLICT);
@@ -52,7 +64,10 @@ export class UserController implements IUserController {
       const user = parsedData.data;
       const userId = (req as CustomRequest).user._id;
 
-      const updatedData = await this._profileManage.updateUserProfileDetails(user, userId);
+      const updatedData = await this._profileManage.updateUserProfileDetails(
+        user,
+        userId
+      );
       if (!updatedData) {
         throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES.BAD_REQUEST);
       }
@@ -62,7 +77,11 @@ export class UserController implements IUserController {
     }
   }
 
-  async getUserAddresses(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getUserAddresses(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
       console.log(userId);
@@ -74,7 +93,11 @@ export class UserController implements IUserController {
     }
   }
 
-  async addUserAddress(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async addUserAddress(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
 
@@ -90,13 +113,20 @@ export class UserController implements IUserController {
     }
   }
 
-  async setPrimaryAddress(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async setPrimaryAddress(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
       console.log(req);
       const { toSetId } = req.body;
       console.log(`${userId}+${toSetId}`);
-      const respose = await this._profileManage.setPrimaryAddress(userId, toSetId);
+      const respose = await this._profileManage.setPrimaryAddress(
+        userId,
+        toSetId
+      );
       if (!respose.success) {
         res.status(STATUS_CODES.BAD_REQUEST).json(respose);
       } else {
@@ -107,14 +137,71 @@ export class UserController implements IUserController {
     }
   }
 
-  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async changePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     const parsed = changePasswordSchema.parse(req.body);
     const userId = (req as CustomRequest).user?._id;
-    const result = await this._changePassword.changePassword('user', userId, parsed);
+    const result = await this._changePassword.changePassword(
+      "user",
+      userId,
+      parsed
+    );
     if (result.success) {
       res.status(STATUS_CODES.OK).json(result);
     } else {
       res.status(STATUS_CODES.CONFLICT).json(result);
+    }
+  }
+  async ongoingBookings(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const limit = Number(req.query.limit) || 10;
+      const page = Number(req.query.page) || 1;
+      const search = (req.query.search as string) || "";
+
+      const userId = (req as CustomRequest).user._id;
+
+      const skip = (page - 1) * limit;
+
+      // ---- SERVICE CALL ----
+      const response = await this._bookingDetailsService.ongoingBookings(
+        userId,
+        limit,
+        skip,
+        search
+      );
+      if (response.success) {
+        res.status(STATUS_CODES.OK).json(response);
+      } else {
+        res.status(STATUS_CODES.BAD_REQUEST).json(response);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+  async bookingDetailData(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const bookingId=req.params.bookingId
+      if(!bookingId){
+        res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message:"ubooking details missing"})
+      }
+      const response=await this._bookingDetailsService.bookingDetailData(bookingId)
+      console.log(response)
+
+      if( response.success){
+        res.status(STATUS_CODES.OK).json(response)
+      }else{
+        res.status(STATUS_CODES.BAD_REQUEST).json(response)
+      }
+
+    } catch (error) {
+      next(error)
     }
   }
 }
