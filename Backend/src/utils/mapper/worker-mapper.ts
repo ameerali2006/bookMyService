@@ -1,5 +1,5 @@
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
-import { ServiceRequest, WorkerProfileDTO } from '../../dto/worker/workingDetails.dto';
+import { ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/workingDetails.dto';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { WorkerModel } from '../../model/worker.model';
@@ -34,6 +34,7 @@ export class WorkerMapper {
         lat: booking?.address?.location?.coordinates?.[1] ?? 0,
         lng: booking?.address?.location?.coordinates?.[0] ?? 0,
       },
+      
 
     };
   }
@@ -60,5 +61,17 @@ export class WorkerMapper {
       lng: worker.location?.coordinates[0] || 0,
     },
     documents: worker.documents || '',
+  });
+  static ApprovedService = (b: IBookingPopulated): ApprovedServices => ({
+    
+        id: b._id.toString(),
+        
+        customerName: b.userId.name,
+        serviceName: b.serviceId.category,
+        date: b.date,
+        startTime: b.startTime,
+        endTime: b.endTime,
+        status: b.status as | 'confirmed'| 'in-progress' | 'awaiting-final-payment',
+      
   });
 }

@@ -3,7 +3,8 @@ import { z } from "zod";
 export const ApprovalSchema = z.object({
   bookingId: z.string().min(1),
   serviceName: z.string().min(1),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, "endTime must be in HH:mm format"),
+  durationHours: z.number().min(1),
+  distance:z.number().min(1),
   additionalItems: z
     .array(
       z.object({

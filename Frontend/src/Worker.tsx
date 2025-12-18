@@ -12,6 +12,8 @@ import WorkManagementPage from "./pages/worker/SlotMangement";
 import { WORKER_ROUTES } from "./config/constant/routes/workerRoutes";
 import WorkerRequestsPage from "./pages/worker/RequestService";
 import WorkerChangePasswordPage from "./pages/worker/ChangePassword";
+import { WorkerApprovedServices } from "./pages/worker/ApprovedServiceListing";
+import WorkerBookingDetailsPage from "./pages/worker/ApprovedServiceDetails";
 
 
 const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
@@ -58,6 +60,14 @@ const Worker = () => {
         <Route
           path={WORKER_ROUTES.CHANGE_PASSWORD}
           element={<IsWorkerLogin>< WorkerChangePasswordPage/></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.SERVICE_APPROVED}
+          element={<IsWorkerLogin>< WorkerApprovedServices/></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.SERVICE_APPROVED_DETAILPAGE}
+          element={<IsWorkerLogin>< WorkerBookingDetailsPage/></IsWorkerLogin>}
         />
       </Routes>
       

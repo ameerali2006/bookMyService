@@ -36,3 +36,14 @@ export interface serviceManageDto extends serviceCreateDto {
   _id: string;
   createdAt: Date;
 }
+export interface AdminBookingDto {
+  id: string
+  customerName: string
+  workerName: string
+  serviceName: string
+  date: Date
+  startTime: string
+  endTime?: string
+  status: "pending" | "confirmed" | "in-progress" | "awaiting-final-payment" | "completed" | "cancelled"
+  createdAt: Date
+}

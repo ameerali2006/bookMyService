@@ -1,5 +1,5 @@
 import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
-import workerAxios from "@/config/axiosSevice/WorkerAxios"
+import workerAxios from "@/config/axiosSevice/WorkerAxios";
 type Break = {
   label: string;
   breakStart: string;
@@ -13,13 +13,14 @@ interface AdditionalItem {
 interface ApprovalData {
   bookingId: string;
   serviceName: string;
-  endTime: string;
+  durationHours: number;
+  distance: number;
   additionalItems?: AdditionalItem[];
   additionalNotes?: string;
 }
 export interface IRequestFilters {
   search?: string;
-  status: "pending" | "approved" | "rejected" ;
+  status: "pending" | "approved" | "rejected";
   date?: string;
   page?: number;
   limit?: number;
@@ -32,58 +33,73 @@ type DaySchedule = {
   breaks: Break[];
 };
 interface ICustomSlot {
-  date: Date
-  startTime: string
-  endTime: string
+  date: Date;
+  startTime: string;
+  endTime: string;
 }
 interface IHoliday {
-  date: Date
-  reason?: string
+  date: Date;
+  reason?: string;
 }
 export type PayLoad = {
   days: DaySchedule[];
 };
-export const  workerService={
-    getWorkingDetails:async (email:string)=>{
-       
-        return await workerAxios.get(`/profile/slot?email=${email}`)
-    },
-    updateWorkingDetails:async (email:string,payload:PayLoad)=>{
-       
-        return await workerAxios.post(`/profile/slot/update`,{email,payload})
-    },
-    getProfileDetails:async ()=>{
-      return await workerAxios.get(`/profile/details`)
-    },
-    updateProfileDetails: async (payload: {
-    name?: string
-    phone?: string
-    experience?: string
-    fees?: number
-    image?: string
+export const workerService = {
+  getWorkingDetails: async (email: string) => {
+    return await workerAxios.get(`/profile/slot?email=${email}`);
+  },
+  updateWorkingDetails: async (email: string, payload: PayLoad) => {
+    return await workerAxios.post(`/profile/slot/update`, { email, payload });
+  },
+  getProfileDetails: async () => {
+    return await workerAxios.get(`/profile/details`);
+  },
+  updateProfileDetails: async (payload: {
+    name?: string;
+    phone?: string;
+    experience?: string;
+    fees?: number;
+    image?: string;
   }) => {
-    console.log(payload)
-    return await workerAxios.put(`/profile/update`, payload)
+    console.log(payload);
+    return await workerAxios.put(`/profile/update`, payload);
   },
-  changePassword:async (payload:ChangePasswordInput ) => {
-   
-    return await workerAxios.put(`/profile/changePassword`, payload)
+  changePassword: async (payload: ChangePasswordInput) => {
+    return await workerAxios.put(`/profile/changePassword`, payload);
   },
-  getCalenderData:async ()=>{
-    return await workerAxios.get(`/calender/getData`)
+  getCalenderData: async () => {
+    return await workerAxios.get(`/calender/getData`);
   },
-  updateCalenderData:async (data:{holidays:IHoliday[],customSlots:ICustomSlot[]})=>{
-    return await workerAxios.put('/calender/update',data)
+  updateCalenderData: async (data: {
+    holidays: IHoliday[];
+    customSlots: ICustomSlot[];
+  }) => {
+    return await workerAxios.put("/calender/update", data);
   },
-  serviceApprove:async (data:ApprovalData)=>{
-    return await workerAxios.put('/service/approve',data)
+  serviceApprove: async (data: ApprovalData) => {
+    return await workerAxios.put("/service/approve", data);
   },
-  serviceReject:async (data:{description:string,bookingId:string})=>{
-    return await workerAxios.put('/service/reject',data)
+  serviceReject: async (data: { description: string; bookingId: string }) => {
+    return await workerAxios.put("/service/reject", data);
   },
-  serviceRequest:async (data:IRequestFilters)=>{
-    return await workerAxios.get(`/service/requests`,{params:data})
+  serviceRequest: async (data: IRequestFilters) => {
+    return await workerAxios.get(`/service/requests`, { params: data });
   },
-  
- 
-}
+  getApprovedServices: async (params: {
+    page: number;
+    limit: number;
+    search?: string;
+    status?: string;
+  }) => {
+    return await workerAxios.get(`/service/approveds`, { params });
+  },
+  getBookingDetails: async (bookingId: string) => {
+    return await workerAxios.get(`/service/approveds/${bookingId}`);
+  },
+  reachedCustomerLocation: async (bookingId: string) => {
+    return await workerAxios.get(`/service/reach-location/${bookingId}`);
+  },
+  verifyWorker:async (bookingId:string,otp:string) => {
+    return await workerAxios.put("/service/verify-worker", {bookingId,otp});
+  },
+};

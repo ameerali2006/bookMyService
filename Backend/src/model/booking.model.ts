@@ -43,7 +43,16 @@ const BookingSchema = new Schema<IBooking>(
         price: { type: Number },
       },
     ],
-
+    paymentBreakdown: [
+      {
+        title: { type: String, required: true },
+        rate: { type: Number, required: true },
+        rateLabel: { type: String, required: true },
+        quantity: { type: Number, required: true },
+        total: { type: Number, required: true },
+      },
+    ],
+ 
     status: {
       type: String,
       enum: [

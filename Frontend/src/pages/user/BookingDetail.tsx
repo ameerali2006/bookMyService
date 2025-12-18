@@ -23,10 +23,18 @@ import { userService } from "@/api/UserService"
 import { ErrorToast } from "@/components/shared/Toaster"
 import Header from "@/components/user/shared/Header"
 import Footer from "@/components/user/shared/Footer"
+import { OtpQrCard } from "@/components/user/OtpQr"
 
 // -----------------------
 // INTERFACE
 // -----------------------
+ interface IPaymentItem {
+  title: string
+  rate: number
+  rateLabel: string
+  quantity: number
+  total: number
+}
 interface BookingDetail {
   id: string
   serviceName: string
@@ -44,7 +52,8 @@ interface BookingDetail {
   advancePaymentStatus: "unpaid" | "paid" | "failed" | "refunded"
   finalPaymentStatus: "unpaid" | "paid" | "failed" | "refunded"
   paymentMethod: "stripe" | "upi" | "cash"
-  additionalItems?: { name: string; qty: number; price: number }[]
+  additionalItems?: { name: string; price: number }[]
+  paymentItems?:IPaymentItem[];
   status: "pending" | "confirmed" | "in-progress" | "awaiting-final-payment" | "completed" | "cancelled"
   workerResponse: "accepted" | "rejected" | "pending"
   otp?: string
@@ -197,7 +206,7 @@ export function BookingDetailPage() {
   const currentStatusIndex = statusSteps.indexOf(booking.status)
   const canCancel =
     (booking.status === "pending" || booking.status === "confirmed") && booking.workerResponse !== "rejected"
-  const showOTPVerification = booking.status === "in-progress"
+  const showOTPVerification = Boolean(booking.otp)
 
   return (<>
     <Header/>
@@ -264,7 +273,7 @@ export function BookingDetailPage() {
           </Card>
 
           {/* OTP Verification Button */}
-          {showOTPVerification && (
+          {/* {showOTPVerification && (
             <div className="mt-6 animate-in fade-in duration-500">
               <Button
                 size="lg"
@@ -274,7 +283,7 @@ export function BookingDetailPage() {
                 Show QR Code Verification
               </Button>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Main Content Grid */}
@@ -353,6 +362,9 @@ export function BookingDetailPage() {
                 </div>
               </div>
             </Card>
+            {booking.otp && (
+              <OtpQrCard otp={booking.otp} />
+            )}
 
             {/* Address Card */}
             <Card className="p-6 bg-gradient-to-br from-white to-slate-50 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -375,6 +387,34 @@ export function BookingDetailPage() {
             </Card>
           </div>
         </div>
+        {booking.additionalItems && booking.additionalItems.length > 0 && (
+          <Card className="p-8 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 mb-8">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full" />
+              <h2 className="text-2xl font-bold text-slate-900">Additional Items</h2>
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-slate-200">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left py-4 px-4 text-sm font-bold text-slate-900">Item</th>
+                    
+                    <th className="text-right py-4 px-4 text-sm font-bold text-slate-900">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {booking.additionalItems.map((item, index) => (
+                    <tr key={index} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                      <td className="py-4 px-4 text-slate-900 font-medium">{item.name}</td>
+                     
+                      <td className="py-4 px-4 text-right font-bold text-slate-900">{formatCurrency(item.price)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
 
         {/* Price Breakdown */}
         <Card className="p-8 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 mb-8">
@@ -396,6 +436,29 @@ export function BookingDetailPage() {
               </div>
               <p className="text-xl font-bold text-slate-900">{formatCurrency(booking.advanceAmount)}</p>
             </div>
+              {booking.paymentItems && booking.paymentItems.length > 0 && (
+                <>
+                  {booking.paymentItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="py-4 flex items-center justify-between hover:bg-slate-50 px-2 rounded-lg transition-colors"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {item.rateLabel} · {item.quantity} × {formatCurrency(item.rate)}
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-slate-900">
+                        {item.total < 0 ? "-" : ""}
+                        {formatCurrency(Math.abs(item.total))}
+                      </p>
+                    </div>
+                  ))}
+                </>
+              )}
 
             {/* Remaining Amount */}
             <div className="py-4 flex items-center justify-between group hover:bg-slate-50 px-2 rounded-lg transition-colors">
@@ -430,35 +493,8 @@ export function BookingDetailPage() {
           </div>
         </Card>
 
-        {/* Additional Items */}
-        {booking.additionalItems && booking.additionalItems.length > 0 && (
-          <Card className="p-8 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 mb-8">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full" />
-              <h2 className="text-2xl font-bold text-slate-900">Additional Items</h2>
-            </div>
-            <div className="overflow-x-auto rounded-lg border border-slate-200">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-left py-4 px-4 text-sm font-bold text-slate-900">Item</th>
-                    <th className="text-center py-4 px-4 text-sm font-bold text-slate-900">Qty</th>
-                    <th className="text-right py-4 px-4 text-sm font-bold text-slate-900">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {booking.additionalItems.map((item, index) => (
-                    <tr key={index} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
-                      <td className="py-4 px-4 text-slate-900 font-medium">{item.name}</td>
-                      <td className="py-4 px-4 text-center text-slate-900 font-semibold">{item.qty}</td>
-                      <td className="py-4 px-4 text-right font-bold text-slate-900">{formatCurrency(item.price)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
+        
+        
 
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">

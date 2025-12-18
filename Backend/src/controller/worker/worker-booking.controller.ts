@@ -65,4 +65,74 @@ export class WorkerBookingController implements IWorkerBookingController {
       next(error);
     }
   }
+  async getServiceApprovals(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const workerId = (req as CustomRequest).user._id 
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || 10
+      const search = req.query.search as string | undefined
+      const status = req.query.status as any
+
+      const result =
+        await this.bookingService.getWorkerApprovedBookings({
+          workerId,
+          page,
+          limit,
+          search,
+          status,
+        })
+
+      if(result.success){
+        res.status(STATUS_CODES.OK).json(result)
+      }else{
+        res.status(STATUS_CODES.BAD_REQUEST).json(result)
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+  async getApprovalsDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const bookingId=req.params.bookingId
+      const result =await this.bookingService.getWorkerAprrovalpageDetails(bookingId)
+      if(result.success){
+        res.status(STATUS_CODES.OK).json(result)
+
+      }else{
+        res.status(STATUS_CODES.BAD_REQUEST).json(result)
+      }
+
+    } catch (error) {
+      next(error)
+    }
+  }
+  async reachLocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const bookingId=req.params.bookingId
+      const result=await this.bookingService.reachedCustomerLocation(bookingId)
+       if(result.success){
+        res.status(STATUS_CODES.OK).json(result)
+
+      }else{
+        res.status(STATUS_CODES.BAD_REQUEST).json(result)
+      }
+
+    } catch (error) {
+      next(error)
+    }
+  }
+  async verifyWorker(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {bookingId,otp} =req.body
+      const response=await this.bookingService.verifyWorker(bookingId,otp)
+      if(response.success){
+        res.status(STATUS_CODES.OK).json(response)
+      }else{
+         res.status(STATUS_CODES.BAD_REQUEST).json(response)
+      }
+
+    } catch (error) {
+      next(error)
+    }
+  }
 }

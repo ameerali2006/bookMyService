@@ -7,5 +7,8 @@ export const WORKER_ROUTES = {
   PROFILE_VIEW: "/profile/view",
   PROFILE_SLOT: "/profile/slot",
   SERVICE_REQUEST:"/appointments/request",
-  CHANGE_PASSWORD:"/profile/change-password"
+  SERVICE_APPROVED:"/appointments/approved",
+  CHANGE_PASSWORD:"/profile/change-password",
+  SERVICE_APPROVED_DETAILPAGE:"/appointments/approved/:bookingId"
+
 };

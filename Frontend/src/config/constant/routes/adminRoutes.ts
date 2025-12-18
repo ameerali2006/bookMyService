@@ -5,4 +5,5 @@ export const ADMIN_ROUTES = {
   WORKERS: "/workers",
   UNVERIFIED: "/unverified",
   SERVICES: "/services",
+  BOOKINGS:"/bookings"
 };

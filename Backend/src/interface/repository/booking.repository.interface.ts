@@ -16,6 +16,12 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   findByWorkerId(workerId: string): Promise<IBookingPopulated[]>;
   updateStatus(id: string, status: string): Promise<IBooking | null>;
   updateWorkerResponse(id: string, response: string): Promise<IBooking | null>;
+  updateStatusWithOTP(id: string, status: 'pending'
+    | 'confirmed'
+    | 'in-progress' 
+    | 'awaiting-final-payment'
+    | 'completed'
+    | 'cancelled'): Promise<IBooking | null>
   updatePaymentStatus(
     id: string,
     paymentStatus: string,
@@ -67,4 +73,30 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     skip: number,
     search: string
   ): Promise<{ bookings: IBookingPopulated[] | null; total: number }>;
+  findWorkerApprovedBookings({
+      workerId,
+      page,
+      limit,
+      search,
+      status,
+    }: {
+    workerId: string
+    page: number
+    limit: number
+    search?: string
+    status?: "approved" | "in-progress"|'awaiting-final-payment'
+  }):Promise<{items:IBookingPopulated[]|null,total:number}>
+  getAllBookings(
+      params: {
+    search?: string
+    status?: string
+    limit?: number
+    page?: number
+  }
+    ): Promise<{
+    data: IBookingPopulated[];
+    total: number;
+    page: number;
+    limit: number;
+  }>
 }

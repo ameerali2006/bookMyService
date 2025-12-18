@@ -9,6 +9,7 @@ import WorkerManagement from "./pages/admin/WorkerManagement";
 import WorkerVerification from "./pages/admin/WorkerVerification";
 import ServiceManagement from "./pages/admin/ServiceManagement";
 import { ADMIN_ROUTES } from "./config/constant/routes/adminRoutes";
+import AdminBookingsPage from "./pages/admin/BookingLising";
 
 
 const LoginPage = lazy(()=>import("./pages/admin/LoginPage"));
@@ -44,6 +45,10 @@ const Admin = () => {
         <Route
           path={ADMIN_ROUTES.SERVICES}
           element={<IsAdminLogin><ServiceManagement /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.BOOKINGS}
+          element={<IsAdminLogin><AdminBookingsPage /></IsAdminLogin>}
         />
       </Routes>
     </Suspense></>

@@ -199,7 +199,40 @@ export class ManagementAdmin implements IAdminManagementController {
         message: `User ${updated?.status ? 'inactive' : 'active'} successfully`,
       });
     } catch (error) {
+      next(error)
 
+    }
+
+  }
+  async getBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {
+        search = "",
+        status = "all",
+        limit = "10",
+        page = "1",
+      } = req.query as {
+        search?: string
+        status?: string
+        limit?: string
+        page?: string
+      }
+
+    const result = await this._adminManagement.getAllBookings(
+      search,
+      status,
+      Number(limit),
+      Number(page)
+    )
+    if(result.success){
+      res.status(STATUS_CODES.OK).json(result)
+    }else{
+      res.status(STATUS_CODES.BAD_REQUEST).json(result)
+    }
+
+
+    } catch (error) {
+      next(error)
     }
   }
 }

@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react"
 import Sidebar from "@/components/admin/Sidebar"
 import Navbar from "@/components/admin/Navbar"
 import Footer from "@/components/user/shared/Footer"
-import { Table, type TableColumn } from "@/components/ui/Table"
+
 import { Pagination } from "@/components/ui/Pagination"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom"
 import { adminManagement } from "@/api/AdminManagement"
 import { SuccessToast, ErrorToast } from "@/components/shared/Toaster"
 import { Switch } from "@/components/ui/switch"
+import { DataTable, type TableColumn } from "@/components/shared/DataTable"
+
 
 interface Worker {
   _id: string
@@ -119,7 +121,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
     {
       key: "name",
       title: "Worker",
-      dataIndex: "name",
+      
       sortable: true,
       render: (_val, record) => (
         <div className="flex items-center gap-3">
@@ -137,7 +139,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
     {
       key: "contact",
       title: "Contact",
-      dataIndex: "email",
+      
       render: (_v, r) => (
         <div className="space-y-1 text-sm">
           <div className="flex items-center gap-2"><Mail className="w-4 h-4" /> {r.email}</div>
@@ -148,7 +150,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
     {
       key: "status",
       title: "Status",
-      dataIndex: "isBlocked",
+      
       render: (_v, r) => (
         <Badge className={r.isBlocked ?"bg-red-100 text-red-700" :"bg-green-100 text-green-700" }>
           {r.isBlocked ? "Blocked": "Active"}
@@ -158,21 +160,21 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
     {
       key: "experience",
       title: "Experience",
-      dataIndex: "experience",
+      
       sortable: true,
       render: val => <span>{val} yrs</span>
     },
     {
-      key: "joinDate",
+      key: "createdAt",
       title: "Joined",
-      dataIndex: "createdAt",
+      
       sortable: true,
       render: val => <span>{new Date(val).toLocaleDateString()}</span>
     },
     {
       key: "toggle",
       title: "Toggle",
-      dataIndex: "isBlocked",
+      
       align: "center",
       render: (_val, record) => (
         <Switch
@@ -225,7 +227,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
             </Button>
           </CardContent></Card>
 
-          <Table
+          <DataTable
             columns={columns}
             data={filteredAndSorted}
             loading={loading}
@@ -236,6 +238,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
               setSortOrder(order)
             }}
           />
+
 
           <Pagination
             current={currentPage}

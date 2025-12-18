@@ -40,6 +40,7 @@ export class TokenService implements ITokenservice {
 
   async refreshToken(refreshToken: string):Promise<{ role: string; accessToken: string }> {
     const payload = await this._jwtService.verifyToken(refreshToken, 'refresh');
+    console.log("refresh tocken request ",payload)
     if (!payload) {
       throw new CustomError(
         MESSAGES.INVALID_TOKEN,

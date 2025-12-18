@@ -36,6 +36,10 @@ export class WorkerRoute extends BaseRoute {
     this.router.put('/service/approve', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.approveService(req, res, next));
     this.router.put('/service/reject', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.rejectService(req, res, next));
     this.router.get('/service/requests', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.getServiceRequests(req, res, next));
+    this.router.get('/service/approveds', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.getServiceApprovals(req, res, next));
+    this.router.get('/service/approveds/:bookingId', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.getApprovalsDetails(req, res, next));
+    this.router.get('/service/reach-location/:bookingId', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.reachLocation(req, res, next));
+    this.router.put('/service/verify-worker', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.verifyWorker(req, res, next));
 
   }
 }

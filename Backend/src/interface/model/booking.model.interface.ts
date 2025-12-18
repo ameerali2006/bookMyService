@@ -13,6 +13,13 @@ export interface IRating {
   score?: number;
   review?: string;
 }
+export interface IPaymentItem {
+  title: string;
+  rate: number;      
+  rateLabel: string; 
+  quantity: number;  
+  total: number;     
+}
 
 export interface IBooking extends Document{
   _id: Types.ObjectId;
@@ -40,6 +47,7 @@ export interface IBooking extends Document{
   paymentMethod?: 'stripe' | 'upi' | 'cash';
 
   additionalItems?: IAdditionalItem[];
+  paymentBreakdown?: IPaymentItem[];
 
   status:
     | 'pending'

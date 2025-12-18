@@ -1,3 +1,5 @@
+import { IPaymentItem } from "../../interface/model/booking.model.interface"
+
 export interface ongoingBookingDto{
     id: string
     serviceName: string
@@ -24,6 +26,7 @@ export interface BookingDetailDto {
   finalPaymentStatus: "unpaid" | "paid" | "failed" | "refunded"
   paymentMethod?: "stripe" | "upi" | "cash"
   additionalItems?: { name: string;  price: number }[]
+  paymentItems?:IPaymentItem[]
   status:
     | "pending"
     | "confirmed"

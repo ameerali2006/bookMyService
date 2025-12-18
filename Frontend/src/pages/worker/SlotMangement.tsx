@@ -24,6 +24,7 @@ import { workerService } from "@/api/WorkerService";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
 import { CalendarModal } from "@/components/worker/SlotManagement/SlotCalender-modal";
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
 
 // ---------- Types ----------
 
@@ -295,11 +296,11 @@ const WorkManagementPage: React.FC = () => {
       const transformedDays = transformedData(response.data.data);
       setSchedule(transformedDays);
 
-      console.log("✅ Schedule updated:", response.data);
-      alert("✅ Schedule saved successfully!");
+      console.log("Schedule updated:", response.data);
+      SuccessToast(" Schedule saved successfully!");
     } catch (error) {
       console.error("❌ Failed to save schedule:", error);
-      alert("❌ Failed to save schedule. Please try again.");
+      ErrorToast("❌ Failed to save schedule. Please try again.");
     }
   };
   const toTimeValue = (iso: string) => {

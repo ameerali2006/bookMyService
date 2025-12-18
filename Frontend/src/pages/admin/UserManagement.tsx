@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from "react"
 import Navbar from "@/components/admin/Navbar"
 import Sidebar from "@/components/admin/Sidebar"
 import Footer from "@/components/user/shared/Footer"
-import { Table, type TableColumn } from "@/components/ui/Table"
+import { Table, } from "@/components/ui/Table"
 import { Pagination } from "@/components/ui/Pagination"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom"
 import { authService} from "@/api/AuthService"
 import { adminManagement } from "@/api/AdminManagement"
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
+import { DataTable, type TableColumn } from "@/components/shared/DataTable"
 
 
 interface User {
@@ -185,7 +186,7 @@ const UserManagement: React.FC = () => {
     {
       key: "user",
       title: "User",
-      dataIndex: "name",
+      
       sortable: true,
       render: (_value, record) => (
         <div className="flex items-center gap-3">
@@ -205,7 +206,7 @@ const UserManagement: React.FC = () => {
     {
       key: "contact",
       title: "Contact",
-      dataIndex: "email",
+      
       render: (_value, record) => (
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm">
@@ -224,7 +225,7 @@ const UserManagement: React.FC = () => {
     {
       key: "status",
       title: "Status",
-      dataIndex: "isBlocked",
+      
       sortable: true,
       render: (_value, record) => (
         <Badge className={record.isBlocked ?   "bg-red-100 text-red-800":"bg-green-100 text-green-800"}>
@@ -235,7 +236,7 @@ const UserManagement: React.FC = () => {
     {
       key: "toggle",
       title: "Toggle",
-      dataIndex: "isBlocked",
+      
       align: "center",
       render: (_value, record) => (
         <Switch
@@ -246,9 +247,9 @@ const UserManagement: React.FC = () => {
       ),
     },
     {
-      key: "joinDate",
+      key: "createdAt",
       title: "Join Date",
-      dataIndex: "createdAt",
+     
       sortable: true,
       render: value => (
         <span>{typeof value === 'string' ? new Date(value).toLocaleDateString() : 'N/A'}</span>
@@ -302,7 +303,7 @@ const UserManagement: React.FC = () => {
             </div>
           </CardContent></Card>
 
-          <Table
+          <DataTable
             columns={columns}
             data={filteredAndSortedData}
             loading={loading}

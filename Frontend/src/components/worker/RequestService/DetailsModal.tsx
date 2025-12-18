@@ -21,6 +21,7 @@ interface ServiceRequest {
   userName: string
   date: string
   time: string
+  availableTime:string
   location: string
   status: "pending" | "approved" | "rejected"
   userLocation: { lat: number; lng: number }
@@ -35,7 +36,8 @@ interface AdditionalItem {
 interface ApprovalData {
   bookingId: string;
   serviceName: string;
-  endTime: string;
+  durationHours:number
+  distance:number
   additionalItems?: AdditionalItem[];
   additionalNotes?: string;
 }
@@ -60,7 +62,7 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
+  return Number((R * c).toFixed(2))
 }
 
 const calculateEstimatedArrival = (distanceKm: number): string => {
@@ -70,7 +72,7 @@ const calculateEstimatedArrival = (distanceKm: number): string => {
 }
 
 export default function RequestDetailsModal({ request, onClose }: RequestDetailsModalProps) {
-  const [endingTime, setEndingTime] = useState("")
+  const [durationHours, setDurationHours] = useState("")
   const [itemsRequired, setItemsRequired] = useState<RequiredItem[]>([])
   const [additionalNotes, setAdditionalNotes] = useState("")
   const [showRejectionModal, setShowRejectionModal] = useState(false)
@@ -84,6 +86,7 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
     request.userLocation.lat,
     request.userLocation.lng,
   )
+  console.log(distance)
   const estimatedArrival = calculateEstimatedArrival(distance)
   const customerLocation={
     lat:request.userLocation.lat,
@@ -119,12 +122,13 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
     const approvalData:ApprovalData = {
       bookingId: request.id,
       serviceName: request.serviceName,
-      endTime:endingTime,
+      durationHours: Number(durationHours),
+      distance,
       additionalItems,
       additionalNotes,
     }
     
- 
+
     console.log("Service Approved:", approvalData)
 
     try {
@@ -166,6 +170,27 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
     setShowRejectionModal(false)
     onClose()
   }
+  const convertToHours = (time?: string): number => {
+    if (!time) return 0
+
+    // Case 1: HH:MM format
+    if (time.includes(":")) {
+      const [hrs, mins] = time.split(":").map(Number)
+      if (isNaN(hrs) || isNaN(mins)) return 0
+      return hrs + mins / 60
+    }
+
+    // Case 2: "3.45" or "3.45 hours"
+    const numeric = parseFloat(time)
+    if (!isNaN(numeric)) {
+      return numeric
+    }
+
+    return 0
+  }
+
+  const maxAvailableHours = convertToHours(request.availableTime)
+  console.log(maxAvailableHours)
 
   const getProgressValue = () => {
     switch (request.status) {
@@ -254,6 +279,16 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
                 </p>
                 <p className="font-semibold text-foreground">{request.time}</p>
               </div>
+              <div className="md:col-span-2 flex items-center gap-2 mt-2">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                Available Time
+              </span>
+
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                {request.availableTime} hrs
+              </span>
+            </div>
               <div className="md:col-span-2">
                 <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
                   <MapPin className="w-4 h-4" /> Location
@@ -271,14 +306,18 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
               <h3 className="font-semibold text-foreground">Service Completion Details</h3>
 
               <div>
-                <Label htmlFor="ending-time" className="text-sm font-medium">
-                  Expected Ending Time
+                <Label htmlFor="duration-hours" className="text-sm font-medium">
+                  Estimated Work Duration (Hours)
                 </Label>
                 <Input
-                  id="ending-time"
-                  type="time"
-                  value={endingTime}
-                  onChange={(e) => setEndingTime(e.target.value)}
+                  id="duration-hours"
+                  type="number"
+                  step="0.25"
+                  min="0.5"
+                  max={maxAvailableHours}
+                  placeholder={`Max ${request.availableTime} hrs`}
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(e.target.value)}
                   className="mt-1"
                 />
               </div>

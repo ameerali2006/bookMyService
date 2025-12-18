@@ -1,4 +1,5 @@
 import {
+  AdminBookingDto,
   serviceCreateDto, serviceManageDto, userManageDto, workerManageDto,
 } from '../../dto/admin/management.dto';
 import { IUser } from '../model/user.model.interface';
@@ -13,4 +14,5 @@ export interface IManagementAdminService{
     getAllServices(search:string, sort:string, page:number, limit:number,): Promise<{services:serviceManageDto[];currentPage: number;totalPages: number;totalItems: number}>;
     serviceRegister(data:serviceCreateDto):Promise<{data?:serviceManageDto, message:string}>
     updateServiceStatus(serviceId:string, status:'inactive' |'active'):Promise<{success:boolean, status:'inactive' |'active'}>
+    getAllBookings(search:string,status:string,limit:number,page:number):Promise<{success:boolean,message:string,bookings?: AdminBookingDto[],total: number,page: number,limit: number}>
 }

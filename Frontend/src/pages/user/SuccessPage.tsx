@@ -96,7 +96,7 @@ const PaymentSuccessPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-3 pt-4">
-            <Button onClick={() => navigate(`/booking/${bookingId}`)} size="lg">
+            <Button onClick={() => navigate(`/bookings/${bookingId}`)} size="lg">
               View Booking Details
             </Button>
             <Button onClick={() => navigate("/")} variant="outline" size="lg">

@@ -11,5 +11,6 @@ export interface IAdminManagementController {
     getAllServices(req: Request, res: Response, next: NextFunction): Promise<void>
     serviceRegister(req: Request, res: Response, next: NextFunction): Promise<void>
     updateServiceStatus(req: Request, res: Response, next: NextFunction): Promise<void>
+    getBookings(req: Request, res: Response, next: NextFunction): Promise<void>
 
 }

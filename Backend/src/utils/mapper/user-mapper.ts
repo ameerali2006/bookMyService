@@ -108,6 +108,7 @@ export class UserMapper {
       paymentMethod: b.paymentMethod,
 
       additionalItems: b.additionalItems || [],
+      paymentItems:b?.paymentBreakdown,
 
       status: b.status,
       workerResponse: b.workerResponse,

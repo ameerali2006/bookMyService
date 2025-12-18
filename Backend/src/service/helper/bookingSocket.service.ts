@@ -11,12 +11,14 @@ import { ISocketHandler } from '../../interface/service/socketHandler.service.in
 import { IBooking, IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { WorkerMapper } from '../../utils/mapper/worker-mapper';
+import { IWorkerHelperService } from '../../interface/service/helper-service.service.interface';
 
 @injectable()
 export class BookingSocketHandler implements ISocketHandler {
   constructor(
     @inject(TYPES.BookingService) private _bookingUseCase: IBookingService,
     @inject(TYPES.BookingRepository) private _bookingRepo:IBookingRepository,
+    @inject(TYPES.WorkerHelperService) private _workerHelper:IWorkerHelperService,
 
   ) {}
 
@@ -43,7 +45,7 @@ export class BookingSocketHandler implements ISocketHandler {
     });
   }
 
-  public static emitBookingToWorker(
+  public  async emitBookingToWorker(
     io: IOServer,
     onlineWorkers: Map<string, { socketId: string; userType: string }>,
     workerId: IWorker,
@@ -54,8 +56,13 @@ export class BookingSocketHandler implements ISocketHandler {
     if (worker) {
       console.log(booking)
       const service = WorkerMapper.serviceRequest(booking);
-      console.log(service);
-      io.to(worker.socketId).emit('receive-pending-booking', service);
+      const nextAvailable = await this._workerHelper.getWorkerAvailableTime(
+            booking.workerId._id.toString(),
+            booking.date,
+            booking.startTime
+          );
+      console.log({...service,availableTime:nextAvailable.availableTime});
+      io.to(worker.socketId).emit('receive-pending-booking', {...service,availableTime:nextAvailable.availableTime});
       console.log(booking);
       console.log(`📨 Booking emitted to worker ${workerId}`);
     } else {

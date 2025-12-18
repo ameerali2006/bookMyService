@@ -120,3 +120,17 @@ export const buildLabeledTimeline = (
   }
   return merged;
 };
+export const addDurationToTime=(startTime: string, durationHours: number): string =>{
+  const [hours, minutes] = startTime.split(":").map(Number);
+
+  const startDate = new Date();
+  startDate.setHours(hours, minutes, 0, 0);
+
+  const addedMinutes = durationHours * 60;
+  startDate.setMinutes(startDate.getMinutes() + addedMinutes);
+
+  const endH = String(startDate.getHours()).padStart(2, "0");
+  const endM = String(startDate.getMinutes()).padStart(2, "0");
+
+  return `${endH}:${endM}`;
+}

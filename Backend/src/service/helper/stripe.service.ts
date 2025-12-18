@@ -14,6 +14,7 @@ import { BookingSocketHandler } from './bookingSocket.service';
 import { io, onlineWorkers } from '../../config/socketServer';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
+import { bookingSocketHandler } from '../../config/di/resolver';
 
 @injectable()
 export class StripeService implements IStripeService {
@@ -122,7 +123,7 @@ export class StripeService implements IStripeService {
 
           if (booking && booking.workerId) {
             console.log(`📢 Emitting booking to worker: ${booking.workerId}`);
-            BookingSocketHandler.emitBookingToWorker(io, onlineWorkers, booking.workerId as IWorker, booking);
+            await bookingSocketHandler.emitBookingToWorker(io, onlineWorkers, booking.workerId as IWorker, booking);
           } else {
             console.log(`⚠️ Booking not found or worker missing for ${bookingId}`);
           }
