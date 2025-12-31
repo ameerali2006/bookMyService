@@ -7,12 +7,12 @@ import { STATUS_CODES } from "../../config/constants/status-code";
 
 import { CustomError } from "../../utils/custom-error";
 import { MESSAGES } from "../../config/constants/message";
-import { updateUserProfileSchema } from "../validation/updateUserProfileDetails";
-import { IProfileManagement } from "../../interface/service/user/profileManagement.serice.interface";
-import { addressSchema } from "../validation/addAddress.zod";
-import { changePasswordSchema } from "../validation/changePassword.zod";
+import { updateUserProfileSchema } from "../validation/update-user-profile-details";
+import { IProfileManagement } from "../../interface/service/user/profile-management.serice.interface";
+import { addressSchema } from "../validation/add-address.zod";
+import { changePasswordSchema } from "../validation/change-password.zod";
 import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
-import { IBookingDetailsService } from "../../interface/service/user/bookingDetails.service.interface";
+import { IBookingDetailsService } from "../../interface/service/user/booking-details.service.interface";
 import { success } from "zod";
 
 @injectable()

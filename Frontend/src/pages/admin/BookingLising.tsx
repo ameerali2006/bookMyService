@@ -28,6 +28,7 @@ import Navbar from "@/components/admin/Navbar"
 import { useNavigate } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { AdminBookingCard } from "@/components/admin/Bookings/BookingCard"
+import { useDebounce } from "@/hook/useDebounce"
 
 export default function AdminBookingsPage() {
     const navigate=useNavigate()
@@ -36,6 +37,7 @@ export default function AdminBookingsPage() {
 
   // Backend-driven state
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebounce(search, 500)
   const [status, setStatus] = useState<BookingStatus | "all">("all")
   const [page, setPage] = useState(1)
   const [limit] = useState(5)
@@ -48,7 +50,7 @@ export default function AdminBookingsPage() {
     setLoading(true)
     try {
       const res = await adminManagement.getBookings({
-        search,
+        search:debouncedSearch,
         status:status === "all" ? undefined : status,
         page,
         limit,

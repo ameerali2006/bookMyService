@@ -3,7 +3,7 @@ import http from 'http';
 import { ENV } from './env/env';
 import { MESSAGES } from './constants/message';
 import { CustomSocket } from '../types/socket';
-import { ISocketHandler } from '../interface/service/socketHandler.service.interface';
+import { ISocketHandler } from '../interface/service/socket-handler.service.interface';
 
 export class SocketCore {
   private io: IOServer;

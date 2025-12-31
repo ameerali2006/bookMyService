@@ -5,9 +5,9 @@ import { IAdminManagementController } from '../../interface/controller/managemen
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { MESSAGES } from '../../config/constants/message';
 import { TYPES } from '../../config/constants/types';
-import { IManagementAdminService } from '../../interface/service/managementAdmin.service.interface';
+import { IManagementAdminService } from '../../interface/service/management-admin.service.interface';
 import { CustomError } from '../../utils/custom-error';
-import { serviceRegistrationSchema } from '../validation/serviceCreate';
+import { serviceRegistrationSchema } from '../validation/service-create';
 
 @injectable()
 export class ManagementAdmin implements IAdminManagementController {
@@ -233,6 +233,22 @@ export class ManagementAdmin implements IAdminManagementController {
 
     } catch (error) {
       next(error)
+    }
+  }
+  async getBookingDetailPage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const bookingId=req.params.bookingId as string 
+
+      const result=await this._adminManagement.getBookingDetail(bookingId)
+      if(result.success){
+      res.status(STATUS_CODES.OK).json(result)
+    }else{
+      res.status(STATUS_CODES.BAD_REQUEST).json(result)
+    }
+
+    } catch (error) {
+      next(error)
+      
     }
   }
 }

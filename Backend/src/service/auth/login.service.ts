@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { LoginDto } from '../../dto/shared/login.dto';
-import { UserDataDTO } from '../../dto/user/auth/userData.dto';
+import { UserDataDTO } from '../../dto/user/auth/user-data.dto';
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
 import { ILoginService } from '../../interface/service/auth/login.service.interface';
 import { TYPES } from '../../config/constants/types';

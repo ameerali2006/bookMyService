@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { AdminBooking } from "@/interface/admin/booking"
+import { useNavigate } from "react-router-dom"
 
 interface AdminBookingCardProps {
   booking: AdminBooking
@@ -15,6 +16,7 @@ const statusVariants = {
 }
 
 export function AdminBookingCard({ booking }: AdminBookingCardProps) {
+  const navigate=useNavigate()
   const formattedDate = new Date(booking.date).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -28,7 +30,7 @@ export function AdminBookingCard({ booking }: AdminBookingCardProps) {
   })
 
   return (
-    <Card className="p-4 transition-shadow hover:shadow-md">
+    <Card className="p-4 transition-shadow hover:shadow-md" onClick={()=>navigate(`/admin/bookings/${booking.id}`)}>
       {/* Mobile Layout */}
       <div className="flex flex-col gap-3 sm:hidden">
         <div className="flex items-start justify-between">

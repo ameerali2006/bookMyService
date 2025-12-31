@@ -1,6 +1,6 @@
 import { Address, ProfileDetails } from '../../dto/user/auth/profile.dto';
 import { UserRegisterDTO, userResponse } from '../../dto/user/auth/user-register.dto';
-import { BookingDetailDto, ongoingBookingDto } from '../../dto/user/bookingDetails.dto';
+import { BookingDetailDto, ongoingBookingDto } from '../../dto/user/booking-details.dto';
 import { IAddress } from '../../interface/model/address.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IUser } from '../../interface/model/user.model.interface';

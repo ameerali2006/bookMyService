@@ -18,6 +18,7 @@ import { authService} from "@/api/AuthService"
 import { adminManagement } from "@/api/AdminManagement"
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import { DataTable, type TableColumn } from "@/components/shared/DataTable"
+import { useDebounce } from "@/hook/useDebounce"
 
 
 interface User {
@@ -46,6 +47,7 @@ const UserManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearch = useDebounce(searchTerm, 500)
   const [sortBy, setSortBy] = useState<string>("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [activeMenuItem, setActiveMenuItem] = useState("UserManagement")
@@ -63,7 +65,7 @@ const UserManagement: React.FC = () => {
     setLoading(true)
     try {
       console.log(currentPage, pageSize, searchTerm, sortBy, sortOrder)
-      const response = await adminManagement.getAllUsers(currentPage, pageSize, searchTerm, sortBy, sortOrder)
+      const response = await adminManagement.getAllUsers(currentPage, pageSize, debouncedSearch, sortBy, sortOrder)
       console.log(response)
       if (response.status === 200 && response.data) {
         setUsers(response.data.users)

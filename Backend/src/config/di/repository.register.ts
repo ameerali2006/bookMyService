@@ -7,8 +7,6 @@ import { OtpRepository } from '../../repository/shared/otp-repository.reposiory'
 import { IOtpRepository } from '../../interface/repository/otp.repository.interface';
 import { IAdminRepository } from '../../interface/repository/admin.repository.interface';
 import { AdminRepository } from '../../repository/admin/admin.repository';
-import { IRedisTokenRepository } from '../../interface/repository/redis/redis.repository.interface';
-import { RedisTokenRepository } from '../../repository/shared/redis.repository';
 import { RefreshTokenRepository } from '../../repository/shared/refresh-token.repository';
 import { IRefreshTokenRepository } from '../../interface/repository/refresh-token.repository.interface';
 import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
@@ -17,16 +15,18 @@ import { IServiceRepository } from '../../interface/repository/service.repositor
 import { ServiceRepository } from '../../repository/helper/service.repository';
 import { IWorkingDetailsRepository } from '../../interface/repository/working-details.interface';
 import { WorkingDetailsRepository } from '../../repository/shared/working-details.repository';
-import { IWorkerAggregation } from '../../interface/repository/workerAggregation.repository.interface';
-import { WorkerAggregation } from '../../repository/worker/workerAggregation.repository';
+import { IWorkerAggregation } from '../../interface/repository/worker-aggregation.repository.interface';
+import { WorkerAggregation } from '../../repository/worker/worker-aggregation.repository';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
 import { BookingRepository } from '../../repository/shared/booking-details.repository';
 import { IPaymentRepository } from '../../interface/repository/payment.repository.interface';
 import { PaymentRepository } from '../../repository/shared/payment.repository';
 import { IWalletRepository } from '../../interface/repository/wallet.repository.interface';
 import { WalletRepository } from '../../repository/shared/wallet.respository';
-import { IWalletTransactionRepository } from '../../interface/repository/walletTransaction.repository.interface';
-import { WalletTransactionRepository } from '../../repository/shared/walletTransaction.repository';
+import { IWalletTransactionRepository } from '../../interface/repository/wallet-transaction.repository.interface';
+import { WalletTransactionRepository } from '../../repository/shared/wallet-transaction.repository';
+import { ISlotLockRepository } from '../../interface/repository/slot-lock.repository.interface';
+import { SlotLockRepository } from '../../repository/helper/slot-lock.repository';
 
 export class RepositoryRegistery {
   static registerRepository():void {
@@ -34,7 +34,7 @@ export class RepositoryRegistery {
     container.register<IOtpRepository>(TYPES.OtpRepository, { useClass: OtpRepository });
     container.register<IAdminRepository>(TYPES.AdminRepository, { useClass: AdminRepository });
     container.register<IWorkerRepository>(TYPES.WorkerRepository, { useClass: WorkerRepository });
-    container.register<IRedisTokenRepository>(TYPES.RedisTokenRepository, { useClass: RedisTokenRepository });
+    container.register<ISlotLockRepository>(TYPES.SlotLockRepository, { useClass: SlotLockRepository });
     container.register<IRefreshTokenRepository>(TYPES.RefreshTokenRepository, { useClass: RefreshTokenRepository });
     container.register<IServiceRepository>(TYPES.ServiceRepository, { useClass: ServiceRepository });
     container.register<IWorkingDetailsRepository>(TYPES.WorkingDetailsRepository, { useClass: WorkingDetailsRepository });

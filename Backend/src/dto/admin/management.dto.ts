@@ -1,3 +1,6 @@
+import { response } from "express"
+import { responsePart } from "../shared/responsePart"
+
 export interface userManageDto{
     _id:string,
     name:string,
@@ -47,3 +50,77 @@ export interface AdminBookingDto {
   status: "pending" | "confirmed" | "in-progress" | "awaiting-final-payment" | "completed" | "cancelled"
   createdAt: Date
 }
+export interface AdminBookingDetailsDto {
+  id: string
+  status: string
+  bookingDate: Date
+  timeSlot: string
+
+  customer: {
+    name: string
+    phone: string
+    avatar?: string
+  }
+
+  worker: {
+    name: string
+    phone?: string
+    email: string
+    avatar?: string
+    response: 'accepted' | 'rejected' | 'pending'
+  }
+
+  service: {
+    name: string
+    category: string
+    duration: number
+  }
+
+  address: {
+    street?: string
+    city: string
+    state: string
+    pinCode: string
+    phone: string
+    lat: number
+    lng: number
+  }
+
+  description?: string
+
+  additionalItems: {
+    name: string
+    price: number
+  }[]
+
+  payment: {
+    advanceAmount: number
+    remainingAmount: number
+    totalAmount: number
+    advancePaid: boolean
+    finalPaid: boolean
+    paymentMethod?: string
+    breakdown?: {
+      title: string
+      rate: number
+      quantity: number
+      total: number
+    }[]
+  }
+
+  rating?: {
+    stars: number
+    review?: string
+  }
+
+  timeline: {
+    status: string
+    completed: boolean
+    date?: Date
+  }[]
+}
+export interface IbookingDetailPageResponse extends responsePart{
+  booking?:AdminBookingDetailsDto
+
+}
+

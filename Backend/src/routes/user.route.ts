@@ -1,7 +1,7 @@
 import express, {
   Response, Request, NextFunction, RequestHandler,
 } from 'express';
-import { BaseRoute } from './base.route.js';
+import { BaseRoute } from './base.route';
 import {
   authController,
   blockStatusMiddleware,
@@ -11,8 +11,8 @@ import {
   tokenController,
   userController,
 
-} from '../config/di/resolver.js';
-import { authorizeRole, verifyAuth } from '../middleware/auth.middleware.js';
+} from '../config/di/resolver';
+import { authorizeRole, verifyAuth } from '../middleware/auth.middleware';
 
 export class UserRoute extends BaseRoute {
   constructor() {

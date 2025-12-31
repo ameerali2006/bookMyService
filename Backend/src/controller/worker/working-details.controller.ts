@@ -7,8 +7,8 @@ import { MESSAGES } from '../../config/constants/message';
 import { CustomError } from '../../utils/custom-error';
 import { IWorkingDetailsManagement, updateWorker } from '../../interface/service/worker/workingDetails.service.interface';
 import { CustomRequest } from '../../middleware/auth.middleware';
-import { workerProfileUpdateSchema } from '../validation/updateWorkerprofile';
-import { changePasswordSchema } from '../validation/changePassword.zod';
+import { workerProfileUpdateSchema } from '../validation/update-worker-profile';
+import { changePasswordSchema } from '../validation/change-password.zod';
 import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
 
 @injectable()

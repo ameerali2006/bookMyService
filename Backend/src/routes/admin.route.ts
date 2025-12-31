@@ -120,5 +120,13 @@ export class AdminRoute extends BaseRoute {
         managementAdminController.getBookings(req, res, next);
       }
     );
+    this.router.get(
+      "/booking/:bookingId",
+      verifyAuth(),
+      authorizeRole(["admin"]),
+      (req: Request, res: Response, next: NextFunction) => {
+        managementAdminController.getBookingDetailPage(req, res, next);
+      }
+    );
   }
 }

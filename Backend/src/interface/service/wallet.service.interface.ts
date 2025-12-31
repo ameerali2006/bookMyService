@@ -1,3 +1,5 @@
+import { responsePart } from "../../dto/shared/responsePart";
+
 export interface IAddBalanceInput {
   userId: string;
   role: "User" | "Worker" | "Admin";
@@ -5,5 +7,5 @@ export interface IAddBalanceInput {
   description?: string;
 }
 export interface IWalletService{
-    addBalance(data: IAddBalanceInput): Promise<{success:boolean,message:string}>;
+    addBalance(data: IAddBalanceInput): Promise<responsePart>;
 }

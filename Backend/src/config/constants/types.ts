@@ -1,4 +1,5 @@
 export const TYPES = {
+  SlotLockRepository:Symbol.for('SlotLockRepository'),
   BookingDetailsService:Symbol.for('BookingDetailsService'),
   WalletService:Symbol.for('WalletService'),
   WalletTransactionRepository:Symbol.for('WalletTransactionRepository'),
@@ -11,7 +12,7 @@ export const TYPES = {
   PasswordService: Symbol.for('PasswordService'),
   EmailService: Symbol.for('EmailService'),
   JwtService: Symbol.for('JwtService'),
-  RedisTokenRepository: Symbol.for('RedisTokenRepository'),
+  RedisTokenService: Symbol.for('RedisTokenService'),
   RefreshTokenRepository: Symbol.for('RefreshTokenRepository'),
   WorkingDetailsRepository: Symbol.for('WorkingDetailsRepository'),
   WorkerAggregation: Symbol.for('WorkerAggregation'),

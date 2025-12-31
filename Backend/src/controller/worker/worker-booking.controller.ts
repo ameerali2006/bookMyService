@@ -3,7 +3,7 @@ import { IWorkerBookingController } from '../../interface/controller/worker-book
 import { Request, Response, NextFunction } from 'express';
 import { TYPES } from '../../config/constants/types';
 import { IWorkerBookingService } from '../../interface/service/worker/worker-booking.service.interface';
-import { ApprovalSchema } from '../validation/serviceApproval.zod';
+import { ApprovalSchema } from '../validation/service-approval.zod';
 import { MESSAGES } from '../../config/constants/message';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { CustomRequest } from '../../middleware/auth.middleware';
@@ -58,7 +58,7 @@ export class WorkerBookingController implements IWorkerBookingController {
         limit: Number(req.query.limit) || 20,
       };
 
-      const response = await this.bookingService.getServiceRequests(filters);
+      const response = await this.bookingService.getServiceRequests({...filters,advancePaymentStatus:'paid'});
 
       res.json(response);
     } catch (error) {

@@ -94,12 +94,16 @@ export default function BasicBookingDetails() {
       setLoading(true);
 
       const response = await userService.selectDateTimeAvailablity(data);
+      
+      console.log(response)
 
       if (response.data.success) {
-        SuccessToast("Time slot selected successfully!");
+        console.log("1")
+        SuccessToast(response.data.message||"Time slot selected successfully!");
         
         navigate(`/services/preBooking/${response.data.bookingId}`);
       } else {
+        console.log('2')
         ErrorToast(response.data.message || "Failed to confirm time slot.");
       }
     } catch (error) {

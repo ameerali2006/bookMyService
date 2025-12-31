@@ -1,5 +1,5 @@
 import { InferSchemaType, model, Schema, Types } from "mongoose";
-import { IWalletTransaction } from "../interface/model/walletTransactions.modal.interface";
+import { IWalletTransaction } from "../interface/model/wallet-transactions.modal.interface";
 
 const WalletTransactionSchema = new Schema(
   {

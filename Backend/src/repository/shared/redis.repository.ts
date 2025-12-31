@@ -1,10 +1,10 @@
 import { injectable } from 'tsyringe';
 import { redisClient } from '../../config/redis';
-import { IRedisTokenRepository } from '../../interface/repository/redis/redis.repository.interface';
+import { IRedisTokenService } from '../../interface/service/redis.service.interface';
 import { CustomError } from '../../utils/custom-error';
 
 @injectable()
-export class RedisTokenRepository implements IRedisTokenRepository {
+export class RedisTokenService implements IRedisTokenService {
   async blackListToken(token: string, expiresIn: number): Promise<void> {
     if (typeof token !== 'string') {
       console.error('Invalid token type:', typeof token, token);

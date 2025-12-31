@@ -1,4 +1,4 @@
-import { WorkerProfileDTO } from '../../../dto/worker/workingDetails.dto';
+import { getCalenderDetailsResponseDto, getProfileDetailsResponseDto, updateCalenderDetailsResponseDto, updateWorkerProfileResponseDto, updateWorkingDetailsResponseDto, WorkerProfileDTO } from '../../../dto/worker/working-details.dto';
 import {
   ICustomSlot, IDaySchedule, IHoliday, IWorkingDetailsDocument,
 } from '../../model/working-details.interface';
@@ -12,11 +12,11 @@ export interface updateWorker{
   image:string
 }
 export interface IWorkingDetailsManagement{
-    updateWorkingDetails(email:string, payload:IDaySchedule):Promise<{success:boolean, message:string, data:IWorkingDetailsDocument|null}>
+    updateWorkingDetails(email:string, payload:IDaySchedule):Promise<updateWorkingDetailsResponseDto>
     getWorkingDetails(email: string): Promise<IWorkingDetailsDocument>
-    getProfileDetails(workerId: string): Promise<{success:boolean, message:string, worker:WorkerProfileDTO|null}>
-    updateWorkerProfile(workerId: string, updateData:Partial<updateWorker>): Promise<{success:boolean, message:string, worker:WorkerProfileDTO|null}>
-    getCalenderDetails(workerId: string): Promise<{success:boolean, message:string, customSlots:ICustomSlot[]|null, holidays:IHoliday[]|null}>
-    updateCalenderDetails(workerId: string, customSlots:ICustomSlot[], holidays:IHoliday[]): Promise<{success:boolean, message:string, customSlots:ICustomSlot[]|null, holidays:IHoliday[]|null}>
+    getProfileDetails(workerId: string): Promise<getProfileDetailsResponseDto>
+    updateWorkerProfile(workerId: string, updateData:Partial<updateWorker>): Promise<updateWorkerProfileResponseDto>
+    getCalenderDetails(workerId: string): Promise<getCalenderDetailsResponseDto>
+    updateCalenderDetails(workerId: string, customSlots:ICustomSlot[], holidays:IHoliday[]): Promise<updateCalenderDetailsResponseDto>
 
 }

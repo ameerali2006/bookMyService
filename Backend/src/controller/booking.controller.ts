@@ -4,7 +4,7 @@ import { StringExpression } from 'mongoose';
 import { IBookingController } from '../interface/controller/booking-controller.controller.interface';
 import { CustomRequest } from '../middleware/auth.middleware';
 import { TYPES } from '../config/constants/types';
-import { IBookingService } from '../interface/service/services/bookingService.sevice.interface';
+import { IBookingService } from '../interface/service/services/booking-service.sevice.interface';
 import { STATUS_CODES } from '../config/constants/status-code';
 
 @injectable()
@@ -22,6 +22,9 @@ export class BookingController implements IBookingController {
         date, time, description, workerId,
       } = req.body;
       const response = await this._bookingService.setBasicBookingDetails(userId, workerId, time, date, description);
+      if(response.message=="Slot already booked by another user"){
+        res.status(STATUS_CODES.OK).json(response);
+      }else
       if (!response.success) {
         res.status(STATUS_CODES.BAD_REQUEST).json(response);
       } else {

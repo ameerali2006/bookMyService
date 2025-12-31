@@ -1,5 +1,5 @@
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
-import { ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/workingDetails.dto';
+import { ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/working-details.dto';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { WorkerModel } from '../../model/worker.model';

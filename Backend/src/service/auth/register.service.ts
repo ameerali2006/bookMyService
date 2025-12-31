@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { UserDataRegisterDto, UserRegisterDTO } from '../../dto/user/auth/user-register.dto';
-import { UserDataDTO } from '../../dto/user/auth/userData.dto';
+import { UserDataDTO } from '../../dto/user/auth/user-data.dto';
 import { WorkerRegisterDTO, responseDto } from '../../dto/worker/auth/worker-register.dto';
 import { IRegisterService } from '../../interface/service/auth/register.service.interface';
 import { TYPES } from '../../config/constants/types';

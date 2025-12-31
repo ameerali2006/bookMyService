@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
 import CreateServiceModal from "@/components/admin/Service/AddServiceModal";
+import { useDebounce } from "@/hook/useDebounce";
 
 // ✅ Match backend fields
 interface Service {
@@ -50,6 +51,7 @@ export default function ServiceManagement() {
   const [uploading, setUploading] = useState(false);
   // Modal states
   const [open, setOpen] = useState(false);
+  const debouncedSearch = useDebounce(search, 500)
   const [formData, setFormData] = useState<{
     category: string;
     description: string;
@@ -74,7 +76,7 @@ export default function ServiceManagement() {
     try {
       const limit = 6;
       const { data } = await adminManagement.getAllSerivces(
-        search,
+        debouncedSearch,
         sort,
         page,
         limit

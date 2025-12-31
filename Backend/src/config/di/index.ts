@@ -1,5 +1,5 @@
-import { RepositoryRegistery } from './repository.register.js';
-import { ServiceRegistery } from './service.register.js';
+import { RepositoryRegistery } from './repository.register';
+import { ServiceRegistery } from './service.register';
 
 export class DependencyInjection {
   static registerAll():void {

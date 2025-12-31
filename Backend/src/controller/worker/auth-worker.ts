@@ -1,22 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { Types } from 'mongoose';
-import { TYPES } from '../../config/constants/types.js';
-import { MESSAGES } from '../../config/constants/message.js';
-import { STATUS_CODES } from '../../config/constants/status-code.js';
-import { LoginDto } from '../../dto/shared/login.dto.js';
-import { clearAuthCookies, setAuthCookies, updateCookieWithAccessToken } from '../../utils/cookie-helper.js';
-import { ITokenservice } from '../../interface/service/token.service.interface.js';
-import { CustomRequest } from '../../middleware/auth.middleware.js';
-import { IWorkerAuthController } from '../../interface/controller/auth-worker.controller.interface.js';
+import { TYPES } from '../../config/constants/types';
+import { MESSAGES } from '../../config/constants/message';
+import { STATUS_CODES } from '../../config/constants/status-code';
+import { LoginDto } from '../../dto/shared/login.dto';
+import { clearAuthCookies, setAuthCookies, updateCookieWithAccessToken } from '../../utils/cookie-helper';
+import { ITokenservice } from '../../interface/service/token.service.interface';
+import { CustomRequest } from '../../middleware/auth.middleware';
+import { IWorkerAuthController } from '../../interface/controller/auth-worker.controller.interface';
 
-import { IResetPassword } from '../../interface/service/resetPassword.service.interface.js';
-import { ILoginService } from '../../interface/service/auth/login.service.interface.js';
-import { schemasByRole } from '../validation/register.zod.js';
-import { IRegisterService } from '../../interface/service/auth/register.service.interface.js';
-import { IOtpService } from '../../interface/service/auth/otp.service.interface.js';
-import { IGoogleService } from '../../interface/service/auth/google.service.interface.js';
-import { IIsVerified } from '../../interface/service/auth/isVerified.service.interface.js';
+import { IResetPassword } from '../../interface/service/reset-password.service.interface';
+import { ILoginService } from '../../interface/service/auth/login.service.interface';
+import { schemasByRole } from '../validation/register.zod';
+import { IRegisterService } from '../../interface/service/auth/register.service.interface';
+import { IOtpService } from '../../interface/service/auth/otp.service.interface';
+import { IGoogleService } from '../../interface/service/auth/google.service.interface';
+import { IIsVerified } from '../../interface/service/auth/is-verified.service.interface';
 
 @injectable()
 export class AuthWorkerController implements IWorkerAuthController {

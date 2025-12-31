@@ -4,7 +4,7 @@ import { IServiceConroller } from '../interface/controller/services.controller.i
 import { TYPES } from '../config/constants/types';
 import { STATUS_CODES } from '../config/constants/status-code';
 
-import { IServiceDetails } from '../interface/service/services/ServiceDetails.service.interface';
+import { IServiceDetails } from '../interface/service/services/Service-details.service.interface';
 
 @injectable()
 export class ServiceController implements IServiceConroller {
@@ -23,7 +23,7 @@ export class ServiceController implements IServiceConroller {
       );
       console.log(response);
 
-      res.status(response.status).json(response);
+      res.status(response.status as number).json(response);
     } catch (error) {
       next(error);
     }

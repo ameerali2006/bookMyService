@@ -1,5 +1,6 @@
-import { ChangePasswordDTO } from '../../controller/validation/changePassword.zod';
+import { ChangePasswordDTO } from '../../controller/validation/change-password.zod';
+import { responsePart } from '../../dto/shared/responsePart';
 
 export interface IChangePasswordService{
-    changePassword(role: 'worker' | 'user', userId: string, dto: ChangePasswordDTO): Promise<{success:boolean, message:string}>
+    changePassword(role: 'worker' | 'user', userId: string, dto: ChangePasswordDTO): Promise<responsePart>
 }

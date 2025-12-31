@@ -3,3 +3,6 @@ export interface LoginDto{
     password:string
     role:'admin'|'worker'|'user'
 }
+export interface requestGoogleAuth{
+    token:string, role:'user'|'worker'
+}

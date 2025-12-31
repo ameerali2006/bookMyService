@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "../../config/constants/types";
 import { IWalletRepository } from "../../interface/repository/wallet.repository.interface";
-import { IWalletTransactionRepository } from "../../interface/repository/walletTransaction.repository.interface";
+import { IWalletTransactionRepository } from "../../interface/repository/wallet-transaction.repository.interface";
 import { IAddBalanceInput, IWalletService } from "../../interface/service/wallet.service.interface";
 
 @injectable()

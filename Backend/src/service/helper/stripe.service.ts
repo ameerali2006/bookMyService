@@ -10,7 +10,7 @@ import {
 } from '../../interface/service/stripe.service.interface';
 import { ENV } from '../../config/env/env';
 import { TYPES } from '../../config/constants/types';
-import { BookingSocketHandler } from './bookingSocket.service';
+import { BookingSocketHandler } from './booking-socket.service';
 import { io, onlineWorkers } from '../../config/socketServer';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';

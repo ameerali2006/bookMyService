@@ -17,6 +17,7 @@ import { adminManagement } from "@/api/AdminManagement"
 import { SuccessToast, ErrorToast } from "@/components/shared/Toaster"
 import { Switch } from "@/components/ui/switch"
 import { DataTable, type TableColumn } from "@/components/shared/DataTable"
+import { useDebounce } from "@/hook/useDebounce"
 
 
 interface Worker {
@@ -36,6 +37,7 @@ const WorkerManagement: React.FC = () => {
   const navigate = useNavigate()
   const [workers, setWorkers] = useState<Worker[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearch = useDebounce(searchTerm, 500)
   const [loading, setLoading] = useState(true)
   const [updateLoading, setUpdateLoading] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -44,7 +46,7 @@ const WorkerManagement: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [total, setTotal] = useState(0)
   useEffect(() => {
-  fetchWorkers(currentPage, pageSize, sortBy, sortOrder, searchTerm)
+  fetchWorkers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch)
 }, [currentPage, pageSize, sortBy, sortOrder, searchTerm])
 
 

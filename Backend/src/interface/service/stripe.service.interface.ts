@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { PaymentStatus } from '../model/payement.model.interface';
+import { createPaymentIntentResponse } from '../../dto/shared/helpers.dto';
 
 export interface CreatePaymentIntenServicetInput {
   amount: number;
@@ -13,7 +14,7 @@ export interface CreatePaymentIntenServicetInput {
   }
 }
 export interface IStripeService {
-    createPaymentIntent(input : CreatePaymentIntenServicetInput): Promise<{success:boolean, message:string, paymentIntent:Stripe.PaymentIntent|null}>
+    createPaymentIntent(input : CreatePaymentIntenServicetInput): Promise<createPaymentIntentResponse>
     updatePaymentStatus(paymentIntentId: string, status: PaymentStatus) : Promise<void>
     handleWebhookEvent(event : Stripe.Event) : Promise<void>
 }

@@ -1,10 +1,11 @@
+import { getServiceNamesResponse, getWorkerAvailableTimeResponse } from '../../dto/shared/helpers.dto';
 import { IService } from '../model/service.model.interface';
 
 export interface IWorkerHelperService{
-    getServiceNames():Promise<{value:string, label:string}[]|null>
+    getServiceNames():Promise<getServiceNamesResponse[]|null>
     getWorkerAvailableTime(
         workerId: string, 
         date: Date, 
         startTime: string
-    ): Promise<{ success: boolean; availableTime?: string }> 
+    ): Promise<getWorkerAvailableTimeResponse> 
 }

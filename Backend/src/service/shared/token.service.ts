@@ -2,7 +2,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { inject, injectable } from 'tsyringe';
 import { ITokenservice } from '../../interface/service/token.service.interface';
 import { IJwtService } from '../../interface/helpers/jwt-service.service.interface';
-import { IRedisTokenRepository } from '../../interface/repository/redis/redis.repository.interface';
+import { IRedisTokenService } from '../../interface/service/redis.service.interface';
 import { TYPES } from '../../config/constants/types';
 import { IRefreshTokenRepository } from '../../interface/repository/refresh-token.repository.interface';
 import { CustomError } from '../../utils/custom-error';
@@ -12,7 +12,7 @@ import { MESSAGES } from '../../config/constants/message';
 @injectable()
 export class TokenService implements ITokenservice {
   constructor(
-        @inject(TYPES.RedisTokenRepository) private _redisTokenRepo:IRedisTokenRepository,
+        @inject(TYPES.RedisTokenService) private _redisTokenRepo:IRedisTokenService,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,
         @inject(TYPES.RefreshTokenRepository)private _refreshTokenRepository: IRefreshTokenRepository,
 

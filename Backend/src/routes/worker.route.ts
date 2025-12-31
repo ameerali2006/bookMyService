@@ -1,9 +1,9 @@
 import { Response, Request, NextFunction } from 'express';
-import { BaseRoute } from './base.route.js';
+import { BaseRoute } from './base.route';
 import {
   authWorkerController, bookingController, cloudinaryController, tokenController, workerbookingController, workingDetailsController,
-} from '../config/di/resolver.js';
-import { authorizeRole, verifyAuth } from '../middleware/auth.middleware.js';
+} from '../config/di/resolver';
+import { authorizeRole, verifyAuth } from '../middleware/auth.middleware';
 
 export class WorkerRoute extends BaseRoute {
   constructor() {

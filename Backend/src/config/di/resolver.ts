@@ -1,37 +1,37 @@
 import { container } from 'tsyringe';
 
-import { DependencyInjection } from './index.js';
+import { DependencyInjection } from './index';
 
-import { AuthUserController } from '../../controller/user/auth-user.js';
-import { IAuthController } from '../../interface/controller/auth-user.controller.interface.js';
+import { AuthUserController } from '../../controller/user/auth-user';
+import { IAuthController } from '../../interface/controller/auth-user.controller.interface';
 
-import { AuthAdminController } from '../../controller/admin/auth-admin.js';
-import { IAdminController } from '../../interface/controller/auth-admin.controller.interface.js';
+import { AuthAdminController } from '../../controller/admin/auth-admin';
+import { IAdminController } from '../../interface/controller/auth-admin.controller.interface';
 
-import { IWorkerAuthController } from '../../interface/controller/auth-worker.controller.interface.js';
-import { AuthWorkerController } from '../../controller/worker/auth-worker.js';
-import { CloudinaryController } from '../../controller/worker/helper-worker.controller.js';
-import { ICloudinaryController } from '../../interface/controller/helper-worker.controller.interface.js';
-import { IAdminManagementController } from '../../interface/controller/management-admin.controller.interface.js';
-import { ManagementAdmin } from '../../controller/admin/management-admin.js';
-import { IServiceConroller } from '../../interface/controller/services.controller.interface.js';
-import { ServiceController } from '../../controller/services.controller.js';
-import { ITokenController } from '../../interface/controller/token.controller.interface.js';
-import { TokenController } from '../../controller/token.controller.js';
-import { BlockStatusMiddleware } from '../../middleware/block-status.middleware.js';
-import { IWorkingDetailsController } from '../../interface/controller/working-details.controller.interface.js';
-import { WorkingDetailsController } from '../../controller/worker/working-details.controller.js';
-import { IUserController } from '../../interface/controller/user-controller.controller.interface.js';
-import { UserController } from '../../controller/user/user-controller.js';
-import { IBookingController } from '../../interface/controller/booking-controller.controller.interface.js';
-import { BookingController } from '../../controller/booking.controller.js';
-import { IStripeController } from '../../interface/controller/stripe.controller.interface.js';
-import { StripeController } from '../../controller/stripe.controller.js';
-import { IWorkerBookingController } from '../../interface/controller/worker-booking.controller.interface.js';
-import { WorkerBookingController } from '../../controller/worker/worker-booking.controller.js';
-import { TYPES } from '../constants/types.js';
-import { ISocketHandler } from '../../interface/service/socketHandler.service.interface.js';
-import { BookingSocketHandler } from '../../service/helper/bookingSocket.service.js';
+import { IWorkerAuthController } from '../../interface/controller/auth-worker.controller.interface';
+import { AuthWorkerController } from '../../controller/worker/auth-worker';
+import { CloudinaryController } from '../../controller/worker/helper-worker.controller';
+import { ICloudinaryController } from '../../interface/controller/helper-worker.controller.interface';
+import { IAdminManagementController } from '../../interface/controller/management-admin.controller.interface';
+import { ManagementAdmin } from '../../controller/admin/management-admin';
+import { IServiceConroller } from '../../interface/controller/services.controller.interface';
+import { ServiceController } from '../../controller/services.controller';
+import { ITokenController } from '../../interface/controller/token.controller.interface';
+import { TokenController } from '../../controller/token.controller';
+import { BlockStatusMiddleware } from '../../middleware/block-status.middleware';
+import { IWorkingDetailsController } from '../../interface/controller/working-details.controller.interface';
+import { WorkingDetailsController } from '../../controller/worker/working-details.controller';
+import { IUserController } from '../../interface/controller/user-controller.controller.interface';
+import { UserController } from '../../controller/user/user-controller';
+import { IBookingController } from '../../interface/controller/booking-controller.controller.interface';
+import { BookingController } from '../../controller/booking.controller';
+import { IStripeController } from '../../interface/controller/stripe.controller.interface';
+import { StripeController } from '../../controller/stripe.controller';
+import { IWorkerBookingController } from '../../interface/controller/worker-booking.controller.interface';
+import { WorkerBookingController } from '../../controller/worker/worker-booking.controller';
+import { TYPES } from '../constants/types';
+import { ISocketHandler } from '../../interface/service/socket-handler.service.interface';
+import { BookingSocketHandler } from '../../service/helper/booking-socket.service';
 
 DependencyInjection.registerAll();
 

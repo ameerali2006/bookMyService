@@ -77,4 +77,8 @@ export const adminManagement = {
       params,
     });
   },
+  getBookingDetailPage:async (bookingId:string)=>{
+    console.log(bookingId)
+    return await adminAxios.get(`/booking/${bookingId}`)
+  }
 };

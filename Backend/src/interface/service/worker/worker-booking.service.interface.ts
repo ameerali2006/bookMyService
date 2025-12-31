@@ -1,7 +1,13 @@
+import { responsePart } from "../../../dto/shared/responsePart";
 import {
   ApprovedServices,
+  getServiceRequestsResponseDto,
+  getWorkerApprovedBookingsRequestDto,
+  getWorkerApprovedBookingsResponseDto,
+  getWorkerAprrovalpageDetailsResponseDto,
   IWorkerRequestResponse,
-} from "../../../dto/worker/workingDetails.dto";
+  reachedCustomerLocationResponseDto,
+} from "../../../dto/worker/working-details.dto";
 import { IBookingPopulated } from "../../model/booking.model.interface";
 
 export interface serviceData {
@@ -19,6 +25,7 @@ export interface IRequestFilters {
   workerId: string;
   search?: string;
   status?: "pending" | "accepted" | "rejected";
+  advancePaymentStatus:"paid"
   date?: string;
   page: number;
   limit: number;
@@ -26,38 +33,17 @@ export interface IRequestFilters {
 export interface IWorkerBookingService {
   approveService(
     data: serviceData
-  ): Promise<{ success: boolean; message: string }>;
+  ): Promise<responsePart>;
   rejectService(
     bookingId: string,
     description: string
-  ): Promise<{ success: boolean; message: string }>;
+  ): Promise<responsePart>;
   getServiceRequests(
     filter: IRequestFilters
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: IWorkerRequestResponse;
-  }>;
-  getWorkerApprovedBookings(query: {
-    workerId: string;
-    page: number;
-    limit: number;
-    search?: string;
-    status?: "approved" | "in-progress" | "awaiting-final-payment";
-  }): Promise<{
-    success: boolean;
-    message: string;
-    today?: ApprovedServices[];
-    upcoming?: ApprovedServices[];
-    pagination?: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }>;
-  getWorkerAprrovalpageDetails(bookingid:string):Promise<{success:boolean,message:string,booking?:(IBookingPopulated&{verification:boolean})}>
-  reachedCustomerLocation(bookingid:string):Promise<{success:boolean,message:string,booking?:(IBookingPopulated&{verification:boolean})}>
-  verifyWorker(bookingId:string,otp:string):Promise<{success:boolean,message:string}>
+  ): Promise<getServiceRequestsResponseDto>;
+  getWorkerApprovedBookings(query: getWorkerApprovedBookingsRequestDto): Promise<getWorkerApprovedBookingsResponseDto>;
+  getWorkerAprrovalpageDetails(bookingid:string):Promise<getWorkerAprrovalpageDetailsResponseDto>
+  reachedCustomerLocation(bookingid:string):Promise<reachedCustomerLocationResponseDto >
+  verifyWorker(bookingId:string,otp:string):Promise<responsePart>
 
 }
