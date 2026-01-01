@@ -8,6 +8,7 @@ import { MESSAGES } from '../../config/constants/message';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { IHashService } from '../../interface/helpers/hash.interface';
 import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { responsePart } from '../../dto/shared/responsePart';
 
 @injectable()
 export class ChangePasswordService implements IChangePasswordService {
@@ -17,7 +18,7 @@ export class ChangePasswordService implements IChangePasswordService {
     @inject(TYPES.AuthUserRepository) private userRepo: IUserRepository,
   ) {}
 
-  async changePassword(role: 'worker' | 'user', userId: string, dto: ChangePasswordDTO): Promise<{success:boolean, message:string}> {
+  async changePassword(role: 'worker' | 'user', userId: string, dto: ChangePasswordDTO): Promise<responsePart> {
     const repo = role === 'worker' ? this.workerRepo : this.userRepo;
     const user = await repo.findById(userId);
 

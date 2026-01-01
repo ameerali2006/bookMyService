@@ -1,5 +1,11 @@
 import { inject, injectable } from 'tsyringe';
 import { BookingDetails, IBookingService, VerifiedPaymentResult } from '../../interface/service/services/booking-service.sevice.interface';
+import {
+  setBasicBookingDetailsResponse,
+  getBookingDetailsResponseDTO,
+  updateWorkerDetailsResponseDto,
+  verifyPaymentResponseDto,
+} from '../../dto/service.dto';
 import { TYPES } from '../../config/constants/types';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
 import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
@@ -15,7 +21,7 @@ export class BookingService implements IBookingService {
 
   ) {}
 
-  async setBasicBookingDetails(userId: string, workerId: string, time: string, date: Date, description: string): Promise<{ success: boolean; message: string; bookingId: string|null; }> {
+  async setBasicBookingDetails(userId: string, workerId: string, time: string, date: Date, description: string): Promise<setBasicBookingDetailsResponse> {
     try {
       if (!userId || !workerId) {
         return {
@@ -108,7 +114,7 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async getBookingDetails(bookingId: string): Promise<{ success: boolean; message: string; details: BookingDetails | null; }> {
+  async getBookingDetails(bookingId: string): Promise<getBookingDetailsResponseDTO> {
     try {
       if (!bookingId) {
         return {
@@ -157,7 +163,7 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async updateWorkerDetails(data: { bookingId: string; workerId: string; endingTime: string; itemsRequired: Array<{ name: string; price: number; description?: string; }>; additionalNotes?: string; }): Promise<{ success: boolean; message: string; booking?: IBooking; }> {
+  async updateWorkerDetails(data: { bookingId: string; workerId: string; endingTime: string; itemsRequired: Array<{ name: string; price: number; description?: string; }>; additionalNotes?: string; }): Promise<updateWorkerDetailsResponseDto> {
     try {
       const {
         bookingId, workerId, endingTime, itemsRequired, additionalNotes,
@@ -221,11 +227,7 @@ export class BookingService implements IBookingService {
   async verifyPayment(
     bookingId: string,
     paymentType: "advance" | "final"
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: VerifiedPaymentResult | null;
-  }> {
+  ): Promise<verifyPaymentResponseDto> {
     try {
       if (!bookingId || !paymentType) {
         return { success: false, message: "Missing bookingId or paymentType", data: null };

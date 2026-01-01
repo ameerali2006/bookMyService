@@ -1,5 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { IWorkerHelperService } from '../../interface/service/helper-service.service.interface';
+import { getServiceNamesResponse, getWorkerAvailableTimeResponse } from '../../dto/shared/helpers.dto';
 import { IService } from '../../interface/model/service.model.interface';
 import { TYPES } from '../../config/constants/types';
 import { IServiceRepository } from '../../interface/repository/service.repository.interface';
@@ -21,7 +22,7 @@ export class WorkerHelperService implements IWorkerHelperService {
 
   }
 
-  async getServiceNames(): Promise<{ value: string; label: string; }[] | null> {
+  async getServiceNames(): Promise<getServiceNamesResponse[] | null> {
     try {
       const data = await this._serviceRepo.findActiveServices();
       if (!data) {
@@ -48,7 +49,7 @@ export class WorkerHelperService implements IWorkerHelperService {
     workerId: string, 
     date: Date, 
     startTime: string
-  ): Promise<{ success: boolean; availableTime?: string }> {
+  ): Promise<getWorkerAvailableTimeResponse> {
 
     const working = await this.workingRepo.findByWorkerId(workerId);
     if (!working) return { success: false };

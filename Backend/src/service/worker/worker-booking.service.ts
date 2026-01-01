@@ -4,6 +4,13 @@ import {
   IWorkerBookingService,
   serviceData,
 } from "../../interface/service/worker/worker-booking.service.interface";
+import {
+  getServiceRequestsResponseDto,
+  getWorkerApprovedBookingsResponseDto,
+  getWorkerAprrovalpageDetailsResponseDto,
+  reachedCustomerLocationResponseDto,
+} from "../../dto/worker/working-details.dto";
+import { responsePart } from "../../dto/shared/responsePart";
 import { TYPES } from "../../config/constants/types";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
 import {
@@ -37,7 +44,7 @@ export class WorkerBookingService implements IWorkerBookingService {
   ) {}
   async approveService(
     data: serviceData
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<responsePart> {
     try {
       const {
         bookingId,
@@ -166,7 +173,7 @@ export class WorkerBookingService implements IWorkerBookingService {
   async rejectService(
     bookingId: string,
     description: string
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<responsePart> {
     try {
       const booking = await this.bookingRepo.findById(bookingId);
 
@@ -232,11 +239,7 @@ export class WorkerBookingService implements IWorkerBookingService {
       };
     }
   }
-  async getServiceRequests(filter: IRequestFilters): Promise<{
-    success: boolean;
-    message: string;
-    data?: IWorkerRequestResponse;
-  }> {
+  async getServiceRequests(filter: IRequestFilters): Promise<getServiceRequestsResponseDto> {
     try {
       const { data: bookings, total } =
         await this.bookingRepo.findServiceRequests(filter);
@@ -283,18 +286,7 @@ export class WorkerBookingService implements IWorkerBookingService {
     limit: number;
     search?: string;
     status?: "approved" | "in-progress" | "awaiting-final-payment";
-  }): Promise<{
-    success: boolean;
-    message: string;
-    today?: ApprovedServices[];
-    upcoming?: ApprovedServices[];
-    pagination?: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }> {
+  }): Promise<getWorkerApprovedBookingsResponseDto> {
     try {
       const { workerId, page = 1, limit = 10, search = "", status } = query;
       console.log(query)
@@ -359,7 +351,7 @@ export class WorkerBookingService implements IWorkerBookingService {
       };
     }
   }
-  async getWorkerAprrovalpageDetails(bookingId: string): Promise<{success:boolean,message:string,booking?:(IBookingPopulated&{verification:boolean})}> {
+  async getWorkerAprrovalpageDetails(bookingId: string): Promise<getWorkerAprrovalpageDetailsResponseDto> {
     try {
       if(!bookingId){
         return {
@@ -388,7 +380,7 @@ export class WorkerBookingService implements IWorkerBookingService {
       
     }
   }
-  async reachedCustomerLocation(bookingid: string): Promise<{ success: boolean; message: string; booking?: (IBookingPopulated & { verification: boolean; }); }> {
+  async reachedCustomerLocation(bookingid: string): Promise<reachedCustomerLocationResponseDto> {
     try {
       if(!bookingid){
         return {
@@ -428,7 +420,7 @@ export class WorkerBookingService implements IWorkerBookingService {
         }
     }
   }
-  async verifyWorker(bookingId: string, otp: string): Promise<{ success: boolean; message: string; }> {
+  async verifyWorker(bookingId: string, otp: string): Promise<responsePart> {
     try {
       if(!bookingId){
         return {

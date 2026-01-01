@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "../../config/constants/types";
-import { BookingDetailDto, ongoingBookingDto } from "../../dto/user/booking-details.dto";
+import { BookingDetailDto, ongoingBookingDto, ongoingBookingsResponseDto, bookingDetailDataResponseDto } from "../../dto/user/booking-details.dto";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
 import { IBookingDetailsService } from "../../interface/service/user/booking-details.service.interface";
 import { UserMapper } from "../../utils/mapper/user-mapper";
@@ -10,7 +10,7 @@ export class BookingDetailsService implements IBookingDetailsService{
     constructor(
         @inject(TYPES.BookingRepository) private bookingRepo:IBookingRepository
     ){}
-    async ongoingBookings(userId:string,limit: number, skip: number, search: string): Promise<{ success: boolean; message: string; data?: { data: ongoingBookingDto[]; total: number; }; }> {
+    async ongoingBookings(userId:string,limit: number, skip: number, search: string): Promise<ongoingBookingsResponseDto> {
         try {
             
 
@@ -55,7 +55,7 @@ export class BookingDetailsService implements IBookingDetailsService{
             }
         }
     }
-    async bookingDetailData(bookingId: string): Promise<{ success: boolean; message: string; booking?: BookingDetailDto; }> {
+    async bookingDetailData(bookingId: string): Promise<bookingDetailDataResponseDto> {
         try {
             if(!bookingId){
                 return {success :false,message:"bookiing detail is missing"}

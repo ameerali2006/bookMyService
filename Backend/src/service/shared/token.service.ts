@@ -1,6 +1,7 @@
 import { JwtPayload } from 'jsonwebtoken';
 import { inject, injectable } from 'tsyringe';
 import { ITokenservice } from '../../interface/service/token.service.interface';
+import { refreshTokenResponse } from '../../dto/shared/helpers.dto';
 import { IJwtService } from '../../interface/helpers/jwt-service.service.interface';
 import { IRedisTokenService } from '../../interface/service/redis.service.interface';
 import { TYPES } from '../../config/constants/types';
@@ -38,7 +39,7 @@ export class TokenService implements ITokenservice {
     await this._refreshTokenRepository.revokeRefreshToken(token);
   }
 
-  async refreshToken(refreshToken: string):Promise<{ role: string; accessToken: string }> {
+  async refreshToken(refreshToken: string):Promise<refreshTokenResponse> {
     const payload = await this._jwtService.verifyToken(refreshToken, 'refresh');
     console.log("refresh tocken request ",payload)
     if (!payload) {

@@ -3,6 +3,8 @@ import { userInfo } from 'node:os';
 import { fa } from 'zod/v4/locales';
 import { AddAddressDto, Address, ProfileDetails } from '../../dto/user/auth/profile.dto';
 import { IProfileManagement } from '../../interface/service/user/profile-management.serice.interface';
+import { updateUserProfileDetailsResponseDto, getUserAddressResponseDto, addUserAddressResponseDto } from '../../dto/user/booking-details.dto';
+import { responsePart } from '../../dto/shared/responsePart';
 import { UserMapper } from '../../utils/mapper/user-mapper';
 import { TYPES } from '../../config/constants/types';
 import { IUserRepository } from '../../interface/repository/user.repository.interface';
@@ -16,11 +18,7 @@ export class ProfileManagement implements IProfileManagement {
         @inject(TYPES.AddressRepository) private _addressRepo:IAddressRepository,
   ) {}
 
-  async getUserProfileDetails(userId: string): Promise<{
-        success: boolean;
-        message: string;
-        user: ProfileDetails | null;
-    }> {
+  async getUserProfileDetails(userId: string): Promise<updateUserProfileDetailsResponseDto> {
     try {
       console.log('user service');
       console.log(userId);
@@ -59,11 +57,7 @@ export class ProfileManagement implements IProfileManagement {
   async updateUserProfileDetails(
     user: Partial<ProfileDetails>,
     userId: string,
-  ): Promise<{
-        success: boolean;
-        message: string;
-        user: ProfileDetails | null;
-    }> {
+  ): Promise<updateUserProfileDetailsResponseDto> {
     try {
       if (!user || Object.keys(user).length === 0) {
         return { success: false, message: 'User data is missing', user: null };
@@ -92,7 +86,7 @@ export class ProfileManagement implements IProfileManagement {
     }
   }
 
-  async getUserAddress(userId: string): Promise<{ success: boolean; message: string; addresses: Address[] | null; }> {
+  async getUserAddress(userId: string): Promise<getUserAddressResponseDto> {
     try {
       if (!userId) {
         return { success: false, message: 'User ID is missing', addresses: null };
@@ -117,7 +111,7 @@ export class ProfileManagement implements IProfileManagement {
     }
   }
 
-  async addUserAddress(userId: string, data: AddAddressDto): Promise<{ success: boolean; message: string; address: Address|null; }> {
+  async addUserAddress(userId: string, data: AddAddressDto): Promise<addUserAddressResponseDto> {
     try {
       if (!userId || !data) {
         return { success: false, message: 'somthing is missing', address: null };
@@ -160,7 +154,7 @@ export class ProfileManagement implements IProfileManagement {
     }
   }
 
-  async setPrimaryAddress(userId: string, setId: string): Promise<{ success: boolean; message: string; }> {
+  async setPrimaryAddress(userId: string, setId: string): Promise<responsePart> {
     try {
       if (!userId || !setId) {
         return { success: false, message: 'Something is missing' };

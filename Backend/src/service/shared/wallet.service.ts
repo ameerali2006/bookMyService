@@ -1,5 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "../../config/constants/types";
+import { responsePart } from "../../dto/shared/responsePart";
 import { IWalletRepository } from "../../interface/repository/wallet.repository.interface";
 import { IWalletTransactionRepository } from "../../interface/repository/wallet-transaction.repository.interface";
 import { IAddBalanceInput, IWalletService } from "../../interface/service/wallet.service.interface";
@@ -26,7 +27,7 @@ export class WalletService implements IWalletService{
 
         return wallet;
     }
-    async addBalance(data: IAddBalanceInput): Promise<{success:boolean,message:string}> {
+    async addBalance(data: IAddBalanceInput): Promise<responsePart> {
         try {
             const { userId,role, amount, description } = data;
            

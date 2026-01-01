@@ -3,6 +3,7 @@ import { LoginDto } from '../../dto/shared/login.dto';
 import { UserDataDTO } from '../../dto/user/auth/user-data.dto';
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
 import { ILoginService } from '../../interface/service/auth/login.service.interface';
+import { ILoginResponseDto } from '../../dto/auth.dto';
 import { TYPES } from '../../config/constants/types';
 import { IAdminRepository } from '../../interface/repository/admin.repository.interface';
 import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
@@ -33,7 +34,7 @@ export class LoginService implements ILoginService {
 
   }
 
-  async execute(user: LoginDto): Promise<{success:boolean, message:string, accessToken: string|null; refreshToken: string|null; user: UserDataDTO | responseDto|IAdmin| null; }> {
+  async execute(user: LoginDto): Promise<ILoginResponseDto> {
     try {
       let repository;
       if (user.role == 'admin') {

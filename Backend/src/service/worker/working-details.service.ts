@@ -24,7 +24,14 @@ import { MESSAGES } from '../../config/constants/message';
 import { CustomError } from '../../utils/custom-error';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { IWorkingHelper } from '../../interface/service/working-helper.service.interface';
-import { WorkerProfileDTO } from '../../dto/worker/working-details.dto';
+import {
+  WorkerProfileDTO,
+  updateWorkingDetailsResponseDto,
+  getProfileDetailsResponseDto,
+  updateWorkerProfileResponseDto,
+  getCalenderDetailsResponseDto,
+  updateCalenderDetailsResponseDto,
+} from '../../dto/worker/working-details.dto';
 import { WorkerMapper } from '../../utils/mapper/worker-mapper';
 
 @injectable()
@@ -127,11 +134,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
   async updateWorkingDetails(
     email: string,
     payload: IDaySchedule,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: IWorkingDetailsDocument | null;
-  }> {
+  ): Promise<updateWorkingDetailsResponseDto> {
     try {
       const worker = await this._workerRepo.findByEmail(email);
       if (!worker) {
@@ -173,7 +176,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
     }
   }
 
-  async getProfileDetails(workerId: string): Promise<{ success: boolean; message: string; worker: WorkerProfileDTO|null; }> {
+  async getProfileDetails(workerId: string): Promise<getProfileDetailsResponseDto> {
     try {
       if (!workerId) {
         return {
@@ -197,7 +200,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
     }
   }
 
-  async updateWorkerProfile(workerId: string, updateData: Partial<updateWorker>): Promise<{ success: boolean; message: string; worker: WorkerProfileDTO | null; }> {
+  async updateWorkerProfile(workerId: string, updateData: Partial<updateWorker>): Promise<updateWorkerProfileResponseDto> {
     try {
       const worker = await this._workerRepo.findById(workerId);
       if (!worker) {
@@ -229,7 +232,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
     }
   }
 
-  async getCalenderDetails(workerId: string): Promise<{ success: boolean; message: string; customSlots: ICustomSlot[] | null; holidays: IHoliday[] | null; }> {
+  async getCalenderDetails(workerId: string): Promise<getCalenderDetailsResponseDto> {
     try {
       if (!workerId) {
         return {
@@ -262,7 +265,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
     }
   }
 
-  async updateCalenderDetails(workerId: string, customSlots: ICustomSlot[]|null, holidays: IHoliday[]|null): Promise<{ success: boolean; message: string; customSlots: ICustomSlot[] | null; holidays: IHoliday[] | null; }> {
+  async updateCalenderDetails(workerId: string, customSlots: ICustomSlot[], holidays: IHoliday[]): Promise<updateCalenderDetailsResponseDto> {
     try {
       if (!workerId) {
         return {
