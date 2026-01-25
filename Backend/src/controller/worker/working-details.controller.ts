@@ -1,22 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
-import { inject, injectable } from 'tsyringe';
-import { IWorkingDetailsController } from '../../interface/controller/working-details.controller.interface';
-import { TYPES } from '../../config/constants/types';
-import { STATUS_CODES } from '../../config/constants/status-code';
-import { MESSAGES } from '../../config/constants/message';
-import { CustomError } from '../../utils/custom-error';
-import { IWorkingDetailsManagement, updateWorker } from '../../interface/service/worker/workingDetails.service.interface';
-import { CustomRequest } from '../../middleware/auth.middleware';
-import { workerProfileUpdateSchema } from '../validation/update-worker-profile';
-import { changePasswordSchema } from '../validation/change-password.zod';
-import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { Request, Response, NextFunction } from "express";
+import { inject, injectable } from "tsyringe";
+import { IWorkingDetailsController } from "../../interface/controller/working-details.controller.interface";
+import { TYPES } from "../../config/constants/types";
+import { STATUS_CODES } from "../../config/constants/status-code";
+import { MESSAGES } from "../../config/constants/message";
+import { CustomError } from "../../utils/custom-error";
+import {
+  IWorkingDetailsManagement,
+  updateWorker,
+} from "../../interface/service/worker/workingDetails.service.interface";
+import { CustomRequest } from "../../middleware/auth.middleware";
+import { workerProfileUpdateSchema } from "../validation/update-worker-profile";
+import { changePasswordSchema } from "../validation/change-password.zod";
+import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
+import { IWalletService } from "../../interface/service/wallet.service.interface";
+import { ITransactionService } from "../../interface/service/transaction.service.interface";
+import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
 
 @injectable()
 export class WorkingDetailsController implements IWorkingDetailsController {
   constructor(
     @inject(TYPES.WorkingDetailsManagement)
     private _workingManage: IWorkingDetailsManagement,
-    @inject(TYPES.ChangePasswordService) private _changePassword:IChangePasswordService,
+    @inject(TYPES.ChangePasswordService)
+    private _changePassword: IChangePasswordService,
+    @inject(TYPES.WalletService) private _walletService: IWalletService,
+    @inject(TYPES.TransactionService)
+    private _transactionService: ITransactionService,
   ) {}
 
   async getWorkingDetails(
@@ -29,13 +39,11 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       console.log(email);
       const details = await this._workingManage.getWorkingDetails(email);
       if (details) {
-        res
-          .status(STATUS_CODES.OK)
-          .json({
-            success: true,
-            message: MESSAGES.DATA_SENT_SUCCESS,
-            data: details,
-          });
+        res.status(STATUS_CODES.OK).json({
+          success: true,
+          message: MESSAGES.DATA_SENT_SUCCESS,
+          data: details,
+        });
       } else {
         res
           .status(STATUS_CODES.BAD_REQUEST)
@@ -60,13 +68,11 @@ export class WorkingDetailsController implements IWorkingDetailsController {
         payload,
       );
       if (details.success) {
-        res
-          .status(STATUS_CODES.OK)
-          .json({
-            success: true,
-            message: MESSAGES.DATA_SENT_SUCCESS,
-            data: details.data,
-          });
+        res.status(STATUS_CODES.OK).json({
+          success: true,
+          message: MESSAGES.DATA_SENT_SUCCESS,
+          data: details.data,
+        });
       } else {
         res
           .status(STATUS_CODES.BAD_REQUEST)
@@ -118,12 +124,15 @@ export class WorkingDetailsController implements IWorkingDetailsController {
         const errors = parsed.error.format();
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors,
         });
       }
       console.log(parsed.data);
-      const response = await this._workingManage.updateWorkerProfile(workerId, parsed.data as updateWorker);
+      const response = await this._workingManage.updateWorkerProfile(
+        workerId,
+        parsed.data as updateWorker,
+      );
       console.log(response);
       if (response.success) {
         res.status(STATUS_CODES.OK).json(response);
@@ -135,11 +144,19 @@ export class WorkingDetailsController implements IWorkingDetailsController {
     }
   }
 
-  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async changePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const parsed = changePasswordSchema.parse(req.body);
       const userId = (req as CustomRequest).user?._id;
-      const result = await this._changePassword.changePassword('worker', userId, parsed);
+      const result = await this._changePassword.changePassword(
+        "worker",
+        userId,
+        parsed,
+      );
       if (result.success) {
         res.status(STATUS_CODES.OK).json(result);
       } else {
@@ -150,7 +167,11 @@ export class WorkingDetailsController implements IWorkingDetailsController {
     }
   }
 
-  async getCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getCalenderDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const workerId = (req as CustomRequest).user._id;
       const response = await this._workingManage.getCalenderDetails(workerId);
@@ -164,12 +185,20 @@ export class WorkingDetailsController implements IWorkingDetailsController {
     }
   }
 
-  async updateCalenderDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateCalenderDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const workerId = (req as CustomRequest).user._id;
       console.log(req.body);
       const { holidays, customSlots } = req.body;
-      const result = await this._workingManage.updateCalenderDetails(workerId, customSlots, holidays);
+      const result = await this._workingManage.updateCalenderDetails(
+        workerId,
+        customSlots,
+        holidays,
+      );
       if (result.success) {
         res.status(STATUS_CODES.OK).json(result);
       } else {
@@ -178,5 +207,56 @@ export class WorkingDetailsController implements IWorkingDetailsController {
     } catch (error) {
       next(error);
     }
+  }
+  async getWalletData(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const userId = (req as CustomRequest).user._id;
+    const role = (req as CustomRequest).user.role;
+    console.log(userId, role);
+    const wallet = await this._walletService.getWalletData(userId, role);
+    console.log(wallet);
+
+    res.status(200).json(wallet);
+  }
+  async getTransactions(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const userId = (req as CustomRequest).user._id;
+    const role = (req as CustomRequest).user.role;
+    const query: WalletTransactionQuery = {
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+
+      type: typeof req.query.type === "string" ? req.query.type : undefined,
+      status:
+        typeof req.query.status === "string" ? req.query.status : undefined,
+
+      sortBy:
+        typeof req.query.sortBy === "string" ? req.query.sortBy : "createdAt",
+      sortOrder:
+        req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+          ? req.query.sortOrder
+          : "desc",
+
+      startDate:
+        typeof req.query.startDate === "string"
+          ? req.query.startDate
+          : undefined,
+      endDate:
+        typeof req.query.endDate === "string" ? req.query.endDate : undefined,
+    };
+    console.log(userId, role);
+    const result = await this._transactionService.getTransactionData(
+      userId,
+      role,
+      query,
+    );
+
+    res.status(STATUS_CODES.OK).json(result);
   }
 }

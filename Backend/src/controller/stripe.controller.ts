@@ -73,6 +73,7 @@ export class StripeController implements IStripeController {
       );
 
       console.log('Received event type:', event);
+      console.log(event.data+"fffffffffff"+event.type)
 
       if (event.type === 'payment_intent.succeeded') {
         await this.stripeService.handleWebhookEvent(event);

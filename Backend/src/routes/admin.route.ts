@@ -128,5 +128,21 @@ export class AdminRoute extends BaseRoute {
         managementAdminController.getBookingDetailPage(req, res, next);
       }
     );
+    this.router.get(
+      "/wallet/walletData",
+      verifyAuth(),
+      authorizeRole(["admin"]),
+      (req: Request, res: Response, next: NextFunction) => {
+        managementAdminController.getWalletData(req, res, next);
+      }
+    );
+    this.router.get(
+      "/wallet/transaction",
+      verifyAuth(),
+      authorizeRole(["admin"]),
+      (req: Request, res: Response, next: NextFunction) => {
+        managementAdminController.getTransactions(req, res, next);
+      }
+    );
   }
 }

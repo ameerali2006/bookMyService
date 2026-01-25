@@ -61,6 +61,7 @@ export function LocationModal({ isOpen, onClose, onConfirm }: LocationModalProps
   // 🆕 Fetch suggestions as user types (debounced)
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
+      
       if (location.trim().length < 3) {
         setSuggestions([])
         return
@@ -112,7 +113,8 @@ export function LocationModal({ isOpen, onClose, onConfirm }: LocationModalProps
       } else {
         ErrorToast("Location not found. Please try a different search term.")
       }
-    } catch {
+    } catch(error) {
+      console.log(error)
       ErrorToast("Unable to search for location. Please try again.")
     } finally {
       setLoading(false)

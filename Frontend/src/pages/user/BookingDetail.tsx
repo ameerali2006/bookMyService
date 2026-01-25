@@ -20,10 +20,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { userService } from "@/api/UserService"
-import { ErrorToast } from "@/components/shared/Toaster"
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import Header from "@/components/user/shared/Header"
 import Footer from "@/components/user/shared/Footer"
 import { OtpQrCard } from "@/components/user/OtpQr"
+import { useSelector } from "react-redux"
+import type { RootState } from "@/redux/store"
+import { PaymentWrapper } from "@/components/stripe/Stripe"
 
 // -----------------------
 // INTERFACE
@@ -141,6 +144,10 @@ export function BookingDetailPage() {
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const user =useSelector((state:RootState)=>state.userTokenSlice.user)
 
   useEffect(() => {
     let mounted = true
@@ -483,13 +490,121 @@ export function BookingDetailPage() {
             </div>
 
             {/* Payment Method */}
-            <div className="py-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CreditCard size={18} className="text-blue-500" />
-                <p className="text-sm font-semibold text-slate-600">Payment Method</p>
-              </div>
-              <Badge className="capitalize bg-slate-200 text-slate-800 font-semibold">{booking.paymentMethod}</Badge>
-            </div>
+            {/* FINAL PAYMENT SECTION */}
+            {booking.status === "awaiting-final-payment" && (
+              <Card className="p-8 bg-gradient-to-br from-white to-slate-50 border border-orange-200 shadow-lg mb-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full" />
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    Complete Final Payment
+                  </h2>
+                </div>
+
+                {/* Payment method selection */}
+                {!paymentMethod && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button
+                      className="h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-lg"
+                      onClick={() => setPaymentMethod("wallet")}
+                    >
+                      Pay with Wallet
+                    </Button>
+
+                    <Button
+                      className="h-14 bg-blue-600 hover:bg-blue-700 text-white text-lg"
+                      onClick={async () => {
+                        try {
+                          setLoadingPayment(true);
+                          const res = await userService.createPaymentIntent({
+                            amount: Math.round(Number(booking.remainingAmount) * 100),
+                            currency: "INR",
+                            description: `Final payment for booking ${booking.id}`,
+                            receiptEmail: user?.email, 
+                            metadata: {
+                              bookingId: booking.id,
+                              paymentType: "final",
+                              addressId: booking.address,
+                            },
+                          });
+
+                          if (!res.data.success) {
+                            ErrorToast("Unable to start Stripe payment");
+                            return;
+                          }
+
+                          setClientSecret(res.data.clientSecret);
+                          setPaymentMethod("stripe");
+                        } catch {
+                          ErrorToast("Payment initialization failed");
+                        } finally {
+                          setLoadingPayment(false);
+                        }
+                      }}
+                    >
+                      {loadingPayment ? "Preparing..." : "Pay with Stripe"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* WALLET PAYMENT */}
+                {paymentMethod === "wallet" && (
+                  <div className="space-y-4 max-w-md">
+                    <p className="text-slate-600">
+                      Amount to pay:{" "}
+                      <span className="font-bold text-slate-900">
+                        {formatCurrency(booking.remainingAmount)}
+                      </span>
+                    </p>
+
+                    <Button
+                      className="w-full h-12 bg-emerald-600"
+                      // onClick={async () => {
+                      //   const res = await userService.walletFinalPayment(booking.id);
+
+                      //   if (res.data.success) {
+                      //     SuccessToast("Payment successful");
+                      //     window.location.reload();
+                      //   } else {
+                      //     ErrorToast(res.data.message);
+                      //   }
+                      // }}
+                    >
+                      Confirm Wallet Payment
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => setPaymentMethod(null)}
+                    >
+                      Back
+                    </Button>
+                  </div>
+                )}
+
+                {/* STRIPE PAYMENT */}
+                {paymentMethod === "stripe" && clientSecret && (
+                  <div className="mt-6">
+                    <PaymentWrapper
+                      clientSecret={clientSecret}
+                      bookingId={booking.id}
+                      paymentType="final"
+                    />
+
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => {
+                        setPaymentMethod(null);
+                        setClientSecret(null);
+                      }}
+                    >
+                      Back
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
+
           </div>
         </Card>
 

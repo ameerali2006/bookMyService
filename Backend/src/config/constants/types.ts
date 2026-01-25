@@ -1,8 +1,9 @@
 export const TYPES = {
+  TransactionService:Symbol.for('TransactionService'),
   SlotLockRepository:Symbol.for('SlotLockRepository'),
   BookingDetailsService:Symbol.for('BookingDetailsService'),
   WalletService:Symbol.for('WalletService'),
-  WalletTransactionRepository:Symbol.for('WalletTransactionRepository'),
+  TransactionRepository:Symbol.for('TransactionRepository'),
   WalletRepository:Symbol.for('WalletRepository'),
   BookingSocketHandler: Symbol.for('BookingSocketHandler'),
   ChangePasswordService: Symbol.for('ChangePasswordService'),

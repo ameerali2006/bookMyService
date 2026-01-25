@@ -9,5 +9,7 @@ export interface IUserController{
     changePassword(req:Request, res:Response, next:NextFunction):Promise<void>
     ongoingBookings(req:Request, res:Response, next:NextFunction):Promise<void>
     bookingDetailData(req:Request, res:Response, next:NextFunction):Promise<void>
+    getWalletData(req:Request, res:Response, next:NextFunction):Promise<void>
+    getTransactions(req:Request, res:Response, next:NextFunction):Promise<void>
 
 }

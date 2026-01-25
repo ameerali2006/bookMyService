@@ -1,9 +1,9 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { User, Calendar, Star, MapPin, ShoppingBag } from "lucide-react"
+import { User, Calendar, Star, MapPin,Wallet } from "lucide-react"
 
-type Section = "profile" | "services-taken" | "booked-services" | "reviews" | "addresses"
+type Section = "profile" | "services-taken" | "wallet" | "reviews" | "addresses"
 
 interface ProfileSidebarProps {
   activeSection: Section
@@ -13,7 +13,7 @@ interface ProfileSidebarProps {
 const sidebarItems = [
   { id: "profile" as Section, label: "Profile", icon: User },
   { id: "services-taken" as Section, label: "Services Taken", icon: Calendar },
-  { id: "booked-services" as Section, label: "Booked Services", icon: ShoppingBag },
+  { id: "wallet" as Section, label: "Wallet", icon: Wallet },
   { id: "reviews" as Section, label: "Reviews", icon: Star },
   { id: "addresses" as Section, label: "Addresses", icon: MapPin },
 ]

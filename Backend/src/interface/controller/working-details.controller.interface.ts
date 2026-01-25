@@ -8,5 +8,7 @@ export interface IWorkingDetailsController{
     changePassword(req: Request, res: Response, next:NextFunction): Promise<void>;
     getCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
     updateCalenderDetails(req: Request, res: Response, next:NextFunction): Promise<void>;
+    getWalletData(req: Request, res: Response, next:NextFunction): Promise<void>;
+    getTransactions(req: Request, res: Response, next:NextFunction): Promise<void>;
 
 }

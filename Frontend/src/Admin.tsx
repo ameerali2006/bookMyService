@@ -11,6 +11,7 @@ import ServiceManagement from "./pages/admin/ServiceManagement";
 import { ADMIN_ROUTES } from "./config/constant/routes/adminRoutes";
 import AdminBookingsPage from "./pages/admin/BookingLising";
 import AdminBookingDetailsPage from "./pages/admin/BookingDetail";
+import AdminWallet from "./pages/admin/AdminWallet";
 
 
 const LoginPage = lazy(()=>import("./pages/admin/LoginPage"));
@@ -50,9 +51,14 @@ const Admin = () => {
         <Route
           path={ADMIN_ROUTES.BOOKINGS}
           element={<IsAdminLogin><AdminBookingsPage /></IsAdminLogin>}
-        /><Route
+        />
+        <Route
           path={ADMIN_ROUTES.BOOKING_DEETAIL}
           element={<IsAdminLogin><AdminBookingDetailsPage /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.WALLET}
+          element={<IsAdminLogin><AdminWallet /></IsAdminLogin>}
         />
       </Routes>
     </Suspense></>

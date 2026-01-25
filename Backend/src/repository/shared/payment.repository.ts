@@ -76,4 +76,7 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
       { new: true },
     );
   }
+  async findByIntentId(paymentIntentId: string): Promise<IPayment | null> {
+    return await Payment.findOne({ paymentIntentId });
+  }
 }

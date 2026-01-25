@@ -51,6 +51,8 @@ export class UserRoute extends BaseRoute {
     this.router.get('/payment/verify', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>bookingController.verifyPayment(req, res, next));
     this.router.get('/bookings/ongoing', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.ongoingBookings(req, res, next));
     this.router.get('/bookings/ongoing/:bookingId', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.bookingDetailData(req, res, next));
+    this.router.get('/profile/walletData', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.getWalletData(req, res, next));
+    this.router.get('/profile/transactions', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.getTransactions(req, res, next));
 
   
   

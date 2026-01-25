@@ -9,6 +9,9 @@ export const WORKER_ROUTES = {
   SERVICE_REQUEST:"/appointments/request",
   SERVICE_APPROVED:"/appointments/approved",
   CHANGE_PASSWORD:"/profile/change-password",
-  SERVICE_APPROVED_DETAILPAGE:"/appointments/approved/:bookingId"
+  SERVICE_APPROVED_DETAILPAGE:"/appointments/approved/:bookingId",
+  All_BOOKINGS:"/appointments/allBookings",
+  WALLET:"/profile/wallet"
+
 
 };

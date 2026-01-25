@@ -5,10 +5,12 @@ import {
   serviceData,
 } from "../../interface/service/worker/worker-booking.service.interface";
 import {
+  allBookingDto,
   getServiceRequestsResponseDto,
   getWorkerApprovedBookingsResponseDto,
   getWorkerAprrovalpageDetailsResponseDto,
   reachedCustomerLocationResponseDto,
+  workerComplateWorkResponseDto,
 } from "../../dto/worker/working-details.dto";
 import { responsePart } from "../../dto/shared/responsePart";
 import { TYPES } from "../../config/constants/types";
@@ -30,6 +32,8 @@ import { WorkerMapper } from "../../utils/mapper/worker-mapper";
 import { IWorkerHelperService } from "../../interface/service/helper-service.service.interface";
 import { MESSAGES } from "../../config/constants/message";
 import { IHashService } from "../../interface/helpers/hash.interface";
+import { STATUS_CODES } from "../../config/constants/status-code";
+import { WorkerBookingListRequest } from "../../controller/validation/allBookingList.zod";
 
 @injectable()
 export class WorkerBookingService implements IWorkerBookingService {
@@ -200,7 +204,7 @@ export class WorkerBookingService implements IWorkerBookingService {
         const wallet = await this.walletService.addBalance({
           userId: booking.userId as string,
           amount: refundAmount,
-          role: "User",
+          role: "user",
           description: `Refund for rejected service (${booking.serviceId})`,
         });
         if (!wallet) return { success: false, message: "user wallet error" };
@@ -241,9 +245,11 @@ export class WorkerBookingService implements IWorkerBookingService {
   }
   async getServiceRequests(filter: IRequestFilters): Promise<getServiceRequestsResponseDto> {
     try {
+      console.log(filter)
       const { data: bookings, total } =
         await this.bookingRepo.findServiceRequests(filter);
       console.log(bookings);
+      
 
       const mapped = WorkerMapper.mapServiceRequest(bookings);
       const finalMapped = await Promise.all(
@@ -464,6 +470,99 @@ export class WorkerBookingService implements IWorkerBookingService {
           success:false,
           message:"internal error"
         }
+    }
+  }
+  async workerComplateWork(bookingId: string): Promise<workerComplateWorkResponseDto> {
+    try {
+      if(!bookingId){
+        return {
+          status:STATUS_CODES.BAD_REQUEST,
+          success:false,
+          message:"booking Id is not fount",
+
+        }
+      }
+      const updateBooking=await this.bookingRepo.updateStatus(bookingId,"awaiting-final-payment")
+      if(!updateBooking){
+        return {
+          status:STATUS_CODES.BAD_REQUEST,
+          success:false,
+          message:"booking updatetion failed",
+
+        }
+      }
+      const booking =await this.bookingRepo.findByIdPopulated(bookingId)
+      if(!booking){
+        return {
+          status:STATUS_CODES.BAD_REQUEST,
+          success:false,
+          message:"booking is not fount",
+
+        }
+      }
+      return {
+        status:STATUS_CODES.OK,
+          success:true,
+          message:"successfully updated",
+          booking:{...booking.toObject(),verification:false},
+      }
+
+
+    } catch (error) {
+      return {
+         status:STATUS_CODES.NOT_FOUND,
+          success:false,
+          message:"booking is not fount",
+      }
+    }
+    
+  }
+  async getWorkerBookings(
+    workerId: string,
+    query: WorkerBookingListRequest
+  ):Promise<{success:boolean,message:string,data?:{
+      bookings:allBookingDto[],
+      total:number,
+      page:number,
+      limit:number,
+    }}> {
+    const {
+      page,
+      limit,
+      search,
+      workerResponses,
+      statuses,
+      from,
+      to,
+    } = query;
+
+    const { items, total } =
+      await this.bookingRepo.allBookingList({
+        workerId,
+        page,
+        limit,
+        search,
+        statuses: Array.isArray(statuses)
+          ? statuses
+          : statuses
+          ? [statuses]
+          : undefined,
+          workerResponses,
+        from: from ? new Date(from) : undefined,
+        to: to ? new Date(to) : undefined,
+      });
+
+    return {
+      success:true,
+      message:"successfully fetch data",
+      data:{
+        bookings: items.map(
+          WorkerMapper.toAllWorkerBookingDto
+        ),
+        total,
+        page,
+        limit,
+      }
     }
   }
 }

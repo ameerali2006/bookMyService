@@ -7,6 +7,8 @@ import { ApprovalSchema } from '../validation/service-approval.zod';
 import { MESSAGES } from '../../config/constants/message';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { CustomRequest } from '../../middleware/auth.middleware';
+import { WorkerBookingListRequestDto } from '../validation/allBookingList.zod';
+import { Error } from 'mongoose';
 
 @injectable()
 export class WorkerBookingController implements IWorkerBookingController {
@@ -133,6 +135,39 @@ export class WorkerBookingController implements IWorkerBookingController {
 
     } catch (error) {
       next(error)
+    }
+  }
+  async workComplated(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {bookingId} = req.body
+      const response =await  this.bookingService.workerComplateWork(bookingId)
+      res.status(response.status||STATUS_CODES.BAD_REQUEST).json(response)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+  async allBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const workerId = (req as CustomRequest).user._id;
+
+    const query =
+      WorkerBookingListRequestDto.parse(req.query);
+
+    const data =
+      await this.bookingService.getWorkerBookings(
+        workerId,   
+        query
+      );
+      if(data.success){
+        res.status(STATUS_CODES.OK).json(data)
+      }else{
+        res.status(STATUS_CODES.BAD_REQUEST).json(data)
+
+      }
+    } catch (error) {
+      console.error(error)
+      next(Error)
     }
   }
 }

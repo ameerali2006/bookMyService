@@ -23,8 +23,8 @@ import { IPaymentRepository } from '../../interface/repository/payment.repositor
 import { PaymentRepository } from '../../repository/shared/payment.repository';
 import { IWalletRepository } from '../../interface/repository/wallet.repository.interface';
 import { WalletRepository } from '../../repository/shared/wallet.respository';
-import { IWalletTransactionRepository } from '../../interface/repository/wallet-transaction.repository.interface';
-import { WalletTransactionRepository } from '../../repository/shared/wallet-transaction.repository';
+import { ITransactionRepository } from '../../interface/repository/transaction.repository.interface';
+import { TransactionRepository } from '../../repository/shared/transaction.repository';
 import { ISlotLockRepository } from '../../interface/repository/slot-lock.repository.interface';
 import { SlotLockRepository } from '../../repository/helper/slot-lock.repository';
 
@@ -42,6 +42,6 @@ export class RepositoryRegistery {
     container.register<IBookingRepository>(TYPES.BookingRepository, { useClass: BookingRepository });
     container.register<IPaymentRepository>(TYPES.PaymentRepository, { useClass: PaymentRepository });
     container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
-    container.register<IWalletTransactionRepository>(TYPES.WalletTransactionRepository, { useClass: WalletTransactionRepository });
+    container.register<ITransactionRepository>(TYPES.TransactionRepository, { useClass: TransactionRepository });
   }
 }

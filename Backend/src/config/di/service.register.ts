@@ -65,6 +65,8 @@ import { IBookingDetailsService } from '../../interface/service/user/booking-det
 import { BookingDetailsService } from '../../service/user/booking-details.service';
 import { RedisTokenService } from '../../repository/shared/redis.repository';
 import { IRedisTokenService } from '../../interface/service/redis.service.interface';
+import { ITransactionService } from '../../interface/service/transaction.service.interface';
+import { TransactionService } from '../../service/shared/transaction.service';
 
 export class ServiceRegistery {
   static registerService():void {
@@ -98,7 +100,7 @@ export class ServiceRegistery {
     container.register<IChangePasswordService>(TYPES.ChangePasswordService, { useClass: ChangePasswordService });
     container.register<IWalletService>(TYPES.WalletService, { useClass: WalletService });
     container.register<IBookingDetailsService>(TYPES.BookingDetailsService, { useClass: BookingDetailsService });
-
+    container.register<ITransactionService>(TYPES.TransactionService, { useClass: TransactionService });
     container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler });
   }
 }

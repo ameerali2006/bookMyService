@@ -10,7 +10,7 @@ const tokenService = new JwtService();
 
 export interface CustomJwtPayload extends JwtPayload{
     userId:string;
-    role: string;
+    role: "user" | "admin" | "worker";
 }
 
 export interface CustomRequest extends Request {
@@ -116,7 +116,7 @@ const isBlacklisted = async (token: string): Promise<boolean> => {
 //* ─────────────────────────────────────────────────────────────
 //*                 🛠️ Authorize Role Middleware
 //* ─────────────────────────────────────────────────────────────
-export const authorizeRole = (allowedRoles: string[]) => (req: Request, res: Response, next: NextFunction) => {
+export const authorizeRole = (allowedRoles: string[]) => (req: Request, res: Response, next: NextFunction) => { 
   console.log('authrole');
   const { user } = (req as CustomRequest);
   console.log(user)

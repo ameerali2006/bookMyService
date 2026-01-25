@@ -23,7 +23,6 @@ export class BookingRepository
   async createBooking(data: Partial<IBooking>): Promise<IBooking> {
     return await Booking.create(data);
   }
-   
 
   async findByIdPopulated(id: string): Promise<IBookingPopulated | null> {
     const result = await Booking.findById(id)
@@ -72,8 +71,21 @@ export class BookingRepository
       { new: true }
     );
   }
-  async updateStatusWithOTP(id: string, status: 'pending'| 'confirmed'| 'in-progress' | 'awaiting-final-payment'| 'completed'| 'cancelled'): Promise<IBooking | null> {
-    return await Booking.findByIdAndUpdate(id, { status,$unset:{otp:""} }, { new: true });
+  async updateStatusWithOTP(
+    id: string,
+    status:
+      | "pending"
+      | "confirmed"
+      | "in-progress"
+      | "awaiting-final-payment"
+      | "completed"
+      | "cancelled"
+  ): Promise<IBooking | null> {
+    return await Booking.findByIdAndUpdate(
+      id,
+      { status, $unset: { otp: "" } },
+      { new: true }
+    );
   }
   async updatePaymentStatus(
     id: string,
@@ -199,6 +211,7 @@ export class BookingRepository
       finalPaymentId: paymentIntentId,
       finalPaymentStatus: status === "succeeded" ? "paid" : status,
       status: status === "succeeded" ? "completed" : "awaiting-final-payment",
+      remainingAmount: status === "succeeded" ? 0 : undefined,
     });
   }
 
@@ -212,6 +225,7 @@ export class BookingRepository
   async findServiceRequests(
     filters: IRequestFilters
   ): Promise<{ data: IBookingPopulated[]; total: number }> {
+    console.log("object");
     const { workerId, search, status, date, page, limit } = filters;
 
     const query: Record<string, unknown> = { workerId };
@@ -224,7 +238,7 @@ export class BookingRepository
     }
 
     const skip = (page - 1) * limit;
-
+    console.log(query);
     const booking = await Booking.find(query)
       .populate("userId", "name phone ")
       .populate("serviceId", "category")
@@ -240,35 +254,41 @@ export class BookingRepository
 
     return { data: booking, total };
   }
-  async findBookingListByUserId(userId:string,status:string[]=[],workerResponse:string[]=[],limit:number,skip:number,search:string):Promise<{bookings:IBookingPopulated[]|null,total:number}>{
-    let query:FilterQuery<IBooking> ={}
-    query.userId=userId
-    if(status.length>0){
-      query.status={$in:status}
+  async findBookingListByUserId(
+    userId: string,
+    status: string[] = [],
+    workerResponse: string[] = [],
+    limit: number,
+    skip: number,
+    search: string
+  ): Promise<{ bookings: IBookingPopulated[] | null; total: number }> {
+    let query: FilterQuery<IBooking> = {};
+    query.userId = userId;
+    if (status.length > 0) {
+      query.status = { $in: status };
     }
-    if(workerResponse.length){
-      query.workerResponse={$in:workerResponse}
+    if (workerResponse.length) {
+      query.workerResponse = { $in: workerResponse };
     }
     if (search && search.trim() !== "") {
       query.$or = [
         { "serviceId.category": { $regex: search, $options: "i" } },
         { "workerId.name": { $regex: search, $options: "i" } },
-       
-      ] 
+      ];
     }
-    console.log(query)
+    console.log(query);
 
     const total = await Booking.countDocuments(query);
     const bookings = await Booking.find(query)
-    .populate("workerId")
-    .populate("serviceId")
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean<IBookingPopulated[]>();
-    console.log({bookings,total})
+      .populate("workerId")
+      .populate("serviceId")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean<IBookingPopulated[]>();
+    console.log({ bookings, total });
 
-    return {bookings,total};
+    return { bookings, total };
   }
   async findWorkerApprovedBookings({
     workerId,
@@ -277,27 +297,25 @@ export class BookingRepository
     search,
     status,
   }: {
-  workerId: string
-  page: number
-  limit: number
-  search?: string
-  status?: "approved" | "in-progress"|'awaiting-final-payment'
-}):Promise<{items:IBookingPopulated[]|null,total:number}> {
-    const query:FilterQuery<IBooking> = {
+    workerId: string;
+    page: number;
+    limit: number;
+    search?: string;
+    status?: "approved" | "in-progress" | "awaiting-final-payment";
+  }): Promise<{ items: IBookingPopulated[] | null; total: number }> {
+    const query: FilterQuery<IBooking> = {
       workerId: workerId,
-      workerResponse:"accepted",
+      workerResponse: "accepted",
       status: status
         ? status
-        : { $in: ['confirmed','in-progress' ,'awaiting-final-payment'] },
-    }
+        : { $in: ["confirmed", "in-progress", "awaiting-final-payment"] },
+    };
 
     if (search) {
-      query.$or = [
-        { bookingId: { $regex: search, $options: "i" } },
-      ]
+      query.$or = [{ bookingId: { $regex: search, $options: "i" } }];
     }
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
     const [items, total] = await Promise.all([
       Booking.find(query)
@@ -309,33 +327,29 @@ export class BookingRepository
         .lean<IBookingPopulated[]>(),
 
       Booking.countDocuments(query),
-    ])
+    ]);
 
-    return { items, total }
+    return { items, total };
   }
-  async getAllBookings(
-    params: {
-  search?: string
-  status?: string
-  limit?: number
-  page?: number
-}
-  ): Promise<{
-  data: IBookingPopulated[];
-  total: number;
-  page: number;
-  limit: number;
-}> {
-    const { search, status, page=1, limit=10 } = params;
+  async getAllBookings(params: {
+    search?: string;
+    status?: string;
+    limit?: number;
+    page?: number;
+  }): Promise<{
+    data: IBookingPopulated[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { search, status, page = 1, limit = 10 } = params;
 
     const query: FilterQuery<IBooking> = {};
 
-    
     if (status && status !== "all") {
       query.status = status;
     }
 
-    
     if (search) {
       query.$or = [
         { _id: search }, // booking id search
@@ -368,4 +382,78 @@ export class BookingRepository
       limit,
     };
   }
+  async allBookingList(params: {
+    workerId: string;
+
+    page: number;
+    limit: number;
+
+    search?: string;
+    statuses?: string[];
+     workerResponses?: string[] 
+    from?: Date;
+    to?: Date;
+  }): Promise<{
+    items: IBookingPopulated[];
+    total: number;
+  } > {
+    const { workerId, page, limit, search, statuses,workerResponses, from, to } = params;
+
+    const query: FilterQuery<IBooking> = {
+      workerId,
+    };
+
+    if (search && search.trim() !== "") {
+      query.$or = [
+        { "userId.name": { $regex: search, $options: "i" } },
+        { "serviceId.category": { $regex: search, $options: "i" } },
+        { "address.city": { $regex: search, $options: "i" } },
+        { "address.street": { $regex: search, $options: "i" } },
+        { "address.buildingName": { $regex: search, $options: "i" } },
+        { "address.area": { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (statuses && statuses.length > 0) {
+      query.status = { $in: statuses };
+    }
+    if (workerResponses && workerResponses.length > 0) {
+      query.workerResponse = { $in: workerResponses }
+    }
+    if (from || to) {
+      query.date = {};
+
+      if (from) {
+        const start = new Date(from);
+        start.setHours(0, 0, 0, 0);
+        query.date.$gte = start;
+      }
+
+      if (to) {
+        const end = new Date(to);
+        end.setHours(23, 59, 59, 999);
+        query.date.$lte = end;
+      }
+    }
+
+    const skip = (page - 1) * limit;
+    console.log(query)
+
+    const [items, total] = await Promise.all([
+      Booking.find(query)
+        .populate("userId", "name phone")
+        .populate("serviceId", "category")
+        .populate("address")
+        .sort({ date: 1, startTime: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean<IBookingPopulated[]>(),
+
+      Booking.countDocuments(query),
+    ]);
+    console.log(items)
+
+    return { items, total };
+  }
 }
+  

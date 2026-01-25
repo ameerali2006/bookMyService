@@ -14,6 +14,9 @@ import { changePasswordSchema } from "../validation/change-password.zod";
 import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
 import { IBookingDetailsService } from "../../interface/service/user/booking-details.service.interface";
 import { success } from "zod";
+import { IWalletService } from "../../interface/service/wallet.service.interface";
+import { ITransactionService } from "../../interface/service/transaction.service.interface";
+import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
 
 @injectable()
 export class UserController implements IUserController {
@@ -22,13 +25,17 @@ export class UserController implements IUserController {
     @inject(TYPES.ChangePasswordService)
     private _changePassword: IChangePasswordService,
     @inject(TYPES.BookingDetailsService)
-    private _bookingDetailsService: IBookingDetailsService
+    private _bookingDetailsService: IBookingDetailsService,
+    @inject(TYPES.WalletService)
+    private _walletService: IWalletService,
+    @inject(TYPES.TransactionService)
+    private _transactionServcie: ITransactionService,
   ) {}
 
   async userProfileDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       console.log((req as CustomRequest).user);
@@ -44,7 +51,7 @@ export class UserController implements IUserController {
   async updateProfileDetails(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       console.log(req.body);
@@ -66,7 +73,7 @@ export class UserController implements IUserController {
 
       const updatedData = await this._profileManage.updateUserProfileDetails(
         user,
-        userId
+        userId,
       );
       if (!updatedData) {
         throw new CustomError(MESSAGES.BAD_REQUEST, STATUS_CODES.BAD_REQUEST);
@@ -80,7 +87,7 @@ export class UserController implements IUserController {
   async getUserAddresses(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
@@ -96,7 +103,7 @@ export class UserController implements IUserController {
   async addUserAddress(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
@@ -116,7 +123,7 @@ export class UserController implements IUserController {
   async setPrimaryAddress(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = (req as CustomRequest).user._id;
@@ -125,7 +132,7 @@ export class UserController implements IUserController {
       console.log(`${userId}+${toSetId}`);
       const respose = await this._profileManage.setPrimaryAddress(
         userId,
-        toSetId
+        toSetId,
       );
       if (!respose.success) {
         res.status(STATUS_CODES.BAD_REQUEST).json(respose);
@@ -140,14 +147,14 @@ export class UserController implements IUserController {
   async changePassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     const parsed = changePasswordSchema.parse(req.body);
     const userId = (req as CustomRequest).user?._id;
     const result = await this._changePassword.changePassword(
       "user",
       userId,
-      parsed
+      parsed,
     );
     if (result.success) {
       res.status(STATUS_CODES.OK).json(result);
@@ -158,7 +165,7 @@ export class UserController implements IUserController {
   async ongoingBookings(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const limit = Number(req.query.limit) || 10;
@@ -174,7 +181,7 @@ export class UserController implements IUserController {
         userId,
         limit,
         skip,
-        search
+        search,
       );
       if (response.success) {
         res.status(STATUS_CODES.OK).json(response);
@@ -185,23 +192,80 @@ export class UserController implements IUserController {
       next(error);
     }
   }
-  async bookingDetailData(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async bookingDetailData(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const bookingId=req.params.bookingId
-      if(!bookingId){
-        res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message:"ubooking details missing"})
+      const bookingId = req.params.bookingId;
+      if (!bookingId) {
+        res
+          .status(STATUS_CODES.BAD_REQUEST)
+          .json({ success: false, message: "ubooking details missing" });
       }
-      const response=await this._bookingDetailsService.bookingDetailData(bookingId)
-      console.log(response)
+      const response =
+        await this._bookingDetailsService.bookingDetailData(bookingId);
+      console.log(response);
 
-      if( response.success){
-        res.status(STATUS_CODES.OK).json(response)
-      }else{
-        res.status(STATUS_CODES.BAD_REQUEST).json(response)
+      if (response.success) {
+        res.status(STATUS_CODES.OK).json(response);
+      } else {
+        res.status(STATUS_CODES.BAD_REQUEST).json(response);
       }
-
     } catch (error) {
-      next(error)
+      next(error);
     }
+  }
+  async getWalletData(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const userId = (req as CustomRequest).user._id;
+    const role = (req as CustomRequest).user.role;
+    console.log(userId, role);
+    const wallet = await this._walletService.getWalletData(userId, role);
+    console.log(wallet);
+
+    res.status(200).json( wallet );
+  }
+  async getTransactions(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const userId = (req as CustomRequest).user._id;
+    const role = (req as CustomRequest).user.role;
+    const query: WalletTransactionQuery = {
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+
+      type: typeof req.query.type === "string" ? req.query.type : undefined,
+      status:
+        typeof req.query.status === "string" ? req.query.status : undefined,
+
+      sortBy:
+        typeof req.query.sortBy === "string" ? req.query.sortBy : "createdAt",
+      sortOrder:
+        req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+          ? req.query.sortOrder
+          : "desc",
+
+      startDate:
+        typeof req.query.startDate === "string"
+          ? req.query.startDate
+          : undefined,
+      endDate:
+        typeof req.query.endDate === "string" ? req.query.endDate : undefined,
+    };
+    console.log(userId, role);
+    const result = await this._transactionServcie.getTransactionData(
+      userId,
+      role,
+      query
+    );
+
+    res.status(STATUS_CODES.OK).json(result)
   }
 }

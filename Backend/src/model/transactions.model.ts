@@ -1,7 +1,7 @@
 import { InferSchemaType, model, Schema, Types } from "mongoose";
-import { IWalletTransaction } from "../interface/model/wallet-transactions.modal.interface";
+import { ITransaction } from "../interface/model/transactions.modal.interface";
 
-const WalletTransactionSchema = new Schema(
+const TransactionSchema = new Schema(
   {
     walletId: {
       type: Schema.Types.ObjectId,
@@ -63,7 +63,7 @@ const WalletTransactionSchema = new Schema(
 
 
 
-export const WalletTransactionModel = model<IWalletTransaction>(
-  "WalletTransaction",
-  WalletTransactionSchema
+export const TransactionModel = model<ITransaction>(
+  "Transaction",
+  TransactionSchema
 );

@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 
-export interface IWalletTransaction extends Document{
+export interface ITransaction extends Document{
   _id: string;
   walletId: string;
 

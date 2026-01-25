@@ -14,6 +14,8 @@ import WorkerRequestsPage from "./pages/worker/RequestService";
 import WorkerChangePasswordPage from "./pages/worker/ChangePassword";
 import { WorkerApprovedServices } from "./pages/worker/ApprovedServiceListing";
 import WorkerBookingDetailsPage from "./pages/worker/ApprovedServiceDetails";
+import AllBookingsPage from "./pages/worker/AllBooking";
+import WorkerWallet from "./pages/worker/WorkerWallet";
 
 
 const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
@@ -68,6 +70,14 @@ const Worker = () => {
         <Route
           path={WORKER_ROUTES.SERVICE_APPROVED_DETAILPAGE}
           element={<IsWorkerLogin>< WorkerBookingDetailsPage/></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.All_BOOKINGS}
+          element={<IsWorkerLogin>< AllBookingsPage/></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.WALLET}
+          element={<IsWorkerLogin><WorkerWallet/></IsWorkerLogin>}
         />
       </Routes>
       

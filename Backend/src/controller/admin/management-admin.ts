@@ -8,11 +8,18 @@ import { TYPES } from '../../config/constants/types';
 import { IManagementAdminService } from '../../interface/service/management-admin.service.interface';
 import { CustomError } from '../../utils/custom-error';
 import { serviceRegistrationSchema } from '../validation/service-create';
+import { CustomRequest } from '../../middleware/auth.middleware';
+import { ITransactionService } from '../../interface/service/transaction.service.interface';
+import { IWalletService } from '../../interface/service/wallet.service.interface';
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
 
 @injectable()
 export class ManagementAdmin implements IAdminManagementController {
   constructor(
         @inject(TYPES.ManagementAdminService) private _adminManagement:IManagementAdminService,
+         @inject(TYPES.WalletService) private _walletService: IWalletService,
+            @inject(TYPES.TransactionService)
+            private _transactionService: ITransactionService,
   ) {
 
   }
@@ -251,4 +258,55 @@ export class ManagementAdmin implements IAdminManagementController {
       
     }
   }
+  async getWalletData(
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ): Promise<void> {
+      const userId = (req as CustomRequest).user._id;
+      const role = (req as CustomRequest).user.role;
+      console.log(userId, role);
+      const wallet = await this._walletService.getWalletData(userId, role);
+      console.log(wallet);
+  
+      res.status(200).json(wallet);
+    }
+    async getTransactions(
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ): Promise<void> {
+      const userId = (req as CustomRequest).user._id;
+      const role = (req as CustomRequest).user.role;
+      const query: WalletTransactionQuery = {
+        page: Number(req.query.page) || 1,
+        limit: Number(req.query.limit) || 10,
+  
+        type: typeof req.query.type === "string" ? req.query.type : undefined,
+        status:
+          typeof req.query.status === "string" ? req.query.status : undefined,
+  
+        sortBy:
+          typeof req.query.sortBy === "string" ? req.query.sortBy : "createdAt",
+        sortOrder:
+          req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+            ? req.query.sortOrder
+            : "desc",
+  
+        startDate:
+          typeof req.query.startDate === "string"
+            ? req.query.startDate
+            : undefined,
+        endDate:
+          typeof req.query.endDate === "string" ? req.query.endDate : undefined,
+      };
+      console.log(userId, role);
+      const result = await this._transactionService.getTransactionData(
+        userId,
+        role,
+        query,
+      );
+  
+      res.status(STATUS_CODES.OK).json(result);
+    }
 }

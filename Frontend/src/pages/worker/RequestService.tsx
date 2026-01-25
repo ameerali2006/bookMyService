@@ -63,6 +63,7 @@ export default function WorkerRequestsPage() {
         page,
         limit: pageSize,
       });
+      console.log(response)
 
       if (response.data.success) {
         setRequests(response.data.data.data);

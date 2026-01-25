@@ -25,7 +25,7 @@ const BookingSchema = new Schema<IBooking>(
       default: 'unpaid',
     },
 
-    finalPaymentId: { type: Schema.Types.ObjectId },
+    finalPaymentId: { type:String },
     finalPaymentStatus: {
       type: String,
       enum: ['unpaid', 'paid', 'failed', 'refunded'],

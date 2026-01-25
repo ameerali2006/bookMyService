@@ -11,4 +11,5 @@ export interface IPaymentRepository extends IBaseRepository<IPayment> {
     findLatestPayment(userId: string, bookingId?: string): Promise<IPayment | null>;
     deletePayment(id: string): Promise<IPayment | null>;
     findByIntentIdAndUpdateStatus(paymentIntentId: string, status: PaymentStatus): Promise<IPayment | null>;
+    findByIntentId(paymentIntentId: string): Promise<IPayment | null>
 }

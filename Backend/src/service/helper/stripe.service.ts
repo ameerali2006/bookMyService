@@ -15,6 +15,7 @@ import { io, onlineWorkers } from '../../config/socketServer';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { bookingSocketHandler } from '../../config/di/resolver';
+import { IWalletService } from '../../interface/service/wallet.service.interface';
 
 @injectable()
 export class StripeService implements IStripeService {
@@ -27,6 +28,7 @@ export class StripeService implements IStripeService {
     private _bookingRepository: IBookingRepository,
     @inject(TYPES.PaymentRepository)
     private _paymentRepository: IPaymentRepository,
+    @inject(TYPES.WalletService) private _walletService:IWalletService
   ) {
     this._apiKey = ENV.STRIPE_SECRET_KEY;
     this._stripe = new Stripe(this._apiKey, {
@@ -45,6 +47,7 @@ export class StripeService implements IStripeService {
       const {
         amount, currency, description, receiptEmail, metadata,
       } = input;
+      console.log(input)
       const paymentIntent = await this._stripe.paymentIntents.create({
         amount,
         currency,
@@ -55,13 +58,14 @@ export class StripeService implements IStripeService {
         receipt_email: receiptEmail,
         metadata,
       });
-
+      console.log(paymentIntent)
       return {
         success: true,
         message: 'Successfully Payment created',
         paymentIntent,
       };
     } catch (error) {
+      console.error(error)
       return {
         success: false,
         message: 'internal error',
@@ -75,9 +79,12 @@ export class StripeService implements IStripeService {
     status: PaymentStatus,
   ): Promise<void> {
     const paymentIntent = await this._stripe.paymentIntents.retrieve(paymentIntentId);
-
+    console.log(paymentIntent)
+   console.log('object')
     const { bookingId,addressId, paymentType } = paymentIntent.metadata || {};
+ 
     if (!bookingId || !paymentType) {
+
       console.warn(' Missing bookingId or paymentType in metadata');
       return;
     }
@@ -92,6 +99,7 @@ export class StripeService implements IStripeService {
     );
 
     if (paymentType === 'advance') {
+      console.log("advance update")
       await this._bookingRepository.updateAdvancePaymentStatus(
         bookingId,
         paymentIntentId,
@@ -104,6 +112,12 @@ export class StripeService implements IStripeService {
         paymentIntentId,
         status,
       );
+      
+    }
+    if (status === 'succeeded') {
+      console.log("sambavam entho indddu")
+      const wall = await this._walletService.creditAdminWallet(paymentIntentId);
+      console.log( wall)
     }
   }
 
@@ -116,7 +130,8 @@ export class StripeService implements IStripeService {
 
         console.log(`✅ Stripe: ${paymentType} payment succeeded for booking ${bookingId}`);
 
-        await this.updatePaymentStatus(successfulPayment.id!, 'succeeded');
+        const updatebooking=await this.updatePaymentStatus(successfulPayment.id!, 'succeeded');
+        console.log(updatebooking)
         if (paymentType === 'advance') {
           const booking = await this._bookingRepository.findByIdPopulated(bookingId) as IBookingPopulated|null;
           console.log(`booking${booking}`);
@@ -130,7 +145,7 @@ export class StripeService implements IStripeService {
         }
 
         break;
-      }
+      } 
       case 'payment_intent.payment_failed': {
         const failedPayment = event.data.object as Stripe.PaymentIntent;
         await this.updatePaymentStatus(failedPayment.id, 'failed');

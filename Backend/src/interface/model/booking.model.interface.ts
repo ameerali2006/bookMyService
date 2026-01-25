@@ -20,6 +20,7 @@ export interface IPaymentItem {
   quantity: number;  
   total: number;     
 }
+export type  BookingStatus= 'pending'| 'confirmed'| 'in-progress' | 'awaiting-final-payment'| 'completed'| 'cancelled'
 
 export interface IBooking extends Document{
   _id: Types.ObjectId;
@@ -49,13 +50,7 @@ export interface IBooking extends Document{
   additionalItems?: IAdditionalItem[];
   paymentBreakdown?: IPaymentItem[];
 
-  status:
-    | 'pending'
-    | 'confirmed'
-    | 'in-progress' 
-    | 'awaiting-final-payment'
-    | 'completed'
-    | 'cancelled';
+  status:BookingStatus
 
   workerResponse: 'accepted' | 'rejected' | 'pending';
 

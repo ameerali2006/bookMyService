@@ -1,5 +1,6 @@
 import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
 import workerAxios from "@/config/axiosSevice/WorkerAxios";
+import type { WalletTransactionQuery } from "@/interface/shared/wallet";
 type Break = {
   label: string;
   breakStart: string;
@@ -102,4 +103,26 @@ export const workerService = {
   verifyWorker:async (bookingId:string,otp:string) => {
     return await workerAxios.put("/service/verify-worker", {bookingId,otp});
   },
-};
+  workComplated:async (bookingId:string) => {
+    return await workerAxios.patch("/service/work-complated", {bookingId});
+  },
+  allBookings:async (params: { page: number,limit: number , search?: string,statuses?: string[],workerResponses?: ("accepted" | "rejected" | "pending")[],from?: Date,to?: Date}) => {
+    return await workerAxios.get("/service/allBookings", {
+      params: {
+        page: params.page,
+        limit: params.limit,
+        search: params.search,
+        statuses: params.statuses?.join(","),
+        workerResponses:params.workerResponses?.join(","),
+        from: params.from,
+        to: params.to,
+      },
+    })
+  },
+  workerWalletData:async ()=>{
+        return await workerAxios.get('/profile/walletData')
+    },
+    getWorkerTransactions:async  (query:WalletTransactionQuery)=>{
+        return await workerAxios.get(`/profile/transactions`,{params:query})
+    }
+}

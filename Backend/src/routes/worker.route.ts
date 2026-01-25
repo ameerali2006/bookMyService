@@ -40,6 +40,10 @@ export class WorkerRoute extends BaseRoute {
     this.router.get('/service/approveds/:bookingId', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.getApprovalsDetails(req, res, next));
     this.router.get('/service/reach-location/:bookingId', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.reachLocation(req, res, next));
     this.router.put('/service/verify-worker', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.verifyWorker(req, res, next));
-
+    this.router.patch('/service/work-complated', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.workComplated(req, res, next));
+    this.router.get('/service/allBookings', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.allBookings(req, res, next));
+    this.router.get('/profile/walletData', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWalletData(req, res, next));
+    this.router.get('/profile/transactions', verifyAuth(), authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) => workingDetailsController.getTransactions(req, res, next));
+    
   }
 }

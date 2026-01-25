@@ -19,14 +19,15 @@ const navItems = [
 ];
 
 const appointmentSubItems = [
+  { label: "All Bookings", path: "/worker/appointments/allBookings" },
   { label: "Requests", path: "/worker/appointments/request" },
   { label: "Approved", path: "/worker/appointments/approved" },
-  { label: "Completed", path: "/worker/appointments/completed" },
+ 
 ];
 
 const profileSubItems = [
   { label: "View Profile", path: "/worker/profile/view" },
-  { label: "Edit Profile", path: "/worker/profile/edit" },
+  { label: "Wallet", path: "/worker/profile/wallet" },
   { label: "Slot Management", path: "/worker/profile/slot" },
 ];
 

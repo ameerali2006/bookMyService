@@ -12,7 +12,7 @@ const WalletSchema = new Schema<IWallet>(
 
     role: {
       type: String,
-      enum: ["User", "Worker", "Admin"],
+      enum: ["user", "worker", "admin"],
       required: true,
     },
 

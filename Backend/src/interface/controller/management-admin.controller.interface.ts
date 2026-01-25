@@ -13,5 +13,7 @@ export interface IAdminManagementController {
     updateServiceStatus(req: Request, res: Response, next: NextFunction): Promise<void>
     getBookings(req: Request, res: Response, next: NextFunction): Promise<void>
     getBookingDetailPage(req: Request, res: Response, next: NextFunction): Promise<void>
+    getWalletData(req: Request, res: Response, next: NextFunction): Promise<void>
+    getTransactions(req: Request, res: Response, next: NextFunction): Promise<void>
 
 }

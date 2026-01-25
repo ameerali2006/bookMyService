@@ -12,6 +12,7 @@ import {
   LogOut,
   Layers,
   Wrench,
+  Wallet
   
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -39,14 +40,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick, onLogout }) 
     { id: "Reviews", label: "Reviews", icon: Star, path: "/admin/reviews" },
     { id: "Verification", label: "Worker Verification", icon: Shield, path: "/admin/unverified" },
     { id: "Users", label: "Users", icon: Users, path: "/admin/users" },
-    { id: "ServiceCategories", label: "Service Categories", icon: Layers, path: "/admin/service-categories" },
+    { id: "Wallet", label: "Wallet", icon: Wallet, path: "/admin/wallet" },
     { id: "ServiceTypes", label: "Worker Skills", icon: Wrench, path: "/admin/service-types" },
   ];
 
   const handleItemClick = (itemId: string, path: string) => {
     onItemClick?.(itemId);
     navigate(path);
-  };
+  }; 
 
   const handleLogout = async () => {
     try {

@@ -1,4 +1,5 @@
 import adminAxios from "@/config/axiosSevice/AdminAxios";
+import type { WalletTransactionQuery } from "@/interface/shared/wallet";
 
 export const adminManagement = {
   getAllUsers: async (
@@ -6,7 +7,7 @@ export const adminManagement = {
     limit: number,
     search?: string,
     sortBy?: string,
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ) => {
     return await adminAxios.get("/users", {
       params: { page, limit, search, sortBy, sortOrder },
@@ -20,7 +21,7 @@ export const adminManagement = {
     limit: number,
     sortBy?: string,
     sortOrder?: "asc" | "desc",
-    search?: string
+    search?: string,
   ) => {
     return await adminAxios.get("/workers", {
       params: { page, limit, sortBy, sortOrder, search },
@@ -43,7 +44,7 @@ export const adminManagement = {
     search: string,
     sort: string,
     page: number,
-    limit: number
+    limit: number,
   ) => {
     return await adminAxios.get("/services", {
       params: { search, sort, page, limit },
@@ -67,18 +68,27 @@ export const adminManagement = {
   },
   getBookings: async (params: {
     search?: string;
-    status?: "confirmed" | "in-progress" | "completed" | "cancelled";
+    status?:
+      | "confirmed"
+      | "in-progress"
+      | "completed"
+      | "cancelled"
+      | "awaiting-final-payment";
     page?: number;
     limit?: number;
   }) => {
-    
-
     return await adminAxios.get("/bookings", {
       params,
     });
   },
-  getBookingDetailPage:async (bookingId:string)=>{
-    console.log(bookingId)
-    return await adminAxios.get(`/booking/${bookingId}`)
-  }
+  getBookingDetailPage: async (bookingId: string) => {
+    console.log(bookingId);
+    return await adminAxios.get(`/booking/${bookingId}`);
+  },
+  adminWalletData: async () => {
+    return await adminAxios.get("/wallet/walletData");
+  },
+  getAdminTransactions: async (query: WalletTransactionQuery) => {
+    return await adminAxios.get(`/wallet/transactions`, { params: query });
+  },
 };

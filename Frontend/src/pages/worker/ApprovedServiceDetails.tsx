@@ -74,7 +74,7 @@ export interface IPaymentItem {
   total: number;
 }
 
-export type BookingStatus = "confirmed" | "in-progress" | "completed";
+export type BookingStatus = "confirmed" | "in-progress" | "completed"|"awaiting-final-payment";
 export type PaymentMethod = "cash" | "card" | "upi" | "wallet";
 
 export interface IBooking {
@@ -192,6 +192,7 @@ export default function WorkerBookingDetailsPage() {
       </Badge>
     );
   };
+  
   const handleVerify = async (otp: string) => {
     if (!booking?._id) {
       ErrorToast("Booking not found");
@@ -245,6 +246,30 @@ export default function WorkerBookingDetailsPage() {
       ErrorToast("Failed to verify arrival");
     }
   };
+  const handleComplated=async()=>{
+     if (!booking?._id) {
+        ErrorToast("Booking not found");
+        return;
+      }
+
+      try {
+        const res = await workerService.workComplated(booking._id);
+
+        if (!res.data.success) {
+          ErrorToast(res.data.message || "Failed to complete work");
+          return;
+        }
+
+        SuccessToast("Work completed successfully");
+
+        
+        loadBooking()
+
+      } catch (error) {
+        console.error("Complete work error:", error);
+        ErrorToast("Something went wrong while completing work");
+      }
+  }
   const handleAddItem = async () => {
     //   if (!newItemName.trim() || !newItemPrice) return
     //   const updated = [
@@ -280,6 +305,22 @@ export default function WorkerBookingDetailsPage() {
     // In real app: API call to persist
   };
   const isInProgress = booking.status === "in-progress"
+  const getActionButton = () => {
+    if (!isToday) {
+      return { label: "Go to Customer Location", action: openMap };
+    }
+
+    if (booking.status === "awaiting-final-payment") {
+      return { label: "Verify Payment", action: handleReachedLocation };
+    }
+
+    if (!isInProgress) {
+      return { label: "Reached to Customer Location", action: handleReachedLocation };
+    }
+
+    return { label: "Work Completed", action: handleComplated };
+  };
+  const { label, action } = getActionButton();
   return (
     <WorkerLayout>
       <Navbar />
@@ -361,7 +402,7 @@ export default function WorkerBookingDetailsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 items-end">
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="icon"
                       onClick={openMap}
@@ -369,20 +410,53 @@ export default function WorkerBookingDetailsPage() {
                     >
                       <MapPin className="h-4 w-4" />
                     </Button>
+                    {isToday && booking.status=="awaiting-final-payment" && (
+                      <Button
+                        onClick={handleReachedLocation}
+                        className="gap-2 bg-emerald-600"
+                      >
+                        <Navigation className="h-4 w-4" />
+                       verify payment 
+                      </Button>
+                    )}
                     
-                    <Button
-                      onClick={isToday ? handleReachedLocation : openMap}
-                      disabled={isToday && isInProgress}
-                      className="gap-2"
-                    >
-                      <Navigation className="h-4 w-4" />
+                    {isToday && !isInProgress && !booking.status=="awaiting-final-payment" && (
+                      <Button
+                        onClick={handleReachedLocation}
+                        className="gap-2"
+                      >
+                        <Navigation className="h-4 w-4" />
+                        Reached to Customer Location
+                      </Button>
+                    )}
 
-                      {isToday
-                        ? !isInProgress
-                          ? "Reached to Customer Location"
-                          : "Worek started"
-                        : "Go to Customer Location"}
-                    </Button>
+                    
+                    {isToday && isInProgress && (
+                      <Button
+                        onClick={()=>handleComplated()}
+                        className="gap-2 "
+                      >
+                        <Navigation className="h-4 w-4" />
+                        Work Complated
+                      </Button>
+                    )}
+
+                    
+                    {!isToday && (
+                      <Button
+                        onClick={openMap}
+                        className="gap-2"
+                      >
+                        <Navigation className="h-4 w-4" />
+                        Go to Customer Location
+                      </Button>
+                    )} */}
+                      
+
+                  <Button onClick={action} className="gap-2">
+                    <Navigation className="h-4 w-4" />
+                    {label}
+                  </Button>
                   </div>
                 </div>
               </CardContent>

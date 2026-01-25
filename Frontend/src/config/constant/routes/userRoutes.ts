@@ -11,4 +11,6 @@ export const USER_ROUTES = {
     BOOK_DETAILS: "/services/bookDetails/:workerId",
     PRE_BOOKING_SLOT:"/services/preBooking/:bookingId",
   },
+  
+  WALLET:"/wallet"
 };

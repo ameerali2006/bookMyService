@@ -64,7 +64,10 @@ export class WalletRepository
     return await WalletModel.findByIdAndDelete(id);
   }
 
-  async findByRole(role: string): Promise<IWallet[]> {
+  async findByRole(role: "user"|"admin"|"worker"): Promise<IWallet[]> {
     return await WalletModel.find({ role }).sort({ createdAt: -1 }).exec();
+  }
+  async findAdminWallet(): Promise<IWallet|null> {
+    return await WalletModel.findOne({ role:"admin" })
   }
 }

@@ -14,6 +14,7 @@ import UserChangePasswordPage from "./pages/user/ChangeUserPassword";
 import PaymentSuccessPage from "./pages/user/SuccessPage";
 import UserBookingsPage from "./pages/user/BookingList";
 import { BookingDetailPage } from "./pages/user/BookingDetail";
+import UserWallet from "./pages/user/UserWallet";
 
 
 
@@ -82,6 +83,10 @@ const User = () => {
         <Route
           path={"/booking/:bookingId/success"}
           element={<IsLogin><PaymentSuccessPage /></IsLogin>}
+        />
+        <Route
+          path={USER_ROUTES.WALLET}
+          element={<IsLogin><UserWallet /></IsLogin>}
         />
 
       </Routes>

@@ -1,5 +1,5 @@
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
-import { ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/working-details.dto';
+import { allBookingDto, ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/working-details.dto';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { WorkerModel } from '../../model/worker.model';
@@ -74,4 +74,30 @@ export class WorkerMapper {
         status: b.status as | 'confirmed'| 'in-progress' | 'awaiting-final-payment',
       
   });
+  static toAllWorkerBookingDto(
+    booking: IBookingPopulated
+  ): allBookingDto {
+    return {
+      id: booking._id.toString(),
+
+      userId: booking.userId._id.toString(),
+      userName: booking.userId.name,
+
+      serviceName: booking.serviceId.category,
+
+      date: booking.date.toISOString().split("T")[0],
+      time: booking.startTime,
+
+      address:
+        typeof booking.address === "string"
+          ? booking.address
+          : booking.address?.buildingName ??
+            booking.address?.street ??
+            booking.address?.area ??
+            "",
+
+      status: booking.status,
+      workerResponse: booking.workerResponse,
+    };
+  }
 }

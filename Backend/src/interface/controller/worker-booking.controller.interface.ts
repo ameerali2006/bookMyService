@@ -8,4 +8,6 @@ export interface IWorkerBookingController{
     getApprovalsDetails(req: Request, res: Response, next: NextFunction): Promise<void>
     reachLocation(req: Request, res: Response, next: NextFunction): Promise<void>
     verifyWorker(req: Request, res: Response, next: NextFunction): Promise<void>
+    workComplated(req: Request, res: Response, next: NextFunction): Promise<void>
+    allBookings(req: Request, res: Response, next: NextFunction): Promise<void>
 }

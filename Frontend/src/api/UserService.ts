@@ -1,5 +1,6 @@
 import type { ChangePasswordInput } from "@/components/shared/ChangePassword";
 import userAxios from "@/config/axiosSevice/UserAxios";
+import type { WalletTransactionQuery } from "@/interface/shared/wallet";
 import type { Numerals } from "react-day-picker";
     
     export interface  AddressForm {
@@ -100,5 +101,12 @@ export const userService={
     bookingDetailData:async (bookingId:string)=>{
         return await userAxios.get(`/bookings/ongoing/${bookingId}`)
     },
+    userWalletData:async ()=>{
+        return await userAxios.get('/profile/walletData')
+    },
+    getUserTransactions:async  (query:WalletTransactionQuery)=>{
+        return await userAxios.get(`/profile/transactions`,{params:query})
+    }
+ 
 } 
   

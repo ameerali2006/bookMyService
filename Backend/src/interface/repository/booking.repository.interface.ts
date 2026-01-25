@@ -1,4 +1,8 @@
-import { IBooking, IBookingPopulated } from "../model/booking.model.interface";
+import {
+  BookingStatus,
+  IBooking,
+  IBookingPopulated,
+} from "../model/booking.model.interface";
 import { PaymentStatus } from "../model/payement.model.interface";
 import { IRequestFilters } from "../service/worker/worker-booking.service.interface";
 import { IBaseRepository } from "./base.repository.interface";
@@ -14,14 +18,18 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   findByIdPopulated(id: string): Promise<IBookingPopulated | null>;
   findByUserId(userId: string): Promise<IBookingPopulated[]>;
   findByWorkerId(workerId: string): Promise<IBookingPopulated[]>;
-  updateStatus(id: string, status: string): Promise<IBooking | null>;
+  updateStatus(id: string, status: BookingStatus): Promise<IBooking | null>;
   updateWorkerResponse(id: string, response: string): Promise<IBooking | null>;
-  updateStatusWithOTP(id: string, status: 'pending'
-    | 'confirmed'
-    | 'in-progress' 
-    | 'awaiting-final-payment'
-    | 'completed'
-    | 'cancelled'): Promise<IBooking | null>
+  updateStatusWithOTP(
+    id: string,
+    status:
+      | "pending"
+      | "confirmed"
+      | "in-progress"
+      | "awaiting-final-payment"
+      | "completed"
+      | "cancelled"
+  ): Promise<IBooking | null>;
   updatePaymentStatus(
     id: string,
     paymentStatus: string,
@@ -74,29 +82,43 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     search: string
   ): Promise<{ bookings: IBookingPopulated[] | null; total: number }>;
   findWorkerApprovedBookings({
-      workerId,
-      page,
-      limit,
-      search,
-      status,
-    }: {
-    workerId: string
-    page: number
-    limit: number
-    search?: string
-    status?: "approved" | "in-progress"|'awaiting-final-payment'
-  }):Promise<{items:IBookingPopulated[]|null,total:number}>
-  getAllBookings(
-      params: {
-    search?: string
-    status?: string
-    limit?: number
-    page?: number
-  }
-    ): Promise<{
+    workerId,
+    page,
+    limit,
+    search,
+    status,
+  }: {
+    workerId: string;
+    page: number;
+    limit: number;
+    search?: string;
+    status?: "approved" | "in-progress" | "awaiting-final-payment";
+  }): Promise<{ items: IBookingPopulated[] | null; total: number }>;
+  getAllBookings(params: {
+    search?: string;
+    status?: string;
+    limit?: number;
+    page?: number;
+  }): Promise<{
     data: IBookingPopulated[];
     total: number;
     page: number;
     limit: number;
-  }>
+  }>;
+  allBookingList(params: {
+    workerId: string;
+
+    page: number;
+    limit: number;
+
+    search?: string;
+    statuses?: string[];
+     workerResponses?: string[] 
+
+    from?: Date;
+    to?: Date;
+  }): Promise<{
+    items: IBookingPopulated[];
+    total: number;
+  } >;
 }

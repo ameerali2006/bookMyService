@@ -1,6 +1,32 @@
-import { IBookingPopulated } from "../../interface/model/booking.model.interface";
+import { BookingStatus, IBookingPopulated } from "../../interface/model/booking.model.interface";
 import { ICustomSlot, IHoliday, IWorkingDetailsDocument } from "../../interface/model/working-details.interface";
 import { responsePart } from "../shared/responsePart";
+export interface allBookingDto{
+  
+  id: string
+  userId: string
+  userName: string
+  serviceName: string
+  date: string      
+  time: string      
+  address: string
+  status:
+    | "pending"
+    | "confirmed"
+    | "in-progress"
+    | "awaiting-final-payment"
+    | "completed"
+    | "cancelled"
+    workerResponse: "accepted" | "rejected" | "pending" 
+}
+export interface WorkerBookingListResponseDto {
+  bookings: allBookingDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+
 
 export interface WorkerProfileDTO {
   id: string;
@@ -108,4 +134,7 @@ export interface  getCalenderDetailsResponseDto extends responsePart{
 export interface  updateCalenderDetailsResponseDto extends responsePart{
   customSlots:ICustomSlot[]|null, 
   holidays:IHoliday[]|null
+}
+export interface  workerComplateWorkResponseDto extends responsePart{
+  booking?:(IBookingPopulated&{verification:boolean})
 }
