@@ -8,8 +8,9 @@ import {
 } from "../../interface/model/booking.model.interface";
 import { BaseRepository } from "./base.repository";
 import { Booking } from "../../model/booking.model";
-import { PaymentStatus } from "../../interface/model/payement.model.interface";
+
 import { IRequestFilters } from "../../interface/service/worker/worker-booking.service.interface";
+import { PaymentStatus } from "../../interface/model/wallet.model.interface";
 
 @injectable()
 export class BookingRepository
@@ -201,7 +202,7 @@ export class BookingRepository
       address: addressId,
     });
   }
-
+   
   async updateFinalPaymentStatus(
     bookingId: string,
     paymentIntentId: string,

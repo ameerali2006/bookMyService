@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
-import { PaymentStatus } from '../model/payement.model.interface';
+
 import { createPaymentIntentResponse } from '../../dto/shared/helpers.dto';
+import { PaymentStatus } from '../model/wallet.model.interface';
 
 export interface CreatePaymentIntenServicetInput {
   amount: number;

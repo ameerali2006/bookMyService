@@ -7,7 +7,7 @@ import {
   IAddBalanceInput,
   IWalletService,
 } from "../../interface/service/wallet.service.interface";
-import { IPaymentRepository } from "../../interface/repository/payment.repository.interface";
+
 import { IWallet } from "../../interface/model/wallet.model.interface";
 
 @injectable()
@@ -16,8 +16,6 @@ export class WalletService implements IWalletService {
     @inject(TYPES.WalletRepository) private walletRepo: IWalletRepository,
     @inject(TYPES.TransactionRepository)
     private walletTransaction: ITransactionRepository,
-    @inject(TYPES.PaymentRepository) private paymentRepo:IPaymentRepository,
-
   ) {}
   private async getOrCreateWallet(
     userId: string,
@@ -108,39 +106,30 @@ export class WalletService implements IWalletService {
       },
     };
   }
-  async creditAdminWallet(paymentIntentId: string) :Promise<IWallet|null> {
-    console.log("workingggg g  g g  g g ")
+  async creditAdminWallet(
+    amount: number,
+    paymentIntentId: string,
+  ): Promise<IWallet | null> {
+    const adminWallet = await this.walletRepo.findAdminWallet();
+    if (!adminWallet) return null;
 
-  const payment =
-    await this.paymentRepo.findByIntentId(paymentIntentId);
-    console.log("payment clg",payment)
-  if(!payment) return null
-  console.log("payment clg",payment)
+    const before = adminWallet.balance;
+    const after = before + amount;
 
-  const adminWallet = await this.walletRepo.findAdminWallet();
-  console.log("adminWallet clg",adminWallet)
-    if(!adminWallet)return null
-  const before = adminWallet.balance;
-  const after = before + payment.amount;
-    console.log("adminWallet clg",adminWallet)
-  await this.walletTransaction.createTransaction({
-    walletId: adminWallet._id.toString(),
-    type: "TOPUP",
-    direction: "CREDIT",
-    amount: payment.amount,
-    balanceBefore: before,
-    balanceAfter: after,
-    status: "SUCCESS", 
-    
-    description: "User payment credited to admin wallet",
+    await this.walletTransaction.createTransaction({
+      walletId: adminWallet._id.toString(),
+      type: "TOPUP",
+      direction: "CREDIT",
+      amount,
+      balanceBefore: before,
+      balanceAfter: after,
+      status: "SUCCESS",
+      description: `Stripe payment credited to admin wallet (${paymentIntentId})`,
+    });
 
-  });
-
-  return await this.walletRepo.updateById(adminWallet._id.toString(), {
-    balance: after,
-    lastActivityAt: new Date(), 
-  });
+    return await this.walletRepo.updateById(adminWallet._id.toString(), {
+      balance: after,
+      lastActivityAt: new Date(),
+    });
+  }
 }
-
-}
- 

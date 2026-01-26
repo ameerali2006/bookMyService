@@ -3,7 +3,8 @@ import {
   IBooking,
   IBookingPopulated,
 } from "../model/booking.model.interface";
-import { PaymentStatus } from "../model/payement.model.interface";
+import { PaymentStatus } from "../model/wallet.model.interface";
+
 import { IRequestFilters } from "../service/worker/worker-booking.service.interface";
 import { IBaseRepository } from "./base.repository.interface";
 

@@ -2,8 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { Stripe } from 'stripe';
 
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
-import { IPaymentRepository } from '../../interface/repository/payment.repository.interface';
-import { PaymentStatus } from '../../interface/model/payement.model.interface';
+
 import {
   CreatePaymentIntenServicetInput,
   IStripeService,
@@ -16,6 +15,7 @@ import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { bookingSocketHandler } from '../../config/di/resolver';
 import { IWalletService } from '../../interface/service/wallet.service.interface';
+import { PaymentStatus } from '../../interface/model/wallet.model.interface';
 
 @injectable()
 export class StripeService implements IStripeService {
@@ -26,9 +26,10 @@ export class StripeService implements IStripeService {
   constructor(
     @inject(TYPES.BookingRepository)
     private _bookingRepository: IBookingRepository,
-    @inject(TYPES.PaymentRepository)
-    private _paymentRepository: IPaymentRepository,
-    @inject(TYPES.WalletService) private _walletService:IWalletService
+    @inject(TYPES.WalletService) 
+    private _walletService:IWalletService
+    
+    
   ) {
     this._apiKey = ENV.STRIPE_SECRET_KEY;
     this._stripe = new Stripe(this._apiKey, {
@@ -93,10 +94,7 @@ export class StripeService implements IStripeService {
       `🧾 Updating ${paymentType} payment for booking ${bookingId} → ${status}`,
     );
 
-    const payment = await this._paymentRepository.findByIntentIdAndUpdateStatus(
-      paymentIntentId,
-      status,
-    );
+    
 
     if (paymentType === 'advance') {
       console.log("advance update")
@@ -116,7 +114,7 @@ export class StripeService implements IStripeService {
     }
     if (status === 'succeeded') {
       console.log("sambavam entho indddu")
-      const wall = await this._walletService.creditAdminWallet(paymentIntentId);
+      const wall = await this._walletService.creditAdminWallet(paymentIntent.amount/100,paymentIntentId.toString());
       console.log( wall)
     }
   }

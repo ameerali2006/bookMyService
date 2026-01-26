@@ -22,5 +22,8 @@ export interface IWalletService {
       role: "user" | "admin" | "worker";
     };
   }>;
-  creditAdminWallet(paymentIntentId: string) :Promise<IWallet|null>
+  creditAdminWallet(
+    amount: number,
+    paymentIntentId: string,
+  ): Promise<IWallet | null>
 }
