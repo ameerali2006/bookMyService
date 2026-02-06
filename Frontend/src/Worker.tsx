@@ -16,6 +16,7 @@ import { WorkerApprovedServices } from "./pages/worker/ApprovedServiceListing";
 import WorkerBookingDetailsPage from "./pages/worker/ApprovedServiceDetails";
 import AllBookingsPage from "./pages/worker/AllBooking";
 import WorkerWallet from "./pages/worker/WorkerWallet";
+import WorkerMessagesPage from "./pages/worker/WorkerChat";
 
 
 const WorkerRegistration=lazy(()=>import("@/pages/worker/Register"))
@@ -78,6 +79,10 @@ const Worker = () => {
         <Route
           path={WORKER_ROUTES.WALLET}
           element={<IsWorkerLogin><WorkerWallet/></IsWorkerLogin>}
+        />
+        <Route
+          path={WORKER_ROUTES.CHAT}
+          element={<IsWorkerLogin><WorkerMessagesPage/></IsWorkerLogin>}
         />
       </Routes>
       

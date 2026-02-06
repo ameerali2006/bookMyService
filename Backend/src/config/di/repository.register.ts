@@ -26,6 +26,10 @@ import { ITransactionRepository } from '../../interface/repository/transaction.r
 import { TransactionRepository } from '../../repository/shared/transaction.repository';
 import { ISlotLockRepository } from '../../interface/repository/slot-lock.repository.interface';
 import { SlotLockRepository } from '../../repository/helper/slot-lock.repository';
+import { IChatRepository } from '../../interface/repository/chat.repository.interface';
+import { ChatRepository } from '../../repository/shared/chat.repoository';
+import { IMessageRepository } from '../../interface/repository/message.repoository.interface';
+import { MessageRepository } from '../../repository/shared/message.repository.interface';
 
 export class RepositoryRegistery {
   static registerRepository():void {
@@ -42,5 +46,8 @@ export class RepositoryRegistery {
    
     container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
     container.register<ITransactionRepository>(TYPES.TransactionRepository, { useClass: TransactionRepository });
+    container.register<IChatRepository>(TYPES.ChatRepository, { useClass:ChatRepository  });
+    container.register<IMessageRepository>(TYPES.MessageRepository, { useClass: MessageRepository });
+
   }
 }

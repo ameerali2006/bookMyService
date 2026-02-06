@@ -11,7 +11,8 @@ export const WORKER_ROUTES = {
   CHANGE_PASSWORD:"/profile/change-password",
   SERVICE_APPROVED_DETAILPAGE:"/appointments/approved/:bookingId",
   All_BOOKINGS:"/appointments/allBookings",
-  WALLET:"/profile/wallet"
+  WALLET:"/profile/wallet",
+  CHAT:"/messages"
 
 
 };

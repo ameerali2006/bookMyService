@@ -1,12 +1,13 @@
 import { createServer } from 'http';
 
 import { SocketCore } from './socket.io';
-import { bookingSocket } from './di/resolver';
+import { bookingSocket, chatSocketHandler } from './di/resolver';
 import app from '../app';
 
 const server = createServer(app);
 const socketCore = new SocketCore(server);
 socketCore.registerHandler(bookingSocket);
+socketCore.registerHandler(chatSocketHandler);
 
 // Initialize chythathu
 socketCore.initialize();

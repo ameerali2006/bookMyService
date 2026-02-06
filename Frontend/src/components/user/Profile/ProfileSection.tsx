@@ -14,7 +14,7 @@ import {
   WarningToast,
 } from "@/components/shared/Toaster";
 import CropImageModal from "@/components/shared/ImageCropModal.";
-import { uploadImageCloudinary } from "@/lib/cloudinaryService";
+import { uploadToCloudinary } from "@/lib/cloudinaryService";
 import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
@@ -92,7 +92,7 @@ export function ProfileSection() {
       setSaving(true);
       console.log("Uploading to Cloudinary...");
 
-      const newImageUrl = await uploadImageCloudinary(file);
+      const newImageUrl = await uploadToCloudinary(file,"user-image");
       console.log("Image uploaded:", newImageUrl);
 
       const updatedData = { ...formData, image: newImageUrl };

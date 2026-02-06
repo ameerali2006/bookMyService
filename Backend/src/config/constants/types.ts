@@ -1,4 +1,6 @@
 export const TYPES = {
+  MessageRepository:Symbol.for('MessageRepository'),
+  ChatRepository:Symbol.for('ChatRepository'),
   TransactionService:Symbol.for('TransactionService'),
   SlotLockRepository:Symbol.for('SlotLockRepository'),
   BookingDetailsService:Symbol.for('BookingDetailsService'),

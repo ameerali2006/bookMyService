@@ -50,8 +50,8 @@ export const adminManagement = {
       params: { search, sort, page, limit },
     });
   },
-  getCloudinarySignature: async () => {
-    return await adminAxios.get("/cloudinary-signature");
+  getCloudinarySignature: async (folder:string) => {
+    return await adminAxios.get("/cloudinary-signature",{params:{folder}});
   },
   createService: async (data: {
     category: string;

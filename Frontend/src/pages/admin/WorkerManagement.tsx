@@ -91,6 +91,9 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
       setUpdateLoading(null)
     }
   }
+  const handleExport=()=>{
+
+  }
 
   const filteredAndSorted = useMemo(() => {
     console.log("workers"+workers)
@@ -201,7 +204,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-900">Worker Management</h1>
-            <Button variant="outline" onClick={() => console.log("Exporting...")}>
+            <Button variant="outline" onClick={() =>handleExport()}>
               <Download className="w-4 h-4 mr-2" /> Export
             </Button>
           </div>

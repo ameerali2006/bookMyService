@@ -32,6 +32,7 @@ import { WorkerBookingController } from '../../controller/worker/worker-booking.
 import { TYPES } from '../constants/types';
 import { ISocketHandler } from '../../interface/service/socket-handler.service.interface';
 import { BookingSocketHandler } from '../../service/helper/booking-socket.service';
+import { ChatSocketHandler } from '../../service/helper/chat-socket.service';
 
 DependencyInjection.registerAll();
 
@@ -51,3 +52,4 @@ export const bookingController = container.resolve<IBookingController>(BookingCo
 export const stripeController = container.resolve<IStripeController>(StripeController);
 export const workerbookingController = container.resolve<IWorkerBookingController>(WorkerBookingController);
 export const bookingSocketHandler = container.resolve(BookingSocketHandler);
+export const chatSocketHandler = container.resolve(ChatSocketHandler);

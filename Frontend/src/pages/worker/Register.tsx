@@ -135,7 +135,7 @@ export default function WorkerRegistration() {
 
   try {
     // 1. Get secure signature from backend
-    const { data } = await authService.workerCloudinory();
+    const { data } = await authService.workerCloudinory('worker-documents');
 
     // 2. Prepare form data for Cloudinary upload
     const formDataPayload = new FormData();

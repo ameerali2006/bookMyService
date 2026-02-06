@@ -31,7 +31,7 @@ import { useSelector } from "react-redux"
 import type { RootState } from "@/redux/store"
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster"
 import { authService } from "@/api/AuthService"
-import { uploadImageCloudinary } from "@/lib/cloudinaryService"
+import { uploadToCloudinary } from "@/lib/cloudinaryService"
 import CropImageModal from "@/components/shared/ImageCropModal."
 import { useNavigate } from "react-router-dom"
 
@@ -106,7 +106,7 @@ const WorkerProfilePage: React.FC = () => {
   const handleCropComplete = async (croppedFile: File) => {
   setUploading(true);
   try {
-    const newImgUrl = await uploadImageCloudinary(croppedFile);
+    const newImgUrl = await uploadToCloudinary(croppedFile,"worker-documents");
     setFormData((prev) => ({ ...prev, profileImage: newImgUrl }));
     SuccessToast("Profile image cropped & updated!");
   } catch (err) {

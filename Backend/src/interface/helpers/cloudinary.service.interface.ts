@@ -1,5 +1,5 @@
 export interface ICloudinaryService {
-  generateSignature(): {
+  generateSignature(folder:string): {
     timestamp: number;
     signature: string;
     apiKey: string;
@@ -7,3 +7,4 @@ export interface ICloudinaryService {
     folder: string;
   };
 }
+ 

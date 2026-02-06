@@ -1,31 +1,40 @@
-import { authService } from "@/api/AuthService";
 import axios from "axios";
+import { authService } from "@/api/AuthService";
 
-export const uploadImageCloudinary = async (file: File) => {
+/**
+ * Reusable Cloudinary upload function
+ * Works for image / video / audio
+ */
+export const uploadToCloudinary = async (
+  file: File,
+  uploadType: "user-image" | "chat-media" | "worker-documents"
+): Promise<string> => {
   try {
-  
-    const { data } = await authService.workerCloudinory();
+    // 1️⃣ Get signed data from backend
+    const { data } = await authService.workerCloudinory(uploadType);
 
-    
-    const formDataPayload = new FormData();
-    formDataPayload.append("file", file);
-    formDataPayload.append("api_key", data.apiKey);
-    formDataPayload.append("timestamp", data.timestamp.toString());
-    formDataPayload.append("signature", data.signature);
-    formDataPayload.append("folder", data.folder);
+    // 2️⃣ Prepare form data
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", data.apiKey);
+    formData.append("timestamp", String(data.timestamp));
+    formData.append("signature", data.signature);
+    formData.append("folder", data.folder);
 
-    
+    // 3️⃣ Upload to Cloudinary
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${data.cloudName}/auto/upload`;
 
-   
-    const uploadRes = await axios.post(cloudinaryUrl, formDataPayload, {
+    const uploadRes = await axios.post(cloudinaryUrl, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    
-    return uploadRes.data.secure_url;
+    // 4️⃣ Return secure URL
+    return uploadRes.data.secure_url as string;
   } catch (error: any) {
-    console.error("Error uploading image to Cloudinary:", error.response?.data || error.message);
+    console.error(
+      "Cloudinary upload failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

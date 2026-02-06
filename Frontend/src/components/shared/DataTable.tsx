@@ -24,6 +24,7 @@ interface DataTableProps<T> {
   sortBy?: string
   sortOrder?: "asc" | "desc"
   onSort?: (key: string, order: "asc" | "desc") => void
+  
 }
 
 export function DataTable<T extends { _id?: string }>({

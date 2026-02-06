@@ -44,6 +44,7 @@ export class WorkerRoute extends BaseRoute {
     this.router.get('/service/allBookings', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.allBookings(req, res, next));
     this.router.get('/profile/walletData', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWalletData(req, res, next));
     this.router.get('/profile/transactions', verifyAuth(), authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) => workingDetailsController.getTransactions(req, res, next));
-    
+    this.router.get('/chats/users', verifyAuth(), authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) => workingDetailsController.getTransactions(req, res, next));
+
   }
 }

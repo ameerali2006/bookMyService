@@ -55,8 +55,8 @@ export const authService={
         return await workerAxios.post('/generate-otp',{email})
 
     },
-    workerCloudinory:async ()=>{
-        return await workerAxios.post('/cloudinary-signature')
+    workerCloudinory:async (folder:string)=>{
+        return await workerAxios.post('/cloudinary-signature',{folder})
     },
     workerRegister: async (data: WorkerRegistrationData & {role:string}) => {
         return await workerAxios.post("/register", data); 
