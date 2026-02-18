@@ -57,6 +57,7 @@ export function MessageInput({
       type: "TEXT",
       content: textInput,
       createdAt: new Date().toISOString(),
+      isOwn:true
     };
 
     onSendMessage(message);
@@ -99,6 +100,7 @@ export function MessageInput({
           type: mediaType.toUpperCase() as "IMAGE" | "VIDEO" | "AUDIO",
           content: url,
           createdAt: new Date().toISOString(),
+          isOwn:true
         };
 
         onSendMedia(message);

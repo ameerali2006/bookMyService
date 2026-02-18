@@ -23,7 +23,9 @@ export const authService={
     },
     googleLogin:async (token:string,role:"user")=>{
         console.log("google>login")
-        return await userAxios.post('/google-login',{token,role})
+        let dat= await userAxios.post('/google-login',{token,role})
+        console.log("dfddffarra",dat.data)
+        return dat
     },
     verifyOtp:async (otp:string,email:string,role:string)=>{
         return await userAxios.post('/verify-otp',{otp,email,role})

@@ -14,7 +14,7 @@ export interface Message {
     mimeType?: string;
   };
   createdAt: string;
-  isOwn?: boolean; // Helper flag to identify if message is from current user
+  isOwn: boolean; // Helper flag to identify if message is from current user
 }
 
 export interface Chat {
@@ -30,7 +30,7 @@ export interface Chat {
 
 export interface SocketAuth {
   userId: string;
-  userType: "user" | "worker";
+  userType: "User" | "Worker";
 }
 
 export interface SocketMessage {

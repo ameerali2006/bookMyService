@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { ENV } from "@/config/env/env";
 import type { Message, SocketAuth } from "@/interface/shared/chat";
@@ -20,14 +20,12 @@ interface UseSocketChatReturn {
   addMessageToLocal: (message: Message) => void;
 }
 
-
 export function useSocketChat({
   auth,
   chatId,
   onMessageReceived,
   onConnectionChange,
 }: UseSocketChatOptions): UseSocketChatReturn {
-
   // ✅ ONLY socket ref you need
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
@@ -36,8 +34,6 @@ export function useSocketChat({
 
   useEffect(() => {
     const socketUrl = ENV.VITE_SERVER_BASEURL;
-
-   
 
     const socket = io(socketUrl, {
       auth: {
@@ -53,7 +49,6 @@ export function useSocketChat({
     socket.on("connect", () => {
       setIsConnected(true);
       onConnectionChange?.(true);
-      socket.emit("chat:join", { chatId });
     });
 
     socket.on("disconnect", () => {
@@ -62,36 +57,42 @@ export function useSocketChat({
     });
 
     socket.on("chat:receive", (message: Message) => {
-      
+      setMessages((prev) => [...prev, message]);
       onMessageReceived?.(message);
     });
 
     socket.on("connect_error", (error: Error) => {
       console.error("[Socket] Connection error:", error.message);
-      setIsConnected(true);
-      onConnectionChange?.(true);
+      setIsConnected(false);
     });
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [auth, chatId, onMessageReceived, onConnectionChange]);
+  }, [auth.userId, auth.userType]);
+
+  useEffect(() => {
+    if (!chatId || !socketRef.current) return;
+
+    socketRef.current.emit("chat:join", { chatId });
+
+    setMessages([]); 
+  }, [chatId]);
 
   const sendMessage = useCallback(
-  (message: Message) => {
-    socketRef.current?.emit("chat:send", {
-      chatId,
-      message: {
-        type: message.type,
-        content: message.content,
-        metadata: message.metadata,
-      },
-    });
-  },
-  [chatId]
-);
-
+    (message: Message) => {
+      socketRef.current?.emit("chat:send", {
+        chatId,
+        message: {
+          type: message.type,
+          content: message.content,
+          metadata: message.metadata,
+        },
+      });
+    },
+    [chatId],
+  );
 
   const addMessageToLocal = useCallback((message: Message) => {
     setMessages((prev) => [...prev, message]);

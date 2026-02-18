@@ -22,7 +22,7 @@ export class SocketCore {
       },
     });
 
-    this.io.use(this.authMiddleware);
+    this.io.use(this.authMiddleware); 
   }
 
   private authMiddleware = (socket: Socket, next: (err?: Error) => void) => {

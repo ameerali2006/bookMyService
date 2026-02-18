@@ -25,7 +25,7 @@ export class BookingSocketHandler implements ISocketHandler {
   public registerEvents(io: IOServer, onlineWorkers: Map<string, { socketId: string; userType: string }>) {
     io.on('connection', (socket) => {
       const customSocket = socket as CustomSocket;
-      if (customSocket.userType !== 'worker') return;
+      if (customSocket.userType !== 'Worker') return;
 
       console.log(`⚙️ Registering BookingSocket for worker ${customSocket.userId}`);
 

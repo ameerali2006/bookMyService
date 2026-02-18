@@ -35,6 +35,8 @@ const GoogleLoginComponent = ({ userType, onGoogleSuccess }: GoogleLoginComponen
           ? await authService.googleWorkerLogin(token,userType)
           : await authService.googleLogin(token,userType);
 
+        console.log(response.data)
+
       if (response.data.success) {
         const {name,email}=response.data.user
         

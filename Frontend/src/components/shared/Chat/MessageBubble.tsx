@@ -10,14 +10,14 @@ interface MessageBubbleProps {
   showSenderName?: boolean;
 }
 
-/**
- * Wrapper component for a single message with optional sender info
- */
+
 export function MessageBubble({
   message,
   isOwn,
   showSenderName = false,
 }: MessageBubbleProps) {
+  console.log("isOwner:",isOwn)
+
   return (
     <div className={cn("flex mb-3", isOwn ? "justify-end" : "justify-start")}>
       <div>

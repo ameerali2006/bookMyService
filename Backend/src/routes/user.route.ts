@@ -6,6 +6,7 @@ import {
   authController,
   blockStatusMiddleware,
   bookingController,
+  chatController,
   serviceController,
   stripeController,
   tokenController,
@@ -53,9 +54,8 @@ export class UserRoute extends BaseRoute {
     this.router.get('/bookings/ongoing/:bookingId', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.bookingDetailData(req, res, next));
     this.router.get('/profile/walletData', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.getWalletData(req, res, next));
     this.router.get('/profile/transactions', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>userController.getTransactions(req, res, next));
+    this.router.get('/chat/chatId', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>chatController.getChatId(req, res, next));
+    this.router.get('/chat/chatHistory', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) =>chatController.getChatHistory(req, res, next));
 
-  
-  
-  
   }
 }

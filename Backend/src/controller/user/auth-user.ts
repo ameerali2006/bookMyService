@@ -146,16 +146,17 @@ export class AuthUserController implements IAuthController {
           accessTokenName,
           refreshTokenName,
         );
-
+        console.log(user)
         res
           .status(STATUS_CODES.OK)
           .json({
             success: true,
             message: MESSAGES.LOGIN_SUCCESS,
             user: {
+              _id:user._id,
               name: user.name,
               email: user.email,
-              image: user?.email,
+              image: user?.image,
 
             },
           });

@@ -1,4 +1,4 @@
-import { IMessage } from "../model/message.model.interface";
+import { IMessage, IMessagePopulated } from "../model/message.model.interface";
 import { IBaseRepository } from "./base.repository.interface";
 
 export interface IMessageRepository extends IBaseRepository<IMessage>{
@@ -7,6 +7,6 @@ export interface IMessageRepository extends IBaseRepository<IMessage>{
     chatId: string,
     limit: number,
     skip: number
-  ): Promise<IMessage[]>;
+  ): Promise<IMessagePopulated[]>;
   markMessagesAsRead(chatId: string, userId: string): Promise<void>;
 }

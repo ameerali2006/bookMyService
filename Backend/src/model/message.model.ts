@@ -11,7 +11,12 @@ const messageSchema = new Schema<IMessage>(
     },
     senderId: {
       type: Schema.Types.ObjectId,
-      ref: "User", // or Worker (same ObjectId type)
+      refPath: "role", // or Worker (same ObjectId type)
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["User", "Worker", "Admin"],
       required: true,
     },
     type: {
@@ -30,7 +35,7 @@ const messageSchema = new Schema<IMessage>(
     readBy: [
       {
         type: Schema.Types.ObjectId,
-        ref: "User",
+         refPath: "role",
       },
     ],
   },

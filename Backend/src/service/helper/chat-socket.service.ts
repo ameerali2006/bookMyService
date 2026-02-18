@@ -28,6 +28,8 @@ export class ChatSocketHandler implements ISocketHandler {
 
       /* ---------------- JOIN CHAT ---------------- */
       socket.on("chat:join", async ({ chatId }) => {
+        console.log('dfdfdfdf meesdsge')
+
         const chat = await this._chatRepo.findById(chatId);
         if (!chat) return;
 
@@ -64,6 +66,7 @@ export class ChatSocketHandler implements ISocketHandler {
         const savedMessage = await this._messageRepo.create({
           chatId,
           senderId: customSocket.userId,
+          role:customSocket.userType,
           type: message.type,
           content: message.content,
           metadata: message.metadata,

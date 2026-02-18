@@ -67,6 +67,8 @@ import { RedisTokenService } from '../../repository/shared/redis.repository';
 import { IRedisTokenService } from '../../interface/service/redis.service.interface';
 import { ITransactionService } from '../../interface/service/transaction.service.interface';
 import { TransactionService } from '../../service/shared/transaction.service';
+import { IChatService } from '../../interface/service/chat.service.interface';
+import { ChatService } from '../../service/shared/chat.service';
 
 export class ServiceRegistery {
   static registerService():void {
@@ -101,6 +103,7 @@ export class ServiceRegistery {
     container.register<IWalletService>(TYPES.WalletService, { useClass: WalletService });
     container.register<IBookingDetailsService>(TYPES.BookingDetailsService, { useClass: BookingDetailsService });
     container.register<ITransactionService>(TYPES.TransactionService, { useClass: TransactionService });
-    container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler });
+    container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler }); 
+    container.register<IChatService>(TYPES.ChatService, { useClass: ChatService });
   }
 }

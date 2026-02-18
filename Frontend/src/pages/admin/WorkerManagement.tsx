@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react"
 import Sidebar from "@/components/admin/Sidebar"
 import Navbar from "@/components/admin/Navbar"
 import Footer from "@/components/user/shared/Footer"
-
+import html2canvas from "html2canvas"
 import { Pagination } from "@/components/ui/Pagination"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -91,9 +91,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
       setUpdateLoading(null)
     }
   }
-  const handleExport=()=>{
 
-  }
 
   const filteredAndSorted = useMemo(() => {
     console.log("workers"+workers)
@@ -204,7 +202,7 @@ const fetchWorkers = async (page = 1, limit = 10, sortBy = "", sortOrder: "asc" 
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-900">Worker Management</h1>
-            <Button variant="outline" onClick={() =>handleExport()}>
+            <Button variant="outline" onClick={() =>console.log("expoort")}>
               <Download className="w-4 h-4 mr-2" /> Export
             </Button>
           </div>

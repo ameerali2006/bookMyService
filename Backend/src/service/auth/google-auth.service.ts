@@ -56,7 +56,8 @@ export class GoogleService implements IGoogleService {
           accessToken,
           refreshToken,
           user: {
-            name: user.name,
+            _id:user._id.toString(),
+            name: user.name, 
             email: user.email,
             googleId: sub,
             image: role == 'user' ? (user as IUser).image || null : (user as IWorker).profileImage || null,

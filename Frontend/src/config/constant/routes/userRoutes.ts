@@ -12,5 +12,6 @@ export const USER_ROUTES = {
     PRE_BOOKING_SLOT:"/services/preBooking/:bookingId",
   },
   
-  WALLET:"/wallet"
+  WALLET:"/wallet",
+  CHAT:"/chat/:bookingId"
 };

@@ -13,7 +13,7 @@ import { BookingSocketHandler } from './booking-socket.service';
 import { io, onlineWorkers } from '../../config/socketServer';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
-import { bookingSocketHandler } from '../../config/di/resolver';
+import { bookingSocketHandler } from '../../config/di/resolver'; 
 import { IWalletService } from '../../interface/service/wallet.service.interface';
 import { PaymentStatus } from '../../interface/model/wallet.model.interface';
 

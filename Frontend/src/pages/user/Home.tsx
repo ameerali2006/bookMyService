@@ -42,7 +42,7 @@ export default function Homepage() {
 
   return (
     <>
-      <Header />
+      <Header /> <Header />
 
       {/* Location Modal */}
       <LocationModal

@@ -3,38 +3,50 @@ import { ChatWindow } from "@/components/shared/Chat/ChatWindows";
 import { MessageInput } from "@/components/shared/Chat/MessageInput";
 import type { Message, SocketAuth } from "@/interface/shared/chat";
 import { useSocketChat } from "@/hook/useSocketChat";
-import { userService } from "@/services/userService";
 
-interface UserChatPageProps {
-  bookingId: string; // pass from route or parent
-}
+import { useParams } from "react-router-dom";
+import { userService } from "@/api/UserService";
+import type { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import Header from "@/components/user/shared/Header";
 
-export default function UserChatPage({ bookingId }: UserChatPageProps) {
-  // 🔐 replace with real auth later
-  const currentUserId = "user-123";
-  const currentUserName = "John Doe";
-  const userType = "user" as const;
+
+
+export default function UserChatPage() {
+  const user=useSelector((state:RootState)=>state.userTokenSlice.user)
+  const currentUserId = user?._id;
+  const currentUserName = user?.name;
+  const userType = "User" as const;
+  const { bookingId } = useParams<{ bookingId: string }>();
+  console.log(user)
+
 
   const [chatId, setChatId] = useState<string>("");
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  // 1️⃣ Load booking → get chatId
+  
   useEffect(() => {
     const loadBooking = async () => {
-      const res = await userService.getBookingDetails(bookingId);
+      if(!bookingId)return
+      const res = await userService.getChatId(bookingId);
+      console.log(res.data)
       setChatId(res.data.chatId);
+
     };
 
     loadBooking();
   }, [bookingId]);
+  
+  if (!currentUserId) {
+  return <div>Loading...</div>;
+}
 
-  // 2️⃣ Socket auth
   const auth: SocketAuth = {
     userId: currentUserId,
     userType,
   };
-
+  console.log("chatId",chatId)
   const {
     isConnected,
     messages: socketMessages,
@@ -42,19 +54,21 @@ export default function UserChatPage({ bookingId }: UserChatPageProps) {
     addMessageToLocal,
   } = useSocketChat({
     auth,
-    chatId,
+    chatId:chatId ?? "",
   });
 
-  // 3️⃣ Load chat history
+  
   useEffect(() => {
+    console.log(chatId)
     if (!chatId) return;
 
     const loadHistory = async () => {
       setIsLoadingHistory(true);
-      const res = await fetchChatHistory(chatId, 50, 0);
+      const res = await userService.chatHistory(chatId, 50, 0);
+      console.log(res.data)
 
-      if (res.success) {
-        setInitialMessages(res.data);
+      if (res.data.success) {
+        setInitialMessages(res.data.messages);
       }
       setIsLoadingHistory(false);
     };
@@ -66,14 +80,16 @@ export default function UserChatPage({ bookingId }: UserChatPageProps) {
 
   const handleSendMessage = useCallback(
     (message: Message) => {
-      addMessageToLocal({ ...message, isOwn: true });
+      // addMessageToLocal({ ...message, isOwn: true });
       sendMessage(message);
     },
     [addMessageToLocal, sendMessage]
   );
 
   return (
+    
     <div className="flex h-screen bg-white">
+       <Header />
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b">

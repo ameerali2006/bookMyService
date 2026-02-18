@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
 
-import { IMessage } from "../../interface/model/message.model.interface";
+import { IMessage, IMessagePopulated } from "../../interface/model/message.model.interface";
 import { BaseRepository } from "./base.repository";
 import { MessageModel } from "../../model/message.model";
 import { IMessageRepository } from "../../interface/repository/message.repoository.interface";
@@ -25,12 +25,13 @@ export class MessageRepository
     chatId: string,
     limit = 50,
     skip = 0
-  ): Promise<IMessage[]> {
+  ): Promise<IMessagePopulated[]> {
     return await MessageModel.find({ chatId })
       .sort({ createdAt: 1 }) // oldest → newest
       .skip(skip)
       .limit(limit)
-      .lean<IMessage[]>();
+      .populate("senderId chatId")   // 👈 populate here
+    .lean<IMessagePopulated[]>();
   }
 
   async markMessagesAsRead(

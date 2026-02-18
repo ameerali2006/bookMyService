@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import type { Chat } from "@/interface/shared/chat";
+import { workerService } from "@/api/WorkerService";
+import { userService } from "@/api/UserService";
 
 interface InboxListProps {
   userId: string;
@@ -39,11 +41,11 @@ export function InboxList({
         setError(null);
         const response =
           role === "worker"
-            ? await fetchWorkerInbox()
-            : await fetchInbox(userId);
-        if (response.success) {
-          setChats(response.data);
-        } else {
+            ? await workerService.getWorkerInbox(userId)
+            : await userService.getInbox(userId);
+        if (response.data.success) {
+          setChats(response.data.chats); 
+        } else { 
           setError("Failed to load inbox");
         }
       } catch (err) {

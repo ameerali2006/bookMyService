@@ -15,6 +15,7 @@ import PaymentSuccessPage from "./pages/user/SuccessPage";
 import UserBookingsPage from "./pages/user/BookingList";
 import { BookingDetailPage } from "./pages/user/BookingDetail";
 import UserWallet from "./pages/user/UserWallet";
+import UserChatPage from "./pages/user/ChatPage";
 
 
 
@@ -88,7 +89,10 @@ const User = () => {
           path={USER_ROUTES.WALLET}
           element={<IsLogin><UserWallet /></IsLogin>}
         />
-
+        <Route
+                  path={USER_ROUTES.CHAT}
+                  element={<IsLogin><UserChatPage /></IsLogin>}
+                />
       </Routes>
       
     </Suspense> 

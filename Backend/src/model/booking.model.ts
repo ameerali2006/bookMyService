@@ -78,8 +78,9 @@ const BookingSchema = new Schema<IBooking>(
       score: { type: Number, min: 1, max: 5 },
       review: String,
     },
-  },
+  }, 
   { timestamps: true },
 );
 
 export const Booking = model<IBooking>('Booking', BookingSchema);
+ 

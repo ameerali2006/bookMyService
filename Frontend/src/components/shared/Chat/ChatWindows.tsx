@@ -34,6 +34,8 @@ export function ChatWindow({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  console.log("isOwner:",messages)
+  console.log()
 
   return (
     <div
@@ -56,17 +58,21 @@ export function ChatWindow({
           </div>
         </div>
       )}
-
+      
       {messages.length > 0 && (
         <div className="flex flex-col p-4 gap-2">
           {messages.map((message) => (
+            <>
+            {console.log("iddddd",message.senderId,currentUserId)}
             <MessageBubble
               key={message.id}
               message={message}
-              isOwn={message.senderId === currentUserId}
+              isOwn={message.senderId==currentUserId}
               showSenderName={showSenderNames}
-            />
-          ))}
+            /></>
+          ))
+          
+          }
           <div ref={messagesEndRef} />
         </div>
       )}

@@ -124,5 +124,14 @@ export const workerService = {
     },
     getWorkerTransactions:async  (query:WalletTransactionQuery)=>{
         return await workerAxios.get(`/profile/transactions`,{params:query})
-    }
+    },
+    getWorkerInbox:async (workerId:string)=>{
+        return await workerAxios.get('/chat/chatInbox',{params:{workerId}})
+    },
+    chatHistory: async (chatId: string, limit: number, skip: number) => {
+    console.log("cahjdsfjdsfjds");
+    return await workerAxios.get(`/chat/chatHistory`, {
+      params: { chatId, limit, skip },
+    });
+  },
 }
