@@ -309,4 +309,17 @@ export class ManagementAdmin implements IAdminManagementController {
   
       res.status(STATUS_CODES.OK).json(result);
     }
+    async getDashboard(req: Request, res: Response,next:NextFunction):Promise<void> {
+      try{
+        const dashboard = await this._adminManagement.getDashboard();
+
+        res.status(STATUS_CODES.OK).json({
+          success: true,
+          data: dashboard
+        });
+      }catch(error){
+        next(error)
+      }
+    }
+
 }

@@ -25,7 +25,7 @@ import { AdminMapper } from '../../utils/mapper/admin-mapper';
 export class LoginService implements ILoginService {
   constructor(
         @inject(TYPES.AdminRepository) private _adminRepo:IAdminRepository,
-        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
+        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository, 
         @inject(TYPES.AuthUserRepository) private _userRepo:IUserRepository,
         @inject(TYPES.PasswordService) private _passwordHash:IHashService,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,

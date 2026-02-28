@@ -3,6 +3,7 @@ import { IWorker } from './worker.model.interface';
 import { IUser } from './user.model.interface';
 import { IService } from './service.model.interface';
 import { IAddress } from './address.model.interface';
+import { IReview } from './review.model.interface';
 
 export interface IAdditionalItem{
   name: string;
@@ -56,14 +57,17 @@ export interface IBooking extends Document{
 
   otp?: string;
 
-  rating?: IRating;
+  reviewId?: Types.ObjectId ;
 
   createdAt?: Date;
   updatedAt?: Date;
 }
-export type IBookingPopulated = Omit<IBooking, 'workerId' | 'userId' | 'serviceId'|'address'> & {
+export type IBookingPopulated = Omit<IBooking, 'workerId' | 'userId' | 'serviceId'|'address'|'reviewId'> & {
   workerId: IWorker;
   userId: IUser;
   serviceId: IService;
-  address:IAddress
+  address:IAddress;
+  reviewId:IReview
+
+
 };

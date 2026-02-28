@@ -69,6 +69,8 @@ import { ITransactionService } from '../../interface/service/transaction.service
 import { TransactionService } from '../../service/shared/transaction.service';
 import { IChatService } from '../../interface/service/chat.service.interface';
 import { ChatService } from '../../service/shared/chat.service';
+import { IReviewService } from '../../interface/service/review.service.Interface';
+import { ReviewService } from '../../service/shared/review.service';
 
 export class ServiceRegistery {
   static registerService():void {
@@ -105,5 +107,6 @@ export class ServiceRegistery {
     container.register<ITransactionService>(TYPES.TransactionService, { useClass: TransactionService });
     container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler }); 
     container.register<IChatService>(TYPES.ChatService, { useClass: ChatService });
+    container.register<IReviewService>(TYPES.ReviewService, { useClass: ReviewService });
   }
 }

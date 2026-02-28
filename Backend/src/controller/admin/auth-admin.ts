@@ -15,8 +15,8 @@ import { ILoginService } from '../../interface/service/auth/login.service.interf
 @injectable()
 export class AuthAdminController implements IAdminController {
   constructor(
-    @inject(TYPES.AuthAdminService) private _authAdminService: IAuthAdminService,
-    @inject(TYPES.TokenService) private _tokenService:ITokenservice,
+    @inject(TYPES.AuthAdminService) private _authAdminService: IAuthAdminService,  
+    @inject(TYPES.TokenService) private _tokenService:ITokenservice,  
 
     @inject(TYPES.LoginService) private _Login:ILoginService,
   ) {}

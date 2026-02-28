@@ -21,6 +21,7 @@ import { IWorker } from "../../interface/model/worker.model.interface";
 import { IServiceRepository } from "../../interface/repository/service.repository.interface";
 import { IBookingPopulated } from "../../interface/model/booking.model.interface";
 import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
+import { IAdminDashboardResponse } from "../../dto/admin/admin-dashboard.dto";
 
 @injectable()
 export class ManagementAdminService implements IManagementAdminService {
@@ -408,4 +409,49 @@ export class ManagementAdminService implements IManagementAdminService {
       }
     }
   }
+  private calculateGrowth(current: number, previous: number): number {
+  if (!previous) return current ? 100 : 0;
+  return Number((((current - previous) / previous) * 100).toFixed(2));
+}
+
+async getDashboard(): Promise<{success:boolean,message:string,data:IAdminDashboardResponse}> {
+  const raw = await this._bookingRepo.getDashboardRawData();
+  const data = raw[0];
+
+  const totalBookings = data.bookingStats[0]?.totalBookings || 0;
+  const completedBookings = data.bookingStats[0]?.completedBookings || 0;
+  const cancelledBookings = data.bookingStats[0]?.cancelledBookings || 0;
+
+  const totalRevenue = data.totalRevenue[0]?.revenue || 0;
+
+  const currentMonth = data.currentMonth[0]?.count || 0;
+  const lastMonth = data.lastMonth[0]?.count || 0;
+
+  const bookingGrowth = this.calculateGrowth(currentMonth, lastMonth);
+
+  return {
+    success:true,
+    message:"fetch success fully",
+    data:{
+    stats: {
+      totalBookings,
+      completedBookings,
+      cancelledBookings,
+      totalRevenue,
+      activeServices: await this._serviceRepo.countDocuments({ status: "active" }),
+      approvedWorkers: await this._workerRepo.countDocuments({ isVerified: "approved" }),
+      totalUsers: await this._userRepo.countDocuments(),
+      bookingGrowth,
+      revenueGrowth: 0 // can calculate similar to booking
+    },
+
+    revenueChart: data.revenueChart.map((item: any) => ({
+      month: `${item._id.month}/${item._id.year}`,
+      revenue: item.revenue
+    })),
+
+    serviceDistribution: data.serviceDistribution
+  }}
+}
+
 }

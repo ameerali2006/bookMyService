@@ -91,4 +91,7 @@ export const adminManagement = {
   getAdminTransactions: async (query: WalletTransactionQuery) => {
     return await adminAxios.get(`/wallet/transactions`, { params: query });
   },
+  getDashBoard: async () => {
+    return await adminAxios.get(`/dashboard`);
+  },
 };

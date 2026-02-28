@@ -24,4 +24,5 @@ export interface IBaseRepository<T extends Document> {
     id: string,
     populateFields: { path: string; select?: string; match?: any }[]
   ): Promise<TReturn | null>
+  countDocuments(filter?: FilterQuery<T> ): Promise<number>
 }

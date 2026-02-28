@@ -100,38 +100,49 @@ export const workerService = {
   reachedCustomerLocation: async (bookingId: string) => {
     return await workerAxios.get(`/service/reach-location/${bookingId}`);
   },
-  verifyWorker:async (bookingId:string,otp:string) => {
-    return await workerAxios.put("/service/verify-worker", {bookingId,otp});
+  verifyWorker: async (bookingId: string, otp: string) => {
+    return await workerAxios.put("/service/verify-worker", { bookingId, otp });
   },
-  workComplated:async (bookingId:string) => {
-    return await workerAxios.patch("/service/work-complated", {bookingId});
+  workComplated: async (bookingId: string) => {
+    return await workerAxios.patch("/service/work-complated", { bookingId });
   },
-  allBookings:async (params: { page: number,limit: number , search?: string,statuses?: string[],workerResponses?: ("accepted" | "rejected" | "pending")[],from?: Date,to?: Date}) => {
+  allBookings: async (params: {
+    page: number;
+    limit: number;
+    search?: string;
+    statuses?: string[];
+    workerResponses?: ("accepted" | "rejected" | "pending")[];
+    from?: Date;
+    to?: Date;
+  }) => {
     return await workerAxios.get("/service/allBookings", {
       params: {
         page: params.page,
         limit: params.limit,
         search: params.search,
         statuses: params.statuses?.join(","),
-        workerResponses:params.workerResponses?.join(","),
+        workerResponses: params.workerResponses?.join(","),
         from: params.from,
         to: params.to,
       },
-    })
+    });
   },
-  workerWalletData:async ()=>{
-        return await workerAxios.get('/profile/walletData')
-    },
-    getWorkerTransactions:async  (query:WalletTransactionQuery)=>{
-        return await workerAxios.get(`/profile/transactions`,{params:query})
-    },
-    getWorkerInbox:async (workerId:string)=>{
-        return await workerAxios.get('/chat/chatInbox',{params:{workerId}})
-    },
-    chatHistory: async (chatId: string, limit: number, skip: number) => {
+  workerWalletData: async () => {
+    return await workerAxios.get("/profile/walletData");
+  },
+  getWorkerTransactions: async (query: WalletTransactionQuery) => {
+    return await workerAxios.get(`/profile/transactions`, { params: query });
+  },
+  getWorkerInbox: async (workerId: string) => {
+    return await workerAxios.get("/chat/chatInbox", { params: { workerId } });
+  },
+  chatHistory: async (chatId: string, limit: number, skip: number) => {
     console.log("cahjdsfjdsfjds");
     return await workerAxios.get(`/chat/chatHistory`, {
       params: { chatId, limit, skip },
     });
   },
-}
+  getDashboard: async () => {
+    return await workerAxios.get("/dashboard");
+  },
+};

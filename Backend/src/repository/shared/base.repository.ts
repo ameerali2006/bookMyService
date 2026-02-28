@@ -47,6 +47,9 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
       .findOneAndUpdate(filter, updateData, { new: true })
       .lean() as Promise<T>;
   }
+  async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
+    return await this.model.countDocuments(filter);
+  }
 
   async findWithPopulate<TReturn = T>(
     filter: FilterQuery<T>,

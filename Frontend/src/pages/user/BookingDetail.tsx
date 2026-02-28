@@ -27,6 +27,7 @@ import { OtpQrCard } from "@/components/user/OtpQr";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
+import ReviewModal from "@/components/user/Review";
 
 // -----------------------
 // INTERFACE
@@ -37,6 +38,11 @@ interface IPaymentItem {
   rateLabel: string;
   quantity: number;
   total: number;
+}
+interface IReview {
+  comment: string;
+  rating: number;
+  createdAt: string;
 }
 interface BookingDetail {
   id: string;
@@ -66,6 +72,7 @@ interface BookingDetail {
     | "cancelled";
   workerResponse: "accepted" | "rejected" | "pending";
   otp?: string;
+  review?: IReview;
 }
 
 const statusSteps = [
@@ -161,8 +168,10 @@ export function BookingDetailPage() {
   >(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const user = useSelector((state: RootState) => state.userTokenSlice.user);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     let mounted = true;
@@ -200,11 +209,20 @@ export function BookingDetailPage() {
     };
 
     fetchDetail();
+    console.log("jskjkjs");
+    console.log(booking?.status, booking?.review);
 
     return () => {
       mounted = false;
     };
   }, [bookingId]);
+  useEffect(() => {
+    if (!booking) return;
+
+    if (booking.status === "completed" && !booking.review) {
+      setReviewOpen(true);
+    }
+  }, [booking]);
 
   if (error) return <p className="p-6 text-center text-red-500">{error}</p>;
 
@@ -232,6 +250,7 @@ export function BookingDetailPage() {
     (booking.status === "pending" || booking.status === "confirmed") &&
     booking.workerResponse !== "rejected";
   const showOTPVerification = Boolean(booking.otp);
+  const review = booking.review;
 
   return (
     <>
@@ -425,9 +444,7 @@ export function BookingDetailPage() {
                       <Button
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() =>
-                          navigate(`/chat/${booking.id}`)
-                        }
+                        onClick={() => navigate(`/chat/${booking.id}`)}
                       >
                         💬 Chat
                       </Button>
@@ -708,6 +725,54 @@ export function BookingDetailPage() {
               )}
             </div>
           </Card>
+          {/* REVIEW SECTION */}
+          {review && (
+            <Card className="p-8 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 mb-8">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-2 h-8 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full" />
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Your Review
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Rating */}
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-slate-600">
+                    Rating:
+                  </p>
+
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className="text-xl">
+                        {star <= review.rating ? "⭐" : "☆"}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span className="text-sm text-slate-500 ml-2">
+                    ({review.rating}/5)
+                  </span>
+                </div>
+
+                {/* Comment */}
+                <div>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">
+                    Comment:
+                  </p>
+                  <p className="text-slate-800 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    {review.comment}
+                  </p>
+                </div>
+
+                {/* Date */}
+                <p className="text-xs text-slate-500">
+                  Reviewed on{" "}
+                  {review.createdAt}
+                </p>
+              </div>
+            </Card>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -733,6 +798,21 @@ export function BookingDetailPage() {
           </div>
         </div>
       </main>
+      <ReviewModal
+        isOpen={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        bookingId={booking.id}
+        onSubmitSuccess={(data: IReview) => {
+          setBooking((prev) => {
+            if (!prev) return prev;
+
+            return {
+              ...prev,
+              review: data,
+            };
+          });
+        }}
+      />
       <Footer />
     </>
   );

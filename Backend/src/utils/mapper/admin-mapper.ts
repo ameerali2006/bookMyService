@@ -112,10 +112,10 @@ export class AdminMapper {
         breakdown: booking.paymentBreakdown,
       },
 
-      rating: booking.rating
+      rating: booking.reviewId
         ? {
-            stars: booking.rating.score ?? 0,
-            review: booking.rating.review,
+            stars: booking.reviewId.rating ?? 0,
+            review: booking.reviewId.comment,
           }
         : undefined,
 

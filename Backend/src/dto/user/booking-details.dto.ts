@@ -11,6 +11,11 @@ export interface ongoingBookingDto{
     time: string
     status: 'accepted' | 'rejected' | 'pending'
 }
+interface IReviewResponseData {
+  comment: string;
+  rating: number;
+  createdAt: string;
+}
 export interface BookingDetailDto {
   id: string
   serviceName: string
@@ -39,6 +44,7 @@ export interface BookingDetailDto {
     | "cancelled"
   workerResponse: "accepted" | "rejected" | "pending"
   otp?: string
+  review?:IReviewResponseData
 }
 
 export interface ongoingBookingsResponseDto extends responsePart{

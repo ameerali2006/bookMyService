@@ -1,3 +1,4 @@
+import { IAdminDashboardResponse } from '../../dto/admin/admin-dashboard.dto';
 import {
   AdminBookingDto,
   IbookingDetailPageResponse,
@@ -18,4 +19,5 @@ export interface IManagementAdminService{
     updateServiceStatus(serviceId:string, status:'inactive' |'active'):Promise<updateServiceStatusResponse>
     getAllBookings(search:string,status:string,limit:number,page:number):Promise<getAllBookingsResponse>
     getBookingDetail(bookingId:string):Promise<IbookingDetailPageResponse>
+    getDashboard(): Promise<{success:boolean,message:string,data:IAdminDashboardResponse}> 
 }

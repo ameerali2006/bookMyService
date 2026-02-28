@@ -144,5 +144,13 @@ export class AdminRoute extends BaseRoute {
         managementAdminController.getTransactions(req, res, next);
       }
     );
+    this.router.get(
+      "/dashboard",
+      verifyAuth(),
+      authorizeRole(["admin"]),
+      (req: Request, res: Response, next: NextFunction) => {
+        managementAdminController.getDashboard(req, res, next);
+      }
+    );
   }
 }

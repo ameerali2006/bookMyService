@@ -26,9 +26,13 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/api/AuthService';
 import { ErrorToast } from '@/components/shared/Toaster';
 import { updateLocation } from '@/redux/slice/userTokenSlice';
+import type { WorkerDashboardResponse } from '@/interface/worker/dashboard.types';
+import { workerService } from '@/api/WorkerService';
 
 export default function WorkerDashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<WorkerDashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const dispatch=useDispatch()
 
 
@@ -36,24 +40,22 @@ export default function WorkerDashboard() {
 
   useEffect(()=>{
     autoUpdateLocation()
-    fetchWorker()
+    fetchDashboard()
   },[])
 
-  const fetchWorker=async()=>{
-    try {
-      console.log(worker)
-
-       const res = await  authService.workerIsVerified(String(worker?.email))
-       console.log(res)
-       if(res.status==400){
-        ErrorToast(res.data.message)
-        return 
-       }
-        setData(res.data);
-    } catch (error) {
-      ErrorToast("Something Went Wrong")
-    }
+  const fetchDashboard = async () => {
+  try {
+    setLoading(true);
+    const res = await workerService.getDashboard();
+    console.log("dashboard",res)
+    setData(res.data.data);
+  } catch (error) {
+    ErrorToast("Failed to load dashboard");
+  } finally {
+    setLoading(false);
   }
+};
+
   const autoUpdateLocation = () => {
     if (!navigator.geolocation) {
       console.log("Geolocation not available");
@@ -98,7 +100,8 @@ export default function WorkerDashboard() {
     });
   };
 
-  if (!data) {
+ if (loading) {
+
     return (
       
         <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -107,7 +110,8 @@ export default function WorkerDashboard() {
      
     );
   }
-  if (data.status === "pending") {
+  if (data?.workerStatus === "pending"){
+
   return (
     <>
       <Navbar />
@@ -124,7 +128,7 @@ export default function WorkerDashboard() {
   );
 }
 
-if (data.status === "rejected") {
+if (data?.workerStatus === "rejected") {
   return (<>
     <Navbar />
       <div className="flex items-center justify-center h-screen bg-red-50">
@@ -176,34 +180,38 @@ if (data.status === "rejected") {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <WorkerStatsCard
+                  <WorkerStatsCard
             title="Total Jobs"
-            value="64"
-            change="10% increase"
+            value={data?.stats.totalJobs.toString() || "0"}
+            change={`${data?.stats.todayJobs || 0} today`}
             trend="up"
             icon={<Wrench className="h-5 w-5 text-black" />}
           />
-          <WorkerStatsCard
+
+                <WorkerStatsCard
             title="Monthly Earnings"
-            value="₹42,800"
-            change="5% increase"
+            value={`₹${data?.stats.monthlyEarnings || 0}`}
+            change={`${data?.stats.upcomingJobs || 0} upcoming`}
             trend="up"
             icon={<DollarSign className="h-5 w-5 text-black" />}
           />
-          <WorkerStatsCard
+
+                  <WorkerStatsCard
             title="Upcoming Jobs"
-            value="5"
-            change="2 today"
+            value={data?.stats.upcomingJobs.toString() || "0"}
+            change="Active bookings"
             trend="neutral"
             icon={<Calendar className="h-5 w-5 text-black" />}
           />
-          <WorkerStatsCard
+
+                    <WorkerStatsCard
             title="Rating"
-            value="4.8 / 5"
-            change="132 reviews"
+            value={`${data?.stats.averageRating || 0} / 5`}
+            change={`${data?.stats.totalReviews || 0} reviews`}
             trend="up"
             icon={<CheckCircle className="h-5 w-5 text-black" />}
           />
+
         </div>
 
         {/* Schedule + Side Column */}
@@ -220,35 +228,41 @@ if (data.status === "rejected") {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { time: '9:00 AM', task: 'Fix kitchen tap', client: 'Rahul Singh', status: 'completed' },
-                  { time: '11:00 AM', task: 'AC wiring check', client: 'Priya Sharma', status: 'in-progress' },
-                  { time: '1:30 PM', task: 'Fan installation', client: 'Ajay Kumar', status: 'upcoming' },
-                  { time: '3:00 PM', task: 'Bathroom leak fix', client: 'Sneha Das', status: 'upcoming' },
-                ].map((job, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                {data?.todaySchedule.map((job) => (
+                  <div
+                    key={job.bookingId}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-foreground">{job.time}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {job.time}
+                        </p>
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{job.task}</p>
-                        <p className="text-sm text-muted-foreground">{job.client}</p>
+                        <p className="font-medium text-foreground">
+                          {job.service}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {job.clientName}
+                        </p>
                       </div>
                     </div>
+
                     <Badge
                       className={
-                        job.status === 'completed'
-                          ? 'bg-green-100 text-green-800 border-green-200'
-                          : job.status === 'in-progress'
-                          ? 'bg-blue-100 text-blue-800 border-blue-200'
-                          : 'bg-gray-100 text-gray-800 border-gray-200'
+                        job.status === "completed"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : job.status === "in-progress"
+                          ? "bg-blue-100 text-blue-800 border-blue-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
                       }
                     >
                       {job.status}
                     </Badge>
                   </div>
                 ))}
+
               </CardContent>
             </Card>
           </div>
@@ -289,16 +303,18 @@ if (data.status === "rejected") {
                   <div>
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-muted-foreground">Job Efficiency</span>
-                      <span className="font-medium text-foreground">82%</span>
+                      <span className="font-medium text-foreground">{data?.stats.efficiency || 0}%</span>
                     </div>
-                    <Progress value={82} className="h-2" />
+                    <Progress value={data?.stats.efficiency || 0} />
+
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-muted-foreground">Client Satisfaction</span>
-                      <span className="font-medium text-foreground">94%</span>
+                      <span className="font-medium text-foreground">{data?.stats.satisfaction || 0}%</span>
                     </div>
-                    <Progress value={94} className="h-2" />
+                    <Progress value={data?.stats.satisfaction || 0} />
+
                   </div>
                 </div>
                 <Separator />

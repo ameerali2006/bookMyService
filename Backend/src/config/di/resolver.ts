@@ -35,6 +35,10 @@ import { BookingSocketHandler } from '../../service/helper/booking-socket.servic
 import { ChatSocketHandler } from '../../service/helper/chat-socket.service';
 import { IChatController } from '../../interface/controller/chat.controller.interface';
 import { ChatController } from '../../controller/chat.controller';
+import { IWorkerController } from '../../interface/controller/worker-controller.controller.interface';
+import { WorkerController } from '../../controller/worker/worker-controller.controller';
+import { IReviewController } from '../../interface/controller/review.controller.interface';
+import { ReviewController } from '../../controller/review.controller';
 
 DependencyInjection.registerAll();
 
@@ -56,3 +60,5 @@ export const workerbookingController = container.resolve<IWorkerBookingControlle
 export const bookingSocketHandler = container.resolve(BookingSocketHandler);
 export const chatSocketHandler = container.resolve(ChatSocketHandler);
 export const chatController = container.resolve<IChatController>(ChatController);
+export const workerController = container.resolve<IWorkerController>(WorkerController);
+export const reviewController = container.resolve<IReviewController>(ReviewController);

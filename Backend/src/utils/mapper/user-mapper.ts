@@ -113,7 +113,14 @@ export class UserMapper {
       status: b.status,
       workerResponse: b.workerResponse,
 
-      otp: b.otp ?? undefined
+      otp: b.otp ?? undefined,
+      review:b.reviewId?{
+        comment:b.reviewId.comment,
+        rating:b.reviewId.rating,
+        createdAt:b.reviewId.createdAt.toLocaleDateString()
+
+        
+      }:undefined
     }
   }
 }

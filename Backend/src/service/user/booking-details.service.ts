@@ -15,7 +15,7 @@ export class BookingDetailsService implements IBookingDetailsService{
             
 
            
-            const statuses = ["pending", "confirmed", "in-progress","awaiting-final-payment"];
+            const statuses = ["pending", "confirmed", "in-progress","awaiting-final-payment","completed"];
             const workerResponses = ["pending","accepted"]; 
 
             

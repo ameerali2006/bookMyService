@@ -1,7 +1,10 @@
 // src/repository/implementation/booking.repository.ts
 import { injectable } from "tsyringe";
-import { FilterQuery } from "mongoose";
-import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
+import { FilterQuery, Types } from "mongoose";
+import {
+  IBookingRepository,
+  IWorkerDashboardRepoResult,
+} from "../../interface/repository/booking.repository.interface";
 import {
   IBooking,
   IBookingPopulated,
@@ -11,6 +14,7 @@ import { Booking } from "../../model/booking.model";
 
 import { IRequestFilters } from "../../interface/service/worker/worker-booking.service.interface";
 import { PaymentStatus } from "../../interface/model/wallet.model.interface";
+import { IAdminDashboardRaw } from "../../dto/admin/admin-dashboard.dto";
 
 @injectable()
 export class BookingRepository
@@ -31,6 +35,7 @@ export class BookingRepository
       .populate("workerId", "name email phone category fees")
       .populate("serviceId", "category price")
       .populate("address")
+      .populate("reviewId")
       .exec();
 
     return result as unknown as IBookingPopulated | null;
@@ -64,12 +69,12 @@ export class BookingRepository
 
   async updateWorkerResponse(
     id: string,
-    response: string
+    response: string,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { workerResponse: response },
-      { new: true }
+      { new: true },
     );
   }
   async updateStatusWithOTP(
@@ -80,35 +85,35 @@ export class BookingRepository
       | "in-progress"
       | "awaiting-final-payment"
       | "completed"
-      | "cancelled"
+      | "cancelled",
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { status, $unset: { otp: "" } },
-      { new: true }
+      { new: true },
     );
   }
   async updatePaymentStatus(
     id: string,
     paymentStatus: string,
-    paymentId?: string
+    paymentId?: string,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { paymentStatus, paymentId },
-      { new: true }
+      { new: true },
     );
   }
 
   async addRating(
     id: string,
     score: number,
-    review?: string
+    review?: string,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(
       id,
       { rating: { score, review }, status: "completed" },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -116,7 +121,7 @@ export class BookingRepository
     return await Booking.findByIdAndUpdate(
       id,
       { status: "cancelled" },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -139,7 +144,7 @@ export class BookingRepository
     workerId: string,
     date: Date,
     startTime: Date,
-    endTime: Date
+    endTime: Date,
   ): Promise<IBooking | null> {
     return await Booking.findOne({
       workerId,
@@ -162,7 +167,7 @@ export class BookingRepository
   async findByWorkerAndRange(
     workerId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<
     Array<{
       date: Date;
@@ -183,7 +188,7 @@ export class BookingRepository
         endTime: 1,
         advancePaymentStatus: 1,
         _id: 0,
-      }
+      },
     )
       .sort({ date: 1, startTime: 1 })
       .lean();
@@ -193,7 +198,7 @@ export class BookingRepository
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus,
-    addressId: string
+    addressId: string,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, {
       advancePaymentId: paymentIntentId,
@@ -202,11 +207,11 @@ export class BookingRepository
       address: addressId,
     });
   }
-   
+
   async updateFinalPaymentStatus(
     bookingId: string,
     paymentIntentId: string,
-    status: PaymentStatus
+    status: PaymentStatus,
   ): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, {
       finalPaymentId: paymentIntentId,
@@ -224,7 +229,7 @@ export class BookingRepository
     }).populate("userId serviceId workerId");
   }
   async findServiceRequests(
-    filters: IRequestFilters
+    filters: IRequestFilters,
   ): Promise<{ data: IBookingPopulated[]; total: number }> {
     console.log("object");
     const { workerId, search, status, date, page, limit } = filters;
@@ -261,7 +266,7 @@ export class BookingRepository
     workerResponse: string[] = [],
     limit: number,
     skip: number,
-    search: string
+    search: string,
   ): Promise<{ bookings: IBookingPopulated[] | null; total: number }> {
     let query: FilterQuery<IBooking> = {};
     query.userId = userId;
@@ -391,14 +396,23 @@ export class BookingRepository
 
     search?: string;
     statuses?: string[];
-     workerResponses?: string[] 
+    workerResponses?: string[];
     from?: Date;
     to?: Date;
   }): Promise<{
     items: IBookingPopulated[];
     total: number;
-  } > {
-    const { workerId, page, limit, search, statuses,workerResponses, from, to } = params;
+  }> {
+    const {
+      workerId,
+      page,
+      limit,
+      search,
+      statuses,
+      workerResponses,
+      from,
+      to,
+    } = params;
 
     const query: FilterQuery<IBooking> = {
       workerId,
@@ -419,7 +433,7 @@ export class BookingRepository
       query.status = { $in: statuses };
     }
     if (workerResponses && workerResponses.length > 0) {
-      query.workerResponse = { $in: workerResponses }
+      query.workerResponse = { $in: workerResponses };
     }
     if (from || to) {
       query.date = {};
@@ -438,7 +452,7 @@ export class BookingRepository
     }
 
     const skip = (page - 1) * limit;
-    console.log(query)
+    console.log(query);
 
     const [items, total] = await Promise.all([
       Booking.find(query)
@@ -452,9 +466,215 @@ export class BookingRepository
 
       Booking.countDocuments(query),
     ]);
-    console.log(items)
+    console.log(items);
 
     return { items, total };
   }
+
+  async getWorkerDashboardStats(
+    workerId: string,
+  ): Promise<IWorkerDashboardRepoResult> {
+    const workerObjectId = new Types.ObjectId(workerId);
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const monthStart = new Date(
+      todayStart.getFullYear(),
+      todayStart.getMonth(),
+      1,
+    );
+
+    // 1️⃣ Total Jobs
+    const totalJobs = await Booking.countDocuments({ workerId });
+
+    // 2️⃣ Completed Jobs
+    const completedJobs = await Booking.countDocuments({
+      workerId,
+      status: "completed",
+    });
+
+    // 3️⃣ Monthly Earnings
+    const monthlyEarningsAgg = await Booking.aggregate([
+      {
+        $match: {
+          workerId: workerObjectId,
+          status: "completed",
+          date: { $gte: monthStart },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
+
+    const monthlyEarnings = monthlyEarningsAgg[0]?.total || 0;
+
+    // 4️⃣ Upcoming Jobs
+    const upcomingJobs = await Booking.countDocuments({
+      workerId,
+      status: { $in: ["confirmed", "in-progress"] },
+      date: { $gte: todayStart },
+    });
+
+    // 5️⃣ Rating Aggregation
+    const ratingAgg = await Booking.aggregate([
+      {
+        $match: {
+          workerId: workerObjectId,
+          "rating.score": { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating.score" },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const avgRating = ratingAgg[0]?.avgRating || 0;
+    const totalReviews = ratingAgg[0]?.totalReviews || 0;
+
+    // 6️⃣ Today Schedule
+    const todaySchedule = await Booking.find({
+      workerId,
+      date: { $gte: todayStart, $lte: todayEnd },
+    })
+      .populate("workerId")
+      .populate("userId")
+      .populate("serviceId")
+      .populate("address")
+      .lean<IBookingPopulated[]>();
+    return {
+      totalJobs,
+      completedJobs,
+      monthlyEarnings,
+      upcomingJobs,
+      avgRating,
+      totalReviews,
+      todaySchedule,
+    };
+  }
+
+  async getDashboardRawData(): Promise<IAdminDashboardRaw[]> {
+    const now = new Date();
+
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    return Booking.aggregate([
+      {
+        $facet: {
+          // 📊 Booking Stats
+          bookingStats: [
+            {
+              $group: {
+                _id: null,
+                totalBookings: { $sum: 1 },
+                completedBookings: {
+                  $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+                },
+                cancelledBookings: {
+                  $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] },
+                },
+              },
+            },
+          ],
+
+          // 💰 Revenue
+          totalRevenue: [
+            {
+              $match: {
+                status: "completed",
+                finalPaymentStatus: "paid",
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                revenue: { $sum: "$totalAmount" },
+              },
+            },
+          ],
+
+          // 📈 Monthly Revenue Chart (Last 6 Months)
+          revenueChart: [
+            {
+              $match: {
+                status: "completed",
+                finalPaymentStatus: "paid",
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  year: { $year: "$createdAt" },
+                  month: { $month: "$createdAt" },
+                },
+                revenue: { $sum: "$totalAmount" },
+              },
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+          ],
+
+          // 🥧 Service Distribution
+          serviceDistribution: [
+            {
+              $lookup: {
+                from: "services",
+                localField: "serviceId",
+                foreignField: "_id",
+                as: "service",
+              },
+            },
+            { $unwind: "$service" },
+
+            {
+              $group: {
+                _id: "$service.category",
+                count: { $sum: 1 },
+              },
+            },
+
+            {
+              $project: {
+                _id: 0,
+                service: "$_id",
+                count: 1,
+              },
+            },
+          ],
+
+          // 📅 Current Month
+          currentMonth: [
+            {
+              $match: { createdAt: { $gte: startOfCurrentMonth } },
+            },
+            { $count: "count" },
+          ],
+
+          // 📅 Last Month
+          lastMonth: [
+            {
+              $match: {
+                createdAt: {
+                  $gte: startOfLastMonth,
+                  $lt: startOfCurrentMonth,
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+        },
+      },
+    ]);
+  }
 }
-  

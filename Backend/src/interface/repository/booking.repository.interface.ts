@@ -1,3 +1,4 @@
+import { IAdminDashboardRaw } from "../../dto/admin/admin-dashboard.dto";
 import {
   BookingStatus,
   IBooking,
@@ -8,13 +9,23 @@ import { PaymentStatus } from "../model/wallet.model.interface";
 import { IRequestFilters } from "../service/worker/worker-booking.service.interface";
 import { IBaseRepository } from "./base.repository.interface";
 
+export interface IWorkerDashboardRepoResult {
+  totalJobs: number;
+  completedJobs: number;
+  monthlyEarnings: number;
+  upcomingJobs: number;
+  avgRating: number;
+  totalReviews: number;
+  todaySchedule: IBookingPopulated[];
+}
+
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>): Promise<IBooking>;
   // findById(id: string): Promise<IBooking | null>;
   // findByUserId(userId: string): Promise<IBooking[]>;
   // findByWorkerId(workerId: string): Promise<IBooking[]>;
   findServiceRequests(
-    filters: IRequestFilters
+    filters: IRequestFilters,
   ): Promise<{ data: IBookingPopulated[]; total: number }>;
   findByIdPopulated(id: string): Promise<IBookingPopulated | null>;
   findByUserId(userId: string): Promise<IBookingPopulated[]>;
@@ -29,17 +40,17 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
       | "in-progress"
       | "awaiting-final-payment"
       | "completed"
-      | "cancelled"
+      | "cancelled",
   ): Promise<IBooking | null>;
   updatePaymentStatus(
     id: string,
     paymentStatus: string,
-    paymentId?: string
+    paymentId?: string,
   ): Promise<IBooking | null>;
   addRating(
     id: string,
     score: number,
-    review?: string
+    review?: string,
   ): Promise<IBooking | null>;
   cancelBooking(id: string): Promise<IBooking | null>;
   findByWorkerAndDate(workerId: string, date: Date): Promise<IBooking[]>;
@@ -47,24 +58,24 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     workerId: string,
     date: Date,
     startTime: Date,
-    endTime: Date
+    endTime: Date,
   ): Promise<IBooking | null>;
   findByIdWithDetails(id: string): Promise<IBooking | null>;
   updateAdvancePaymentStatus(
     bookingId: string,
     paymentIntentId: string,
     status: PaymentStatus,
-    addressId: string
+    addressId: string,
   ): Promise<IBooking | null>;
   updateFinalPaymentStatus(
     bookingId: string,
     paymentIntentId: string,
-    status: PaymentStatus
+    status: PaymentStatus,
   ): Promise<IBooking | null>;
   findByWorkerAndRange(
     workerId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<
     Array<{
       date: Date;
@@ -80,7 +91,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     workerResponse: string[],
     limit: number,
     skip: number,
-    search: string
+    search: string,
   ): Promise<{ bookings: IBookingPopulated[] | null; total: number }>;
   findWorkerApprovedBookings({
     workerId,
@@ -114,12 +125,16 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
     search?: string;
     statuses?: string[];
-     workerResponses?: string[] 
+    workerResponses?: string[];
 
     from?: Date;
     to?: Date;
   }): Promise<{
     items: IBookingPopulated[];
     total: number;
-  } >;
+  }>;
+  getWorkerDashboardStats(
+    workerId: string,
+  ): Promise<IWorkerDashboardRepoResult>;
+  getDashboardRawData(): Promise<IAdminDashboardRaw[]>
 }

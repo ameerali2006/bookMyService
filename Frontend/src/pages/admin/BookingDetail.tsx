@@ -1,20 +1,8 @@
-
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
-  Calendar,
-  Clock,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Briefcase,
-  DollarSign,
-  Star,
-  ChevronDown,
   ExternalLink,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -26,20 +14,18 @@ import { adminManagement } from "@/api/AdminManagement"
 import { ErrorToast } from "@/components/shared/Toaster"
 import type { AdminBookingDetailsDto } from "@/interface/admin/booking"
 
-
-
 function getStatusColor(status: string) {
   switch (status) {
     case "confirmed":
-      return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+      return "bg-blue-50 text-blue-700 border-blue-200"
     case "in-progress":
-      return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+      return "bg-amber-50 text-amber-700 border-amber-200"
     case "completed":
-      return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+      return "bg-green-50 text-green-700 border-green-200"
     case "cancelled":
-      return "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20"
+      return "bg-red-50 text-red-700 border-red-200"
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-gray-100 text-gray-600"
   }
 }
 
@@ -49,61 +35,78 @@ function isToday(dateString: string) {
   return today.toDateString() === date.toDateString()
 }
 
-export default async function AdminBookingDetailsPage() {
- const { bookingId } = useParams<{ bookingId: string }>()
+export default function AdminBookingDetailsPage() {
+  const { bookingId } = useParams<{ bookingId: string }>()
   const navigate = useNavigate()
 
   const [booking, setBooking] = useState<AdminBookingDetailsDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-    useEffect(() => {
-      if (!bookingId) return
 
-      const fetchBooking = async () => {
-        try {
-          const response = await adminManagement.getBookingDetailPage(bookingId)
-          setBooking(response.data.booking)
-        } catch (error) {
-          ErrorToast("Failed to load booking details")
-          navigate("/admin/bookings")
-        } finally {
-          setLoading(false)
-        }
+  useEffect(() => {
+    if (!bookingId) return
+
+    const fetchBooking = async () => {
+      try {
+        const response = await adminManagement.getBookingDetailPage(bookingId)
+        setBooking(response.data.booking)
+      } catch (error) {
+        ErrorToast("Failed to load booking details")
+        navigate("/admin/bookings")
+      } finally {
+        setLoading(false)
       }
+    }
 
-      fetchBooking()
-    }, [bookingId])
-    if (loading) {
-    return <div className="p-10 text-center">Loading booking...</div>
+    fetchBooking()
+  }, [bookingId])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center text-gray-500">
+        Loading booking...
+      </div>
+    )
   }
 
-  if (!booking) return null 
+  if (!booking) return null
 
   const googleMapsUrl = `https://www.google.com/maps?q=${booking.address.lat},${booking.address.lng}`
-  
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar activeItem="WorkerManagement" onItemClick={() => {}} onLogout={() => {
-        localStorage.removeItem("adminToken")
-        sessionStorage.clear()
-        navigate("/admin/login")
-      }} />
+    <div className="min-h-screen bg-white text-gray-800">
+      <Sidebar
+        activeItem="WorkerManagement"
+        onItemClick={() => {}}
+        onLogout={() => {
+          localStorage.removeItem("adminToken")
+          sessionStorage.clear()
+          navigate("/admin/login")
+        }}
+      />
       <Navbar userName="Admin" onSearch={setSearch} />
 
-     <main className="ml-64 pt-16">
-        <div className="container max-w-5xl py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl font-bold font-mono">#{booking.id}</h1>
+      <main className="ml-64 pt-16 px-10 pb-16">
+        <div className="max-w-6xl mx-auto space-y-10">
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-gray-400">
+                Booking Details
+              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <h1 className="text-3xl font-bold tracking-wide text-[#0B1F3A]">
+                  #{booking.id}
+                </h1>
                 <Badge variant="outline" className={cn("border", getStatusColor(booking.status))}>
                   {booking.status}
                 </Badge>
-                {isToday(booking.bookingDate.toString()) && <Badge variant="secondary">Today</Badge>}
+                {isToday(booking.bookingDate.toString()) && (
+                  <Badge className="bg-[#F4B400] text-white">Today</Badge>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground">
-                Booking Date:{" "}
+              <p className="text-sm text-gray-500 mt-2">
                 {new Date(booking.bookingDate).toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -113,358 +116,109 @@ export default async function AdminBookingDetailsPage() {
               </p>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-6 bg-muted/30 rounded-lg p-6">
-          {/* Customer Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Customer Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={booking.customer.avatar || "/placeholder.svg"} alt={booking.customer.name} />
-                  <AvatarFallback>
-                    {booking.customer.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <p className="font-semibold text-lg">{booking.customer.name}</p>
-                  </div>
+          <div className="space-y-8">
 
-                  <div className="grid gap-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{booking.customer.phone}</span>
-                    </div>
+            {/* Customer + Worker */}
+            <div className="grid lg:grid-cols-2 gap-8">
 
-                    <div className="flex items-start gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <div className="flex-1">
-                        <p>{booking.address.street}</p>
-                        <p className="text-muted-foreground">
-                          {booking.address.city}, {booking.address.state}{" "}
-                          {booking.address.pinCode}
-                        </p>
-                        <a
-                          href={googleMapsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-primary hover:underline mt-1"
-                        >
-                          Open in Google Maps
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
+              <Card className="shadow-sm border rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-[#0B1F3A] font-semibold">
+                    Customer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="flex gap-4">
+                    <Avatar className="h-14 w-14">
+                      <AvatarImage src={booking.customer.avatar || "/placeholder.svg"} />
+                      <AvatarFallback>
+                        {booking.customer.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{booking.customer.name}</p>
+                      <p className="text-gray-500">{booking.customer.phone}</p>
                     </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Worker Information - Admin Only */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Worker Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={booking.worker.avatar || "/placeholder.svg"} alt={booking.worker.name} />
-                  <AvatarFallback>
-                    {booking.worker.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <p className="font-semibold text-lg">{booking.worker.name}</p>
-                    <Badge variant={booking.worker.response === "accepted" ? "default" : "secondary"} className="mt-1">
-                      {booking.worker.response}
-                    </Badge>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{booking.worker.phone}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{booking.worker.email}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Service Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Service Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Service Name</p>
-                  <p className="font-semibold">{booking.service.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Category</p>
-                  <p className="font-semibold">{booking.service.category}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Date</p>
-                    <p className="font-medium">
-                      {new Date(booking.bookingDate).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Time Slot</p>
-                    <p className="font-medium">{booking.timeSlot}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">Duration</p>
-                <p className="font-medium">{booking.service.duration} minutes</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status Timeline - Read Only */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Status Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-
-                <div className="space-y-6">
-                  {booking.timeline.map((item, index) => (
-                    <div key={index} className="relative flex items-start gap-4">
-                      <div
-                        className={cn(
-                          "relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2",
-                          item.completed ? "bg-primary border-primary" : "bg-background border-muted",
-                        )}
-                      >
-                        {item.completed && <div className="h-3 w-3 rounded-full bg-primary-foreground" />}
-                      </div>
-
-                      <div className="flex-1 pt-1">
-                        <p
-                          className={cn(
-                            "font-medium capitalize",
-                            item.completed ? "text-foreground" : "text-muted-foreground",
-                          )}
-                        >
-                          {item.status.replace("-", " ")}
-                        </p>
-                        {item.date && (
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(item.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Booking Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Booking Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {booking.description ? (
-                <p className="text-sm leading-relaxed">{booking.description}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No description provided</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Additional Items - Read Only */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Items</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {booking.additionalItems.length > 0 ? (
-                <div className="space-y-3">
-                  {booking.additionalItems.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                      <span className="text-sm font-medium">{item.name}</span>
-                      <span className="text-sm font-semibold">${item.price.toFixed(2)}</span>
-                    </div>
-                  ))}
                   <Separator />
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="font-semibold">Total Additional Items</span>
-                    <span className="font-semibold text-lg">
-                      ${booking.additionalItems.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
-                    </span>
+
+                  <div className="text-gray-600">
+                    <p>{booking.address.street}</p>
+                    <p>
+                      {booking.address.city}, {booking.address.state} {booking.address.pinCode}
+                    </p>
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      className="text-[#0B1F3A] hover:underline inline-flex items-center gap-1 mt-2"
+                    >
+                      Open in Google Maps <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No additional items</p>
-              )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* Payment Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Payment Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Advance Amount</p>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-lg">${booking.payment.advanceAmount.toFixed(2)}</p>
-                    <Badge variant={booking.payment.advancePaid ? "default" : "secondary"}>
-                      {booking.payment.advancePaid ? "Paid" : "Pending"}
-                    </Badge>
+              <Card className="shadow-sm border rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-[#0B1F3A] font-semibold">
+                    Worker Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <p className="font-semibold">{booking.worker.name}</p>
+                  <p className="text-gray-500">{booking.worker.phone}</p>
+                  <p className="text-gray-500">{booking.worker.email}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Service + Payment */}
+            <div className="grid lg:grid-cols-2 gap-8">
+
+              <Card className="shadow-sm border rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-[#0B1F3A] font-semibold">
+                    Service Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <p><span className="text-gray-400">Service:</span> {booking.service.name}</p>
+                  <p><span className="text-gray-400">Category:</span> {booking.service.category}</p>
+                  <p><span className="text-gray-400">Duration:</span> {booking.service.duration} mins</p>
+                  <p><span className="text-gray-400">Time Slot:</span> {booking.timeSlot}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm border rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-[#0B1F3A] font-semibold">
+                    Payment Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Advance</span>
+                    <span>${booking.payment.advanceAmount.toFixed(2)}</span>
                   </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground">Remaining Amount</p>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-lg">${booking.payment.remainingAmount.toFixed(2)}</p>
-                    <Badge variant={booking.payment.finalPaid ? "default" : "secondary"}>
-                      {booking.payment.finalPaid ? "Paid" : "Pending"}
-                    </Badge>
+                  <div className="flex justify-between">
+                    <span>Remaining</span>
+                    <span>${booking.payment.remainingAmount.toFixed(2)}</span>
                   </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">Total Amount</span>
-                <span className="text-2xl font-bold">${booking.payment.totalAmount.toFixed(2)}</span>
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">Payment Method</p>
-                <p className="font-medium">{booking.payment.paymentMethod}</p>
-              </div>
-
-              {booking.payment.breakdown && booking.payment.breakdown.length > 0 && (
-                <Collapsible>
-                  <CollapsibleTrigger className="flex items-center justify-between w-full py-2 hover:text-primary transition-colors">
-                    <span className="font-medium">Payment Breakdown</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-2">
-                    <div className="space-y-2 rounded-lg border p-4">
-                      {booking.payment.breakdown.map((item, index) => (
-                        <div key={index} className="grid grid-cols-4 gap-2 text-sm">
-                          <span className="col-span-2 font-medium">{item.title}</span>
-                          <span className="text-right text-muted-foreground">
-                            ${item.rate} × {item.quantity}
-                          </span>
-                          <span className="text-right font-semibold">${item.total.toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Rating & Review */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                Rating & Review
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {booking.rating ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    {[...Array(5)].map((_, i) => {
-                      const stars = booking.rating?.stars ?? 0
-
-                      return (
-                        <Star
-                          key={i}
-                          className={cn(
-                            "h-5 w-5",
-                            i < stars
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground"
-                          )}
-                        />
-                      )
-                    })}
-                    <span className="font-semibold text-lg ml-2">
-                      {(booking.rating?.stars ?? 0)}.0
-                    </span>
+                  <Separator />
+                  <div className="flex justify-between text-xl font-bold text-[#0B1F3A]">
+                    <span>Total</span>
+                    <span>${booking.payment.totalAmount.toFixed(2)}</span>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                  <p className="text-sm leading-relaxed bg-muted/50 p-4 rounded-lg">
-                    {booking.rating?.review}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">Not rated yet</p>
-              )}
-            </CardContent>
-          </Card>
+          </div>
         </div>
       </main>
     </div>

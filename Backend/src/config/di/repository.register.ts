@@ -29,7 +29,9 @@ import { SlotLockRepository } from '../../repository/helper/slot-lock.repository
 import { IChatRepository } from '../../interface/repository/chat.repository.interface';
 import { ChatRepository } from '../../repository/shared/chat.repoository';
 import { IMessageRepository } from '../../interface/repository/message.repoository.interface';
-import { MessageRepository } from '../../repository/shared/message.repository.interface';
+import { MessageRepository } from '../../repository/shared/message.repository';
+import { IReviewRepository } from '../../interface/repository/review.repository.interface';
+import { ReviewRepository } from '../../repository/shared/review.repository';
 
 export class RepositoryRegistery {
   static registerRepository():void {
@@ -47,7 +49,9 @@ export class RepositoryRegistery {
     container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
     container.register<ITransactionRepository>(TYPES.TransactionRepository, { useClass: TransactionRepository });
     container.register<IChatRepository>(TYPES.ChatRepository, { useClass:ChatRepository  });
-    container.register<IMessageRepository>(TYPES.MessageRepository, { useClass: MessageRepository });
+    container.register<IMessageRepository>(TYPES.MessageRepository, { useClass:MessageRepository  });
+
+    container.register<IReviewRepository>(TYPES.ReviewRepository, { useClass: ReviewRepository });
 
   }
 }
