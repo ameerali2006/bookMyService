@@ -8,7 +8,7 @@ const workerAxios = createAxiosClient({
   publicRoutes: PUBLIC_ROUTES,
   removeAuthAction: removeWorker,
   loginRedirect: "/worker/login",
-  refreshTokenEndpoint: "/worker/refresh-token"
+  refreshTokenEndpoint: "/refresh-token"
 });
 
 export default workerAxios;

@@ -17,6 +17,16 @@ export class ChatService implements IChatService {
     @inject(TYPES.MessageRepository) private messageRepo: IMessageRepository,
   ) {}
 
+  private async validateParticipant(chatId: string, userId: string) {
+    const chat = await this.chatRepo.findById(chatId);
+    if (!chat) throw new Error("Chat not found");
+
+    const allowed =
+      chat.userId.toString() === userId || chat.workerId.toString() === userId;
+
+    if (!allowed) throw new Error("Unauthorized");
+  }
+
   async createChat(
     bookingId: string,
   ): Promise<{ success: boolean; message: string; chatId?: string }> {
@@ -125,5 +135,25 @@ export class ChatService implements IChatService {
       message: "Chat inbox fetched successfully",
       chats,
     };
+  }
+  async deleteMessage(chatId: string, messageId: string, userId: string) {
+    await this.validateParticipant(chatId, userId);
+
+    await this.messageRepo.deleteMessage(messageId, userId);
+
+    return { messageId };
+  }
+
+  async reactToMessage(
+    chatId: string,
+    messageId: string,
+    userId: string,
+    emoji: string,
+  ) {
+    await this.validateParticipant(chatId, userId);
+
+    await this.messageRepo.reactToMessage(messageId, userId, emoji);
+
+    return { messageId, userId, emoji };
   }
 }

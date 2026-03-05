@@ -14,7 +14,13 @@ export interface Message {
     mimeType?: string;
   };
   createdAt: string;
-  isOwn: boolean; // Helper flag to identify if message is from current user
+  isOwn: boolean;
+   isDeleted?: boolean;
+  replyTo?: Message | null;
+  reactions?: {
+    userId: string;
+    emoji: string;
+  }[]; 
 }
 
 export interface Chat {

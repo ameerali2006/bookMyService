@@ -24,7 +24,7 @@ export class WorkerRoute extends BaseRoute {
     this.router.post('/reset-password', (req: Request, res: Response, next: NextFunction) => authWorkerController.resetPassword(req, res, next));
     this.router.get('/getserviceNames', (req: Request, res: Response, next: NextFunction) => cloudinaryController.getServiceNames(req, res, next));
     this.router.get('/isVerified', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => authWorkerController.isVerified(req, res, next));
-    this.router.post('/refresh-token', (req: Request, res: Response, next: NextFunction) => tokenController.handleTokenRefresh(req, res));
+    this.router.post('/refresh-token', (req: Request, res: Response, ) => authWorkerController.handleTokenRefresh(req, res));
     this.router.get('/profile/slot', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWorkingDetails(req, res, next));
     this.router.post('/profile/slot/update', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.updateWorkingDetails(req, res, next));
     this.router.get('/appointments/requestService', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWorkingDetails(req, res, next));

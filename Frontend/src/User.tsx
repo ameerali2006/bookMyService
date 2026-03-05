@@ -16,6 +16,8 @@ import UserBookingsPage from "./pages/user/BookingList";
 import { BookingDetailPage } from "./pages/user/BookingDetail";
 import UserWallet from "./pages/user/UserWallet";
 import UserChatPage from "./pages/user/ChatPage";
+import UserLayout from "./layout/userLayout";
+import NotFound from "./components/shared/NotFound";
 
 
 
@@ -30,12 +32,7 @@ const User = () => {
   return (
     <Suspense fallback={<Loader message="loading..."/>}>
         <Routes>
-          
-       
-        <Route index element={<Homepage />} />
-
-        
-        <Route
+          <Route
           path={USER_ROUTES.REGISTER}
           element={<IsLogout><Register /></IsLogout>}
         />
@@ -52,6 +49,13 @@ const User = () => {
           element={<IsLogout><UserResetPassword /></IsLogout>}
         />
 
+        <Route element={<UserLayout />}>
+          
+       
+        <Route index element={<Homepage />} />
+
+        
+        
        
         <Route
           path={USER_ROUTES.PROFILE}
@@ -93,6 +97,8 @@ const User = () => {
                   path={USER_ROUTES.CHAT}
                   element={<IsLogin><UserChatPage /></IsLogin>}
                 />
+        </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
       
     </Suspense> 

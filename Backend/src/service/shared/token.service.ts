@@ -50,7 +50,7 @@ export class TokenService implements ITokenservice {
     }
     return {
       role: (payload as JwtPayload).role,
-      accessToken: this._jwtService.generateAccessToken((payload as JwtPayload).userId, (payload as JwtPayload).role),
+      accessToken: this._jwtService.generateAccessToken((payload as JwtPayload)._id, (payload as JwtPayload).role),
     };
   }
 }

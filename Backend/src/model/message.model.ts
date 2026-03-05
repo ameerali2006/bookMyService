@@ -7,11 +7,11 @@ const messageSchema = new Schema<IMessage>(
       type: Schema.Types.ObjectId,
       ref: "Chat",
       required: true,
-      index: true, // 🔥 fast chat history queries
+      index: true, 
     },
     senderId: {
       type: Schema.Types.ObjectId,
-      refPath: "role", // or Worker (same ObjectId type)
+      refPath: "role", 
       required: true,
     },
     role: {
@@ -38,7 +38,35 @@ const messageSchema = new Schema<IMessage>(
          refPath: "role",
       },
     ],
+    
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    
+    replyTo: {
+      type: Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
+// 🆕
+    reactions: [
+      {
+        userId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        emoji: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    editedAt: Date,
   },
+  
   {
     timestamps: true,
   }

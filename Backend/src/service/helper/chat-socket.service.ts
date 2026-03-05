@@ -8,7 +8,6 @@ import { TYPES } from "../../config/constants/types";
 import { IChatRepository } from "../../interface/repository/chat.repository.interface";
 import { IMessageRepository } from "../../interface/repository/message.repoository.interface";
 
-
 @injectable()
 export class ChatSocketHandler implements ISocketHandler {
   constructor(
@@ -16,19 +15,19 @@ export class ChatSocketHandler implements ISocketHandler {
     private _chatRepo: IChatRepository,
 
     @inject(TYPES.MessageRepository)
-    private _messageRepo: IMessageRepository
+    private _messageRepo: IMessageRepository,
   ) {}
 
   public registerEvents(
     io: IOServer,
-    onlineUsers: Map<string, { socketId: string; userType: string }>
+    onlineUsers: Map<string, { socketId: string; userType: string }>,
   ) {
     io.on("connection", (socket) => {
       const customSocket = socket as CustomSocket;
 
       /* ---------------- JOIN CHAT ---------------- */
       socket.on("chat:join", async ({ chatId }) => {
-        console.log('dfdfdfdf meesdsge')
+        console.log("dfdfdfdf meesdsge");
 
         const chat = await this._chatRepo.findById(chatId);
         if (!chat) return;
@@ -45,7 +44,7 @@ export class ChatSocketHandler implements ISocketHandler {
 
         socket.join(chatId);
         console.log(
-          `💬 ${customSocket.userType} ${customSocket.userId} joined chat ${chatId}`
+          `💬 ${customSocket.userType} ${customSocket.userId} joined chat ${chatId}`,
         );
       });
 
@@ -66,7 +65,7 @@ export class ChatSocketHandler implements ISocketHandler {
         const savedMessage = await this._messageRepo.create({
           chatId,
           senderId: customSocket.userId,
-          role:customSocket.userType,
+          role: customSocket.userType,
           type: message.type,
           content: message.content,
           metadata: message.metadata,
@@ -74,6 +73,64 @@ export class ChatSocketHandler implements ISocketHandler {
 
         // 📡 EMIT TO BOTH SIDES
         io.to(chatId).emit("chat:receive", savedMessage);
+      });
+      socket.on("chat:react", async ({ chatId, messageId, emoji }) => {
+        try {
+          console.log({ chatId, messageId, emoji })
+          const customSocket = socket as CustomSocket;
+          const userId = customSocket.userId;
+
+          const chat = await this._chatRepo.findById(chatId);
+          if (!chat) return;
+
+          // 🔐 SECURITY CHECK
+          if (
+            chat.userId.toString() !== userId &&
+            chat.workerId.toString() !== userId
+          ) {
+            return;
+          }
+
+          // ✅ ATOMIC REACTION UPDATE
+          const emoje=await this._messageRepo.reactToMessage(messageId, userId, emoji);
+          console.log(emoje)
+
+
+
+          // 📡 Emit minimal payload
+          io.to(chatId).emit("chat:reaction", {
+            messageId,
+            userId,
+            emoji,
+          });
+        } catch (error) {
+          console.error("Reaction error:", error);
+        }
+      });
+      socket.on("chat:delete", async ({ chatId, messageId }) => {
+        try {
+          const customSocket = socket as CustomSocket;
+          const userId = customSocket.userId;
+
+          const chat = await this._chatRepo.findById(chatId);
+          if (!chat) return;
+
+          // 🔐 SECURITY CHECK
+          if (
+            chat.userId.toString() !== userId &&
+            chat.workerId.toString() !== userId
+          ) {
+            return;
+          }
+
+          await this._messageRepo.deleteMessage(messageId, userId);
+
+          io.to(chatId).emit("chat:deleted", {
+            messageId,
+          });
+        } catch (error) {
+          console.error("Delete error:", error);
+        }
       });
     });
   }

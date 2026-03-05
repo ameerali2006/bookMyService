@@ -5,7 +5,7 @@ const adminAxios = createAxiosClient({
   baseURL:"/admin",
   removeAuthAction: removeAdmin,
   loginRedirect: "/admin/login",
-  refreshTokenEndpoint: "/admin/refresh-token"
+  refreshTokenEndpoint: "/refresh-token"
 });
 
 export default adminAxios;

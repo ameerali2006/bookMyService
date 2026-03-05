@@ -8,77 +8,119 @@ import io from "socket.io-client";
 interface UseSocketChatOptions {
   auth: SocketAuth;
   chatId: string;
-  onMessageReceived?: (message: Message) => void;
-  onConnectionChange?: (connected: boolean) => void;
 }
 
 interface UseSocketChatReturn {
-  socket: ReturnType<typeof io> | null;
   isConnected: boolean;
-  sendMessage: (message: Message) => void;
   messages: Message[];
-  addMessageToLocal: (message: Message) => void;
+  sendMessage: (message: Message) => void;
+  deleteMessage: (messageId: string) => void;
+  reactToMessage: (messageId: string, emoji: string) => void;
+  setReplyMessage: (message: Message | null) => void;
+  replyMessage: Message | null;
 }
 
 export function useSocketChat({
   auth,
   chatId,
-  onMessageReceived,
-  onConnectionChange,
 }: UseSocketChatOptions): UseSocketChatReturn {
-  // ✅ ONLY socket ref you need
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [replyMessage, setReplyMessage] = useState<Message | null>(null);
+
+  /* ================= SOCKET CONNECT ================= */
 
   useEffect(() => {
-    const socketUrl = ENV.VITE_SERVER_BASEURL;
-
-    const socket = io(socketUrl, {
+    const socket = io(ENV.VITE_SERVER_BASEURL, {
       auth: {
         userId: auth.userId,
         userType: auth.userType,
       },
-      reconnection: true,
-      reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      setIsConnected(true);
-      onConnectionChange?.(true);
-    });
+    socket.on("connect", () => setIsConnected(true));
+    socket.on("disconnect", () => setIsConnected(false));
 
-    socket.on("disconnect", () => {
-      setIsConnected(false);
-      onConnectionChange?.(false);
-    });
+    /* ================= RECEIVE MESSAGE ================= */
 
     socket.on("chat:receive", (message: Message) => {
       setMessages((prev) => [...prev, message]);
-      onMessageReceived?.(message);
     });
 
-    socket.on("connect_error", (error: Error) => {
-      console.error("[Socket] Connection error:", error.message);
-      setIsConnected(false);
+    /* ================= DELETE ================= */
+
+    socket.on("chat:deleted", ({ messageId }:{messageId:string}) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, isDeleted: true }
+            : msg
+        )
+      );
+    });
+
+    /* ================= REACTION ================= */
+
+    socket.on("chat:reaction", ({ messageId, userId, emoji }:{ messageId:string, userId :string, emoji:string}) => {
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.id !== messageId) return msg;
+
+          const reactions = msg.reactions ?? [];
+
+          const existing = reactions.find(
+            (r) => r.userId === userId
+          );
+
+          let updatedReactions;
+
+          if (existing?.emoji === emoji) {
+            // remove reaction (toggle)
+            updatedReactions = reactions.filter(
+              (r) => r.userId !== userId
+            );
+          } else if (existing) {
+            // update emoji
+            updatedReactions = reactions.map((r) =>
+              r.userId === userId
+                ? { ...r, emoji }
+                : r
+            );
+          } else {
+            // add reaction
+            updatedReactions = [
+              ...reactions,
+              { userId, emoji },
+            ];
+          }
+
+          return {
+            ...msg,
+            reactions: updatedReactions,
+          };
+        })
+      );
     });
 
     return () => {
       socket.disconnect();
-      socketRef.current = null;
     };
   }, [auth.userId, auth.userType]);
+
+  /* ================= JOIN CHAT ================= */
 
   useEffect(() => {
     if (!chatId || !socketRef.current) return;
 
     socketRef.current.emit("chat:join", { chatId });
-
-    setMessages([]); 
+    setMessages([]);
   }, [chatId]);
+
+  /* ================= SEND MESSAGE ================= */
 
   const sendMessage = useCallback(
     (message: Message) => {
@@ -88,21 +130,47 @@ export function useSocketChat({
           type: message.type,
           content: message.content,
           metadata: message.metadata,
+          replyTo: replyMessage?.id || null,
         },
       });
+
+      setReplyMessage(null);
     },
-    [chatId],
+    [chatId, replyMessage]
   );
 
-  const addMessageToLocal = useCallback((message: Message) => {
-    setMessages((prev) => [...prev, message]);
-  }, []);
+  /* ================= DELETE ================= */
+
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      socketRef.current?.emit("chat:delete", {
+        chatId,
+        messageId,
+      });
+    },
+    [chatId]
+  );
+
+  /* ================= REACT ================= */
+
+  const reactToMessage = useCallback(
+    (messageId: string, emoji: string) => {
+      socketRef.current?.emit("chat:react", {
+        chatId,
+        messageId,
+        emoji,
+      });
+    },
+    [chatId]
+  );
 
   return {
-    socket: socketRef.current,
     isConnected,
-    sendMessage,
     messages,
-    addMessageToLocal,
+    sendMessage,
+    deleteMessage,
+    reactToMessage,
+    setReplyMessage,
+    replyMessage,
   };
 }

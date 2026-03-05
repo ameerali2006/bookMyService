@@ -15,6 +15,7 @@ import { IRegisterService } from '../../interface/service/auth/register.service.
 import { IOtpService } from '../../interface/service/auth/otp.service.interface';
 import { IGoogleService } from '../../interface/service/auth/google.service.interface';
 import { CustomError } from '../../utils/custom-error';
+import { IJwtService } from '../../interface/helpers/jwt-service.service.interface';
 
 @injectable()
 export class AuthUserController implements IAuthController {
@@ -26,6 +27,7 @@ export class AuthUserController implements IAuthController {
     @inject(TYPES.LoginService) private _Login:ILoginService,
     @inject(TYPES.OtpService) private _Otp:IOtpService,
     @inject(TYPES.GoogleService) private _googleAuth:IGoogleService,
+     @inject(TYPES.JwtService) private _jwtService:IJwtService,
 
   ) {}
 
@@ -236,29 +238,52 @@ export class AuthUserController implements IAuthController {
     }
   }
 
-  async handleTokenRefresh(req: Request, res: Response):Promise<void> {
-    try {
-      const refreshToken = (req as CustomRequest).user.refresh_token;
-      const newTokens = await this._tokenService.refreshToken(refreshToken);
-      const accessTokenName = 'access_token';
-      updateCookieWithAccessToken(
-        res,
-        newTokens.accessToken,
-        accessTokenName,
-      );
-      res.status(STATUS_CODES.OK).json({
-        success: true,
-        message: MESSAGES.UPDATE_SUCCESS,
+  async handleTokenRefresh(req: Request, res: Response): Promise<void> {
+  try {
+
+    console.log("ALL COOKIES:", req.cookies);
+
+    const refreshToken = req.cookies?.refresh_token;
+
+    console.log("REFRESH TOKEN FROM COOKIE:", refreshToken);
+
+    if (!refreshToken) {
+      console.log("NO REFRESH TOKEN FOUND");
+      res.status(401).json({
+        message: "Refresh token missing",
       });
-    } catch (error) {
-      clearAuthCookies(
-        res,
-        'access_token',
-        'refresh_token',
-      );
-      res.status(STATUS_CODES.UNAUTHORIZED).json({
-        message: MESSAGES.INVALID_TOKEN,
-      });
+      return;
     }
+
+    const payload = this._jwtService.verifyToken(
+      refreshToken,
+      "refresh"
+    );
+
+    console.log("REFRESH PAYLOAD:", payload);
+
+    const newTokens = await this._tokenService.refreshToken(refreshToken);
+
+    updateCookieWithAccessToken(
+      res,
+      newTokens.accessToken,
+      "access_token"
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Token refreshed",
+    });
+
+  } catch (error) {
+
+    console.log("REFRESH ERROR:", error);
+
+    clearAuthCookies(res, "access_token", "refresh_token");
+
+    res.status(401).json({
+      message: "Invalid refresh token",
+    });
   }
+}
 }

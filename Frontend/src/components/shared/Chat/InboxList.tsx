@@ -105,9 +105,9 @@ export function InboxList({
               )}
             >
               <div className="flex items-center gap-3">
-                {chat.participantAvatar && (
+                {chat.participantName && (
                   <img
-                    src={chat.participantAvatar || "/placeholder.svg"}
+                    src={chat.participantAvatar || "https://st3.depositphotos.com/3581215/18899/v/450/depositphotos_188994514-stock-illustration-vector-illustration-male-silhouette-profile.jpg"}
                     alt={chat.participantName}
                     className="w-10 h-10 rounded-full object-cover"
                   />

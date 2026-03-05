@@ -58,7 +58,7 @@ export default function AdvancePaymentPage() {
        <div className="w-full border-b border-border bg-background">
         <Header />
       </div>
-      <NotFoundPage/>
+      {/* <NotFoundPage/> */}
       <Footer />
       </>
 

@@ -110,7 +110,7 @@ export class AdminRoute extends BaseRoute {
     this.router.post(
       "/refresh-token",
       (req: Request, res: Response, next: NextFunction) =>
-        tokenController.handleTokenRefresh(req, res)
+        authAdminController.handleTokenRefresh(req, res)
     );
     this.router.get(
       "/bookings",

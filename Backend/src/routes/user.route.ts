@@ -37,7 +37,7 @@ export class UserRoute extends BaseRoute {
     this.router.post('/forgot-password', (req: Request, res: Response, next: NextFunction) => authController.forgotPassword(req, res, next));
     this.router.post('/reset-password', (req: Request, res: Response, next: NextFunction) => authController.resetPassword(req, res, next));
     this.router.get('/getService', (req: Request, res: Response, next: NextFunction) => serviceController.getServices(req, res, next));
-    this.router.post('/refresh-token', (req: Request, res: Response, next: NextFunction) => tokenController.handleTokenRefresh(req, res));
+    this.router.post('/refresh-token', (req: Request, res: Response, next: NextFunction) => authController.handleTokenRefresh(req, res));
 
     this.router.get('/profile/userDetails', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.userProfileDetails(req, res, next));
     this.router.put('/profile/updateUserDetails', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.updateProfileDetails(req, res, next));

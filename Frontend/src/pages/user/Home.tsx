@@ -42,7 +42,7 @@ export default function Homepage() {
 
   return (
     <>
-      <Header /> <Header />
+     
 
       {/* Location Modal */}
       <LocationModal
@@ -140,7 +140,7 @@ export default function Homepage() {
         </section>
       </div>
 
-      <Footer />
+      
     </>
   );
 }
