@@ -18,7 +18,7 @@ export interface IAdminDashboardRaw {
   }[];
 
   serviceDistribution: {
-    service: string;   // serviceId
+    service: string; // serviceId
     count: number;
   }[];
 
@@ -55,4 +55,3 @@ export interface IAdminDashboardResponse {
     count: number;
   }[];
 }
-

@@ -4,7 +4,7 @@ export interface WalletTransactionQuery {
   type?: string
   status?: string
   sortBy?: string
-  sortOrder?: "asc" | "desc"
+  sortOrder?: 'asc' | 'desc'
   startDate?: string
   endDate?: string
 }

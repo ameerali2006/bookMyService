@@ -1,6 +1,4 @@
-import { Document } from 'mongoose';
-
-export interface IAddress extends Document {
+export interface IAddress {
   _id:string
   label?: string;
   userId?:string

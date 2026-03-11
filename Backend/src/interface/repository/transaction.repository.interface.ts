@@ -1,6 +1,6 @@
-import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
-import { ITransaction } from "../model/transactions.modal.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
+import { ITransaction } from '../model/transactions.modal.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface ITransactionRepository extends IBaseRepository<ITransaction> {
   createTransaction(data: Partial<ITransaction>): Promise<ITransaction>;

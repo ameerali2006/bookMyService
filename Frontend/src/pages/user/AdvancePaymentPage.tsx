@@ -11,7 +11,7 @@ import AddAddressModal from "@/components/user/Profile/AddAddress";
 
 import { useParams } from "react-router-dom";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
-import { ErrorToast } from "@/components/shared/Toaster";
+import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
 import NotFoundPage from "@/components/shared/PageNotFound";
 
 export type AddressLabel = "Home" | "Work" | "Shop";
@@ -32,14 +32,13 @@ type Address = {
   isPrimary: boolean;
 };
 
-
-
 export default function AdvancePaymentPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [showStripePayment, setShowStripePayment] = useState(false);
-  const [clientSecret,setClientSecret]=useState<string>("")
+  const [clientSecret, setClientSecret] = useState<string>("");
+  const [isWalletPaying, setIsWalletPaying] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<{
     workerName: string;
     serviceName: string;
@@ -49,33 +48,33 @@ export default function AdvancePaymentPage() {
     totalPrice: number;
     advance: number;
   } | null>(null);
-  const param=useParams()
-  const bookingId=param.bookingId
+  const param = useParams();
+  const bookingId = param.bookingId;
 
-  if(!bookingId){
+  if (!bookingId) {
     return (
       <>
-       <div className="w-full border-b border-border bg-background">
-        <Header />
-      </div>
-      {/* <NotFoundPage/> */}
-      <Footer />
+        <div className="w-full border-b border-border bg-background">
+          <Header />
+        </div>
+        {/* <NotFoundPage/> */}
+        <Footer />
       </>
-
-    )
+    );
   }
-  
+
   useEffect(() => {
-    fetchAddresses();
-    fetchBookingDetails();
-  }, []);
+    if (bookingId) {
+      fetchAddresses();
+      fetchBookingDetails();
+    }
+  }, [bookingId]);
 
   const fetchBookingDetails = async () => {
     try {
-        
-        console.log(bookingId)
+      console.log(bookingId);
       const res = await userService.getBookingDetails(bookingId as string);
-      console.log(res)
+      console.log(res);
       if (res.data.details) {
         setBookingDetails(res.data.details);
       }
@@ -88,28 +87,57 @@ export default function AdvancePaymentPage() {
       const res = await userService.getUserAddress();
       if (res.data.addresses && res.data.addresses.length > 0) {
         setAddresses(res.data.addresses);
-        setSelectedAddressId(res.data.addresses[0]._id);
+        const primary =
+          res.data.addresses.find((a: Address) => a.isPrimary) ||
+          res.data.addresses[0];
+
+        setSelectedAddressId(primary._id);
       }
     } catch (err) {
       console.error("Failed to fetch addresses:", err);
     }
   };
-    if (!bookingDetails) {
+  if (!bookingDetails) {
     return <p>Loading booking details...</p>;
-    }
+  }
   const selectedAddress = addresses.find((a) => a._id === selectedAddressId);
 
-  const handleWalletPay = () => {
-    console.log(`Wallet payment initiated for ₹${bookingDetails.advance}`);
-    console.log("Selected address:", selectedAddress);
+  const handleWalletPay = async () => {
+    try {
+      if (!bookingId) {
+        ErrorToast("Booking not found");
+        return;
+      }
+
+      setIsWalletPaying(true);
+
+      const res = await userService.walletPayment({
+        bookingId,
+        addressId: selectedAddressId,
+        paymentType: "advance",
+      });
+
+      if (res.data.success) {
+        SuccessToast(res.data.message);
+        setTimeout(() => {
+          window.location.href = `/booking/${bookingId}/success?type=advance`;
+        }, 1200);
+      } else {
+        ErrorToast(res.data.message);
+      }
+    } catch (error: any) {
+      ErrorToast(error?.response?.data?.message || "Wallet payment failed");
+    } finally {
+      setIsWalletPaying(false);
+    }
   };
 
   const handleStripePay = async () => {
     try {
       const bookingId = param.bookingId;
-      if(!bookingId){
-        ErrorToast("booking detalils not fount ")
-        return 
+      if (!bookingId) {
+        ErrorToast("booking detalils not fount ");
+        return;
       }
 
       const res = await userService.createPaymentIntent({
@@ -120,12 +148,11 @@ export default function AdvancePaymentPage() {
           bookingId,
           addressId: selectedAddressId,
           paymentType: "advance",
-        }
+        },
       });
 
       setClientSecret(res.data.clientSecret);
       setShowStripePayment(true);
-
     } catch (err) {
       console.log(err);
       ErrorToast("Failed to initialize Stripe payment");
@@ -146,49 +173,51 @@ export default function AdvancePaymentPage() {
           </h2>
 
           {addresses.length > 0 ? (
-            <form className="space-y-3" aria-label="Saved addresses">
-              {addresses.map((addr) => (
-                <label key={addr._id} className="block">
-                  <Card
-                    className={cn(
-                      "shadow-lg rounded-2xl p-4 border border-border transition-colors cursor-pointer bg-white",
-                      selectedAddressId === addr._id
-                        ? "ring-2 ring-ring bg-gray-300"
-                        : "hover:bg-accent hover:text-accent-foreground"
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="address"
-                        className="mt-1 h-4 w-4 accent-yellow-400"
-                        aria-label={`Select ${addr.label} address`}
-                        checked={selectedAddressId === addr._id}
-                        onChange={() => setSelectedAddressId(addr._id)}
-                      />
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="font-medium text-foreground">
-                            {addr.label}
+            <>
+              <form   className="space-y-3 max-h-[350px] overflow-y-auto pr-2"
+  aria-label="Saved addresses">
+                {addresses.map((addr) => (
+                  <label key={addr._id} className="block">
+                    <Card
+                      className={cn(
+                        "shadow-lg rounded-2xl p-4 border border-border transition-colors cursor-pointer bg-white",
+                        selectedAddressId === addr._id
+                          ? "ring-2 ring-ring bg-gray-300"
+                          : "hover:bg-accent hover:text-accent-foreground",
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="radio"
+                          name="address"
+                          className="mt-1 h-4 w-4 accent-yellow-400"
+                          checked={selectedAddressId === addr._id}
+                          onChange={() => setSelectedAddressId(addr._id)}
+                        />
+                        <div className="space-y-1">
+                          <p className="font-medium">{addr.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {`${addr.buildingName}, ${addr.street}, ${addr.area}, ${addr.city}`}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Phone: {addr.phone}
                           </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {`${addr.buildingName}, ${addr.street}, ${addr.area}, ${addr.city}, ${addr.state}, ${addr.country} - ${addr.pinCode}`}
-                        </p>
-                        {addr.landmark && (
-                          <p className="text-sm text-muted-foreground">
-                            Landmark: {addr.landmark}
-                          </p>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          Phone: {addr.phone}
-                        </p>
                       </div>
-                    </div>
-                  </Card>
-                </label>
-              ))}
-            </form>
+                    </Card>
+                  </label>
+                ))}
+              </form>
+
+              {/* Add Address Button */}
+              <Button
+                onClick={() => setShowAddAddressModal(true)}
+                className="w-full mt-2"
+                variant="outline"
+              >
+                + Add New Address
+              </Button>
+            </>
           ) : (
             <Button
               onClick={() => setShowAddAddressModal(true)}
@@ -249,9 +278,7 @@ export default function AdvancePaymentPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Total Amount</span>
-                  <span className="text-foreground">
-                    ₹--
-                  </span>
+                  <span className="text-foreground">₹--</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
@@ -270,28 +297,34 @@ export default function AdvancePaymentPage() {
                     variant="secondary"
                     className="w-full hover:bg-gray-300"
                     onClick={handleWalletPay}
-                    disabled={!selectedAddressId}
+                    disabled={!selectedAddressId || isWalletPaying}
                   >
-                    Pay ₹{bookingDetails.advance} via Wallet
+                    {isWalletPaying
+                      ? "Processing..."
+                      : `Pay ₹${bookingDetails.advance} via Wallet`}
                   </Button>
                   <Button
                     type="button"
                     className="w-full bg-blue-900 hover:bg-blue-800"
-                    onClick={handleStripePay}  // <── FIXED
+                    onClick={handleStripePay} // <── FIXED
                     disabled={!selectedAddressId}
                   >
                     Pay ₹{bookingDetails.advance} via Stripe
                   </Button>
-
                 </div>
               )}
             </Card>
           ) : (
             // Replace Bill Summary with Stripe Payment
-            clientSecret && <PaymentWrapper clientSecret={clientSecret} paymentType="advance" bookingId={bookingId}/>
-
+            clientSecret && (
+              <PaymentWrapper
+                clientSecret={clientSecret}
+                paymentType="advance"
+                bookingId={bookingId}
+              />
+            )
           )}
-        </div> 
+        </div>
       </section>
 
       {showAddAddressModal && (
@@ -299,7 +332,7 @@ export default function AdvancePaymentPage() {
           open={showAddAddressModal}
           onClose={() => {
             setShowAddAddressModal(false);
-            fetchAddresses(); 
+            fetchAddresses();
           }}
         />
       )}

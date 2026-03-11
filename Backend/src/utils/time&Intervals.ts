@@ -2,25 +2,23 @@ export type Interval = { start: number; end: number };
 export type LabeledStatus = 'available' | 'break' | 'booked' | 'unavailable';
 
 export const toMinutes = (t: string): number => {
-  
   if (t === '24:00') return 1440;
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
 };
 export const isTimeGreater = (t1: string, t2: string): boolean => {
-  const time1=toMinutes(t1)
-  const time2=toMinutes(t2)
+  const time1 = toMinutes(t1);
+  const time2 = toMinutes(t2);
   return time1 > time2;
 };
 export const doTimesOverlap = (startA: string, endA: string, startB: string, endB: string): boolean => {
   const aStart = toMinutes(startA);
-  const aEnd   = toMinutes(endA);
+  const aEnd = toMinutes(endA);
   const bStart = toMinutes(startB);
-  const bEnd   = toMinutes(endB);
+  const bEnd = toMinutes(endB);
   return aStart < bEnd && aEnd > bStart;
 };
 export const fromMinutes = (n: number): string => {
-  
   if (n <= 0) return '00:00';
   if (n >= 1440) return '24:00';
   const h = Math.floor(n / 60).toString().padStart(2, '0');
@@ -29,7 +27,6 @@ export const fromMinutes = (n: number): string => {
 };
 
 export const dateKey = (d: Date): string => {
-  
   const dd = new Date(d);
   dd.setHours(0, 0, 0, 0);
   const y = dd.getFullYear();
@@ -39,7 +36,6 @@ export const dateKey = (d: Date): string => {
 };
 
 export const dayBounds = (d: Date): { start: Date; end: Date } => {
-  
   const s = new Date(d);
   s.setHours(0, 0, 0, 0);
   const e = new Date(s);
@@ -62,7 +58,6 @@ export const mergeIntervals = (arr: Interval[]): Interval[] => {
 };
 
 export const subtractIntervals = (base: Interval[], cuts: Interval[]): Interval[] => {
-  
   let res = mergeIntervals(base);
   const cc = mergeIntervals(cuts);
   for (const c of cc) {
@@ -72,9 +67,9 @@ export const subtractIntervals = (base: Interval[], cuts: Interval[]): Interval[
         next.push(b);
         continue;
       }
-      
+
       if (c.start > b.start) next.push({ start: b.start, end: Math.min(c.start, b.end) });
-      
+
       if (c.end < b.end) next.push({ start: Math.max(c.end, b.start), end: b.end });
     }
     res = next;
@@ -87,7 +82,6 @@ export const buildLabeledTimeline = (
   breaks: Interval[],
   booked: Interval[],
 ): Array<{ start: number; end: number; status: LabeledStatus }> => {
-  
   const points = new Set<number>([0, 1440]);
   for (const v of available) { points.add(v.start); points.add(v.end); }
   for (const v of breaks) { points.add(v.start); points.add(v.end); }
@@ -108,7 +102,6 @@ export const buildLabeledTimeline = (
     raw.push({ start: s, end: e, status });
   }
 
-  
   const merged: typeof raw = [];
   for (const seg of raw) {
     const last = merged[merged.length - 1];
@@ -120,8 +113,8 @@ export const buildLabeledTimeline = (
   }
   return merged;
 };
-export const addDurationToTime=(startTime: string, durationHours: number): string =>{
-  const [hours, minutes] = startTime.split(":").map(Number);
+export const addDurationToTime = (startTime: string, durationHours: number): string => {
+  const [hours, minutes] = startTime.split(':').map(Number);
 
   const startDate = new Date();
   startDate.setHours(hours, minutes, 0, 0);
@@ -129,11 +122,11 @@ export const addDurationToTime=(startTime: string, durationHours: number): strin
   const addedMinutes = durationHours * 60;
   startDate.setMinutes(startDate.getMinutes() + addedMinutes);
 
-  const endH = String(startDate.getHours()).padStart(2, "0");
-  const endM = String(startDate.getMinutes()).padStart(2, "0");
+  const endH = String(startDate.getHours()).padStart(2, '0');
+  const endM = String(startDate.getMinutes()).padStart(2, '0');
 
   return `${endH}:${endM}`;
-}
+};
 
 export function normalizeDay(date: Date) {
   const d = new Date(date);

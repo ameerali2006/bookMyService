@@ -1,15 +1,15 @@
-import { AdminDataDTO } from "../../dto/admin/admin.dto";
+import { AdminDataDTO } from '../../dto/admin/admin.dto';
 import {
   AdminBookingDetailsDto,
   serviceManageDto,
   userManageDto,
   workerManageDto,
-} from "../../dto/admin/management.dto";
-import { IAdmin } from "../../interface/model/admin.model.interface";
-import { IBookingPopulated } from "../../interface/model/booking.model.interface";
-import { IService } from "../../interface/model/service.model.interface";
-import { IUser } from "../../interface/model/user.model.interface";
-import { IWorker } from "../../interface/model/worker.model.interface";
+} from '../../dto/admin/management.dto';
+import { IAdmin } from '../../interface/model/admin.model.interface';
+import { IBookingPopulated } from '../../interface/model/booking.model.interface';
+import { IService } from '../../interface/model/service.model.interface';
+import { IUser } from '../../interface/model/user.model.interface';
+import { IWorker } from '../../interface/model/worker.model.interface';
 
 export class AdminMapper {
   static resAdminData(admin: IAdmin): AdminDataDTO {
@@ -61,12 +61,13 @@ export class AdminMapper {
       createdAt: w.createdAt,
     }));
   }
+
   static resBookingDetails(booking: IBookingPopulated): AdminBookingDetailsDto {
-    return  {
+    return {
       id: booking._id.toString(),
       status: booking.status,
       bookingDate: booking.date,
-      timeSlot: `${booking.startTime} - ${booking.endTime ?? ""}`,
+      timeSlot: `${booking.startTime} - ${booking.endTime ?? ''}`,
 
       customer: {
         name: booking.userId.name,
@@ -106,27 +107,27 @@ export class AdminMapper {
         advanceAmount: booking.advanceAmount,
         remainingAmount: booking.remainingAmount ?? 0,
         totalAmount: booking.totalAmount ?? 0,
-        advancePaid: booking.advancePaymentStatus === "paid",
-        finalPaid: booking.finalPaymentStatus === "paid",
+        advancePaid: booking.advancePaymentStatus === 'paid',
+        finalPaid: booking.finalPaymentStatus === 'paid',
         paymentMethod: booking.paymentMethod,
         breakdown: booking.paymentBreakdown,
       },
 
       rating: booking.reviewId
         ? {
-            stars: booking.reviewId.rating ?? 0,
-            review: booking.reviewId.comment,
-          }
+          stars: booking.reviewId.rating ?? 0,
+          review: booking.reviewId.comment,
+        }
         : undefined,
 
       timeline: [
-        { status: "confirmed", completed: booking.status !== "pending" },
+        { status: 'confirmed', completed: booking.status !== 'pending' },
         {
-          status: "in-progress",
+          status: 'in-progress',
           completed:
-            booking.status === "in-progress" || booking.status === "completed",
+            booking.status === 'in-progress' || booking.status === 'completed',
         },
-        { status: "completed", completed: booking.status === "completed" },
+        { status: 'completed', completed: booking.status === 'completed' },
       ],
     };
   }

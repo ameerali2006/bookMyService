@@ -1,27 +1,27 @@
-import { Schema, model, Types } from "mongoose";
-import { IMessage } from "../interface/model/message.model.interface";
+import { Schema, model, Types } from 'mongoose';
+import { IMessage } from '../interface/model/message.model.interface';
 
 const messageSchema = new Schema<IMessage>(
   {
     chatId: {
       type: Schema.Types.ObjectId,
-      ref: "Chat",
+      ref: 'Chat',
       required: true,
-      index: true, 
+      index: true,
     },
     senderId: {
       type: Schema.Types.ObjectId,
-      refPath: "role", 
+      refPath: 'role',
       required: true,
     },
     role: {
       type: String,
-      enum: ["User", "Worker", "Admin"],
+      enum: ['User', 'Worker', 'Admin'],
       required: true,
     },
     type: {
       type: String,
-      enum: ["TEXT", "IMAGE", "VIDEO", "AUDIO"],
+      enum: ['TEXT', 'IMAGE', 'VIDEO', 'AUDIO'],
       required: true,
     },
     content: {
@@ -35,22 +35,21 @@ const messageSchema = new Schema<IMessage>(
     readBy: [
       {
         type: Schema.Types.ObjectId,
-         refPath: "role",
+        refPath: 'role',
       },
     ],
-    
+
     isDeleted: {
       type: Boolean,
       default: false,
     },
 
-    
     replyTo: {
       type: Schema.Types.ObjectId,
-      ref: "Message",
+      ref: 'Message',
       default: null,
     },
-// 🆕
+    // 🆕
     reactions: [
       {
         userId: {
@@ -66,10 +65,10 @@ const messageSchema = new Schema<IMessage>(
 
     editedAt: Date,
   },
-  
+
   {
     timestamps: true,
-  }
+  },
 );
 
-export const MessageModel = model<IMessage>("Message", messageSchema);
+export const MessageModel = model<IMessage>('Message', messageSchema);

@@ -9,6 +9,6 @@ export interface ISocketHandler {
   //     onlineWorkers: Map<string, { socketId: string; userType: string }>,
   //     workerId: IWorker,
   //     booking: IBookingPopulated,
-  
+
   //   ):Promise<void>
 }

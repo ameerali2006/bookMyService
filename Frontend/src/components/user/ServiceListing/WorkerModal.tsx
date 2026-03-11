@@ -11,7 +11,7 @@ interface Worker {
   name: string
   experience: string
   fees:number
-  image: string
+  profileImage: string
   zone: string
   distance:number
 
@@ -40,7 +40,7 @@ export function WorkerProfileModal({ worker, isOpen, onClose }: WorkerProfileMod
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={worker.image || "/placeholder.svg"} alt={worker.name} />
+              <AvatarImage src={worker.profileImage || "https://i.pinimg.com/236x/05/78/16/05781612d2cbadf5e423cd0cef59b4f1.jpg"} alt={worker.name} />
               <AvatarFallback className="text-lg">
                 {worker.name
                   .split(" ")

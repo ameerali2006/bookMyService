@@ -37,7 +37,9 @@ export class EmailService implements IEmailService {
   }
 
   async sendServiceRejectedEmail(payload: IServiceRejectedPayload): Promise<void> {
-    const { email, userName, serviceName, reason, refundAmount } = payload;
+    const {
+      email, userName, serviceName, reason, refundAmount,
+    } = payload;
 
     const subject = `Service Rejected — ${serviceName} — bookMyService`;
     const html = SERVICE_REJECTED_MAIL_CONTENT(userName, serviceName, reason, refundAmount);
@@ -46,9 +48,10 @@ export class EmailService implements IEmailService {
 
     // optional logs for audit / debugging
     console.log(
-      `📨 Service rejection email sent to ${email} for service ${serviceName}. Refund: ${typeof refundAmount === "number" ? refundAmount : "N/A"}`
+      `📨 Service rejection email sent to ${email} for service ${serviceName}. Refund: ${typeof refundAmount === 'number' ? refundAmount : 'N/A'}`,
     );
   }
+
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
     const mailOptions = {
       from: `"bookMyService" <${ENV.EMAIL_USER}>`,

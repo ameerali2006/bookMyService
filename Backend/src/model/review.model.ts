@@ -1,27 +1,27 @@
 // models/review.model.ts
 
-import { Schema, model } from "mongoose";
-import { IReview } from "../interface/model/review.model.interface";
+import { Schema, model } from 'mongoose';
+import { IReview } from '../interface/model/review.model.interface';
 
 const ReviewSchema = new Schema<IReview>(
   {
     bookingId: {
       type: Schema.Types.ObjectId,
-      ref: "Booking",
+      ref: 'Booking',
       required: true,
       unique: true,
     },
 
     workerId: {
       type: Schema.Types.ObjectId,
-      ref: "Worker",
+      ref: 'Worker',
       required: true,
       index: true,
     },
 
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true,
     },
@@ -44,11 +44,11 @@ const ReviewSchema = new Schema<IReview>(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // 🔥 Compound index for better performance
 ReviewSchema.index({ workerId: 1, createdAt: -1 });
 ReviewSchema.index({ workerId: 1, rating: -1 });
 
-export const Review = model<IReview>("Review", ReviewSchema);
+export const Review = model<IReview>('Review', ReviewSchema);

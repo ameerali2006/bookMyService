@@ -24,7 +24,7 @@ export class WorkerRoute extends BaseRoute {
     this.router.post('/reset-password', (req: Request, res: Response, next: NextFunction) => authWorkerController.resetPassword(req, res, next));
     this.router.get('/getserviceNames', (req: Request, res: Response, next: NextFunction) => cloudinaryController.getServiceNames(req, res, next));
     this.router.get('/isVerified', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => authWorkerController.isVerified(req, res, next));
-    this.router.post('/refresh-token', (req: Request, res: Response, ) => authWorkerController.handleTokenRefresh(req, res));
+    this.router.post('/refresh-token', (req: Request, res: Response) => authWorkerController.handleTokenRefresh(req, res));
     this.router.get('/profile/slot', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWorkingDetails(req, res, next));
     this.router.post('/profile/slot/update', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.updateWorkingDetails(req, res, next));
     this.router.get('/appointments/requestService', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWorkingDetails(req, res, next));
@@ -43,10 +43,9 @@ export class WorkerRoute extends BaseRoute {
     this.router.patch('/service/work-complated', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.workComplated(req, res, next));
     this.router.get('/service/allBookings', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerbookingController.allBookings(req, res, next));
     this.router.get('/profile/walletData', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getWalletData(req, res, next));
-    this.router.get('/profile/transactions', verifyAuth(), authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) => workingDetailsController.getTransactions(req, res, next));
-    this.router.get('/chat/chatInbox', verifyAuth(), authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) =>chatController.getWorkerInboxUsers(req, res, next));
-    this.router.get('/chat/chatHistory', verifyAuth(),authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) =>chatController.getChatHistory(req, res, next));
-    this.router.get('/dashboard', verifyAuth(),authorizeRole(['worker']) , (req: Request, res: Response, next: NextFunction) =>workerController.getDashboard(req, res, next));
-
+    this.router.get('/profile/transactions', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workingDetailsController.getTransactions(req, res, next));
+    this.router.get('/chat/chatInbox', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => chatController.getWorkerInboxUsers(req, res, next));
+    this.router.get('/chat/chatHistory', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => chatController.getChatHistory(req, res, next));
+    this.router.get('/dashboard', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerController.getDashboard(req, res, next));
   }
 }

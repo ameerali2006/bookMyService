@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/api/AuthService";
+import { ErrorToast, WarningToast } from "./Toaster";
 
 interface ResetPasswordFormProps {
   role: "user" | "worker";
@@ -35,7 +36,10 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ role, token, onBa
 
     setLoading(true);
     try {
-      await (role === "user" ? authService.userResetPassword : authService.workerResetPassword)({ token, password, confirmPassword });
+      const result=await (role === "user" ? authService.userResetPassword : authService.workerResetPassword)({ token, password, confirmPassword });
+      if(!result.data.success){
+        ErrorToast(result.data.message)
+      }
       setResetSuccess(true);
       onSuccess?.();
     } catch (error: any) {

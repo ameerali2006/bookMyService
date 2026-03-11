@@ -1,10 +1,13 @@
-import { getBookingDetailsResponseDTO, setBasicBookingDetailsResponse, updateWorkerDetailsRequestDto, updateWorkerDetailsResponseDto, verifyPaymentResponseDto } from "../../../dto/service.dto";
-import { IBooking } from "../../model/booking.model.interface";
+import {
+  getBookingDetailsResponseDTO, setBasicBookingDetailsResponse, updateWorkerDetailsRequestDto, updateWorkerDetailsResponseDto, verifyPaymentResponseDto,
+} from '../../../dto/service.dto';
+import { IBooking } from '../../model/booking.model.interface';
+
 export interface VerifiedPaymentResult {
   bookingId: string
   amountPaid: number
-  type: "advance" | "final"
-  
+  type: 'advance' | 'final'
+
 }
 export interface BookingDetails {
   workerName: string;
@@ -28,6 +31,6 @@ export interface IBookingService {
   updateWorkerDetails(data: updateWorkerDetailsRequestDto): Promise<updateWorkerDetailsResponseDto>;
   verifyPayment(
     bookingId: string,
-    paymentType: "advance" | "final"
+    paymentType: 'advance' | 'final'
   ): Promise<verifyPaymentResponseDto>;
 }

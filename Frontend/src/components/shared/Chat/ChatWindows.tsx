@@ -36,7 +36,7 @@ export function ChatWindow({
   return (
     <div
       className={cn(
-        "flex flex-col flex-1 overflow-y-auto bg-white",
+        "flex flex-col flex-1 overflow-y-auto bg-white pb-28",
         className
       )}
     >

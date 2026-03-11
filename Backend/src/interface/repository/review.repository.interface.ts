@@ -1,8 +1,7 @@
 // interface/repository/review.repository.interface.ts
 
-
-import { IReview } from "../model/review.model.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { IReview } from '../model/review.model.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IReviewRepository extends IBaseRepository<IReview> {
   findByBookingId(bookingId: string): Promise<IReview | null>;

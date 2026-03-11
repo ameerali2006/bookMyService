@@ -45,13 +45,12 @@ export class RepositoryRegistery {
     container.register<IWorkingDetailsRepository>(TYPES.WorkingDetailsRepository, { useClass: WorkingDetailsRepository });
     container.register<IWorkerAggregation>(TYPES.WorkerAggregation, { useClass: WorkerAggregation });
     container.register<IBookingRepository>(TYPES.BookingRepository, { useClass: BookingRepository });
-   
+
     container.register<IWalletRepository>(TYPES.WalletRepository, { useClass: WalletRepository });
     container.register<ITransactionRepository>(TYPES.TransactionRepository, { useClass: TransactionRepository });
-    container.register<IChatRepository>(TYPES.ChatRepository, { useClass:ChatRepository  });
-    container.register<IMessageRepository>(TYPES.MessageRepository, { useClass:MessageRepository  });
+    container.register<IChatRepository>(TYPES.ChatRepository, { useClass: ChatRepository });
+    container.register<IMessageRepository>(TYPES.MessageRepository, { useClass: MessageRepository });
 
     container.register<IReviewRepository>(TYPES.ReviewRepository, { useClass: ReviewRepository });
-
   }
 }

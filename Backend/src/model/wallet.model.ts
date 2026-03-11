@@ -1,5 +1,5 @@
-import { model, Schema } from "mongoose";
-import { IWallet } from "../interface/model/wallet.model.interface";
+import { model, Schema } from 'mongoose';
+import { IWallet } from '../interface/model/wallet.model.interface';
 
 const WalletSchema = new Schema<IWallet>(
   {
@@ -7,12 +7,12 @@ const WalletSchema = new Schema<IWallet>(
       type: Schema.Types.ObjectId,
       required: true,
       index: true,
-      refPath:"role"
+      refPath: 'role',
     },
 
     role: {
       type: String,
-      enum: ["user", "worker", "admin"],
+      enum: ['user', 'worker', 'admin'],
       required: true,
     },
 
@@ -33,7 +33,7 @@ const WalletSchema = new Schema<IWallet>(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export const WalletModel = model<IWallet>("Wallet", WalletSchema);
+export const WalletModel = model<IWallet>('Wallet', WalletSchema);

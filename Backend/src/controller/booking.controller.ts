@@ -22,14 +22,14 @@ export class BookingController implements IBookingController {
         date, time, description, workerId,
       } = req.body;
       const response = await this._bookingService.setBasicBookingDetails(userId, workerId, time, date, description);
-      if(response.message=="Slot already booked by another user"){
+      if (response.message == 'Slot already booked by another user') {
         res.status(STATUS_CODES.OK).json(response);
-      }else
-      if (!response.success) {
-        res.status(STATUS_CODES.BAD_REQUEST).json(response);
-      } else {
-        res.status(STATUS_CODES.OK).json(response);
-      }
+      } else
+        if (!response.success) {
+          res.status(STATUS_CODES.BAD_REQUEST).json(response);
+        } else {
+          res.status(STATUS_CODES.OK).json(response);
+        }
     } catch (error) {
       next(error);
     }
@@ -49,13 +49,14 @@ export class BookingController implements IBookingController {
       next(error);
     }
   }
+
   async verifyPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { bookingId, paymentType } = req.query;
 
       const response = await this._bookingService.verifyPayment(
         bookingId as string,
-        paymentType as "advance" | "final"
+        paymentType as 'advance' | 'final',
       );
 
       if (!response.success) {
@@ -67,6 +68,4 @@ export class BookingController implements IBookingController {
       next(error);
     }
   }
-
-
 }

@@ -16,6 +16,8 @@ export interface IWorker extends Document{
   zone: string;
   experience: '0-1' | '2-5' | '6-10' | '10+';
   category: Types.ObjectId
+  description?:string,
+  skills?:string[]
   fees: number;
   isBlocked: boolean;
   isActive: boolean;

@@ -45,7 +45,7 @@ export class BookingSocketHandler implements ISocketHandler {
     });
   }
 
-  public  async emitBookingToWorker(
+  public async emitBookingToWorker(
     io: IOServer,
     onlineWorkers: Map<string, { socketId: string; userType: string }>,
     workerId: IWorker,
@@ -54,15 +54,15 @@ export class BookingSocketHandler implements ISocketHandler {
   ) {
     const worker = onlineWorkers.get(workerId._id.toString());
     if (worker) {
-      console.log(booking)
+      console.log(booking);
       const service = WorkerMapper.serviceRequest(booking);
       const nextAvailable = await this._workerHelper.getWorkerAvailableTime(
-            booking.workerId._id.toString(),
-            booking.date,
-            booking.startTime
-          );
-      console.log({...service,availableTime:nextAvailable.availableTime});
-      io.to(worker.socketId).emit('receive-pending-booking', {...service,availableTime:nextAvailable.availableTime});
+        booking.workerId._id.toString(),
+        booking.date,
+        booking.startTime,
+      );
+      console.log({ ...service, availableTime: nextAvailable.availableTime });
+      io.to(worker.socketId).emit('receive-pending-booking', { ...service, availableTime: nextAvailable.availableTime });
       console.log(booking);
       console.log(`📨 Booking emitted to worker ${workerId}`);
     } else {

@@ -1,5 +1,5 @@
-import { WorkerBookingListRequest } from "../../../controller/validation/allBookingList.zod";
-import { responsePart } from "../../../dto/shared/responsePart";
+import { WorkerBookingListRequest } from '../../../controller/validation/allBookingList.zod';
+import { responsePart } from '../../../dto/shared/responsePart';
 import {
   allBookingDto,
   ApprovedServices,
@@ -10,8 +10,8 @@ import {
   IWorkerRequestResponse,
   reachedCustomerLocationResponseDto,
   workerComplateWorkResponseDto,
-} from "../../../dto/worker/working-details.dto";
-import { IBookingPopulated } from "../../model/booking.model.interface";
+} from '../../../dto/worker/working-details.dto';
+import { IBookingPopulated } from '../../model/booking.model.interface';
 
 export interface serviceData {
   bookingId: string;
@@ -27,8 +27,8 @@ export interface serviceData {
 export interface IRequestFilters {
   workerId: string;
   search?: string;
-  status?: "pending" | "accepted" | "rejected";
-  advancePaymentStatus: "paid";
+  status?: 'pending' | 'accepted' | 'rejected';
+  advancePaymentStatus: 'paid';
   date?: string;
   page: number;
   limit: number;

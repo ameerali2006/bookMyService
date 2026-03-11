@@ -1,13 +1,13 @@
-import { IAdminDashboardRaw } from "../../dto/admin/admin-dashboard.dto";
+import { IAdminDashboardRaw } from '../../dto/admin/admin-dashboard.dto';
 import {
   BookingStatus,
   IBooking,
   IBookingPopulated,
-} from "../model/booking.model.interface";
-import { PaymentStatus } from "../model/wallet.model.interface";
+} from '../model/booking.model.interface';
+import { PaymentStatus } from '../model/wallet.model.interface';
 
-import { IRequestFilters } from "../service/worker/worker-booking.service.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { IRequestFilters } from '../service/worker/worker-booking.service.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IWorkerDashboardRepoResult {
   totalJobs: number;
@@ -35,12 +35,12 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   updateStatusWithOTP(
     id: string,
     status:
-      | "pending"
-      | "confirmed"
-      | "in-progress"
-      | "awaiting-final-payment"
-      | "completed"
-      | "cancelled",
+      | 'pending'
+      | 'confirmed'
+      | 'in-progress'
+      | 'awaiting-final-payment'
+      | 'completed'
+      | 'cancelled',
   ): Promise<IBooking | null>;
   updatePaymentStatus(
     id: string,
@@ -81,7 +81,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
       date: Date;
       startTime: string;
       endTime?: string | null;
-      advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+      advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
     }>
   >;
   findPendingAdvanceBookings(workerId: string): Promise<IBooking[]>;
@@ -104,7 +104,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     page: number;
     limit: number;
     search?: string;
-    status?: "approved" | "in-progress" | "awaiting-final-payment";
+    status?: 'approved' | 'in-progress' | 'awaiting-final-payment';
   }): Promise<{ items: IBookingPopulated[] | null; total: number }>;
   getAllBookings(params: {
     search?: string;

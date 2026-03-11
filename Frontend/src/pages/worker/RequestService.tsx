@@ -80,7 +80,7 @@ export default function WorkerRequestsPage() {
 
   useEffect(() => {
     fetchRequests();
-  }, [search, status, date, page, pageSize]);
+  }, [search, status, date, page, pageSize,selectedRequest]); 
 
   const getStatusColor = (status: ServiceRequest["status"]) => {
     switch (status) {

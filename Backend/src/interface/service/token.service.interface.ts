@@ -1,4 +1,4 @@
-import { refreshTokenResponse } from "../../dto/shared/helpers.dto"
+import { refreshTokenResponse } from '../../dto/shared/helpers.dto';
 
 export interface ITokenservice{
     blacklistToken(token:string):Promise<void>

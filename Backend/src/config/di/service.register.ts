@@ -105,7 +105,7 @@ export class ServiceRegistery {
     container.register<IWalletService>(TYPES.WalletService, { useClass: WalletService });
     container.register<IBookingDetailsService>(TYPES.BookingDetailsService, { useClass: BookingDetailsService });
     container.register<ITransactionService>(TYPES.TransactionService, { useClass: TransactionService });
-    container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler }); 
+    container.register<ISocketHandler>(TYPES.BookingSocketHandler, { useClass: BookingSocketHandler });
     container.register<IChatService>(TYPES.ChatService, { useClass: ChatService });
     container.register<IReviewService>(TYPES.ReviewService, { useClass: ReviewService });
   }

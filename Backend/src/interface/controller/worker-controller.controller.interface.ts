@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
 export interface IWorkerController{
-    getDashboard(req: Request, res: Response,next:NextFunction):Promise<void>
+    getDashboard(req: Request, res: Response, next:NextFunction):Promise<void>
 }

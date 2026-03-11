@@ -1,15 +1,17 @@
-import { inject, injectable } from "tsyringe";
-import { IReviewController } from "../interface/controller/review.controller.interface";
-import { Request, Response, NextFunction } from "express";
-import { STATUS_CODES } from "../config/constants/status-code";
-import { CustomRequest } from "../middleware/auth.middleware";
-import { TYPES } from "../config/constants/types";
-import { IReviewService } from "../interface/service/review.service.Interface";
+import { inject, injectable } from 'tsyringe';
+import { Request, Response, NextFunction } from 'express';
+import { IReviewController } from '../interface/controller/review.controller.interface';
+import { STATUS_CODES } from '../config/constants/status-code';
+import { CustomRequest } from '../middleware/auth.middleware';
+import { TYPES } from '../config/constants/types';
+import { IReviewService } from '../interface/service/review.service.Interface';
+
 @injectable()
 export class ReviewController implements IReviewController {
   constructor(
     @inject(TYPES.ReviewService) private reviewService: IReviewService,
   ) {}
+
   async addReview(
     req: Request,
     res: Response,
@@ -17,13 +19,13 @@ export class ReviewController implements IReviewController {
   ): Promise<void> {
     try {
       const { bookingId, comment, rating } = req.body;
-      console.log({ bookingId, comment, rating })
+      console.log({ bookingId, comment, rating });
 
       const userId = (req as CustomRequest).user._id;
-      if (!bookingId || !rating || String(comment).trim() == "") {
+      if (!bookingId || !rating || String(comment).trim() == '') {
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: "BookingId and rating are required",
+          message: 'BookingId and rating are required',
         });
         return;
       }
@@ -31,7 +33,7 @@ export class ReviewController implements IReviewController {
       if (rating < 1 || rating > 5) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: "Rating must be between 1 and 5",
+          message: 'Rating must be between 1 and 5',
         });
         return;
       }
@@ -42,12 +44,12 @@ export class ReviewController implements IReviewController {
         bookingId,
         userId,
       );
-      console.log(result)
+      console.log(result);
 
-      res.status(STATUS_CODES.OK).json(result)
+      res.status(STATUS_CODES.OK).json(result);
     } catch (error) {
-      console.error(error)
-      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message:"server interfnal Error"})
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: 'server interfnal Error' });
     }
   }
 }

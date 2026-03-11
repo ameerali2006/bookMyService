@@ -1,19 +1,18 @@
-import { injectable } from "tsyringe";
+import { injectable } from 'tsyringe';
 
+import { Types } from 'mongoose';
 import {
   IMessage,
   IMessagePopulated,
-} from "../../interface/model/message.model.interface";
-import { BaseRepository } from "./base.repository";
-import { MessageModel } from "../../model/message.model";
-import { IMessageRepository } from "../../interface/repository/message.repoository.interface";
-import { Types } from "mongoose";
+} from '../../interface/model/message.model.interface';
+import { BaseRepository } from './base.repository';
+import { MessageModel } from '../../model/message.model';
+import { IMessageRepository } from '../../interface/repository/message.repoository.interface';
 
 @injectable()
 export class MessageRepository
   extends BaseRepository<IMessage>
-  implements IMessageRepository
-{
+  implements IMessageRepository {
   constructor() {
     super(MessageModel);
   }
@@ -34,7 +33,7 @@ export class MessageRepository
       .sort({ createdAt: 1 }) // oldest → newest
       .skip(skip)
       .limit(limit)
-      .populate("senderId chatId") // 👈 populate here
+      .populate('senderId chatId') // 👈 populate here
       .lean<IMessagePopulated[]>();
   }
 
@@ -44,6 +43,7 @@ export class MessageRepository
       { $addToSet: { readBy: userId } },
     );
   }
+
   async deleteMessage(
     messageId: string,
     userId: string,
@@ -58,13 +58,14 @@ export class MessageRepository
         $set: {
           isDeleted: true,
           deletedAt: new Date(),
-          content: "",
+          content: '',
           metadata: {},
         },
       },
-      { new: true },  
+      { new: true },
     );
   }
+
   async reactToMessage(
     messageId: string,
     userId: string,
@@ -75,12 +76,12 @@ export class MessageRepository
     const updateExisting = await MessageModel.updateOne(
       {
         _id: messageId,
-        "reactions.userId": userId,
+        'reactions.userId': userId,
       },
       {
         $set: {
-          "reactions.$.emoji": emoji,
-          "reactions.$.reactedAt": now,
+          'reactions.$.emoji': emoji,
+          'reactions.$.reactedAt': now,
         },
       },
     );
@@ -89,7 +90,7 @@ export class MessageRepository
       await MessageModel.updateOne(
         {
           _id: messageId,
-          "reactions.userId": { $ne: userId },
+          'reactions.userId': { $ne: userId },
         },
         {
           $push: {

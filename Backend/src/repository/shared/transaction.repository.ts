@@ -1,18 +1,17 @@
 // src/repository/implementation/wallet-transaction.repository.ts
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 
-import { BaseRepository } from "./base.repository";
+import { BaseRepository } from './base.repository';
 
-import { ITransactionRepository } from "../../interface/repository/transaction.repository.interface";
-import { ITransaction } from "../../interface/model/transactions.modal.interface";
-import { TransactionModel } from "../../model/transactions.model";
-import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
+import { ITransactionRepository } from '../../interface/repository/transaction.repository.interface';
+import { ITransaction } from '../../interface/model/transactions.modal.interface';
+import { TransactionModel } from '../../model/transactions.model';
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
 
 @injectable()
 export class TransactionRepository
   extends BaseRepository<ITransaction>
-  implements ITransactionRepository
-{
+  implements ITransactionRepository {
   constructor() {
     super(TransactionModel);
   }
@@ -23,7 +22,7 @@ export class TransactionRepository
 
   async findById(id: string): Promise<ITransaction | null> {
     return await TransactionModel.findById(id)
-      .populate("walletId")
+      .populate('walletId')
       .exec();
   }
 
@@ -48,53 +47,53 @@ export class TransactionRepository
   async deleteTransaction(id: string): Promise<ITransaction | null> {
     return await TransactionModel.findByIdAndDelete(id);
   }
+
   async findWithFilters(
-  walletId: string,
-  query: WalletTransactionQuery
-): Promise<{
+    walletId: string,
+    query: WalletTransactionQuery,
+  ): Promise<{
   transactions: ITransaction[];
   total: number;
 }> {
-  const {
-    page = 1,
-    limit = 10,
-    type,
-    status,
-    sortBy = "createdAt",
-    sortOrder = "desc",
-    startDate,
-    endDate,
-  } = query;
+    const {
+      page = 1,
+      limit = 10,
+      type,
+      status,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      startDate,
+      endDate,
+    } = query;
 
-  const filter: any = {
-    walletId:walletId.toString(),
-  };
+    const filter: any = {
+      walletId: walletId.toString(),
+    };
 
-  if (type) filter.type = type;
-  if (status) filter.status = status;
+    if (type) filter.type = type;
+    if (status) filter.status = status;
 
-  if (startDate || endDate) {
-    filter.createdAt = {};
-    if (startDate) filter.createdAt.$gte = new Date(startDate);
-    if (endDate) filter.createdAt.$lte = new Date(endDate);
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+
+    const skip = (page - 1) * limit;
+    const sortDirection = sortOrder === 'asc' ? 1 : -1;
+
+    const [transactions, total] = await Promise.all([
+      TransactionModel.find(filter)
+        .sort({ [sortBy]: sortDirection })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      TransactionModel.countDocuments(filter),
+    ]);
+
+    return {
+      transactions,
+      total,
+    };
   }
-
-  const skip = (page - 1) * limit;
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
-
-  const [transactions, total] = await Promise.all([
-    TransactionModel.find(filter)
-      .sort({ [sortBy]: sortDirection })
-      .skip(skip)
-      .limit(limit)
-      .exec(),
-    TransactionModel.countDocuments(filter),
-  ]);
-
-  return {
-    transactions,
-    total,
-  };
-}
-
 }

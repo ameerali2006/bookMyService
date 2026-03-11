@@ -1,9 +1,9 @@
-import { TransactionResponseDTO } from "../../dto/shared/transaction.dt"
-import { ITransaction } from "../../interface/model/transactions.modal.interface"
+import { TransactionResponseDTO } from '../../dto/shared/transaction.dt';
+import { ITransaction } from '../../interface/model/transactions.modal.interface';
 
 export class SharedMapper {
   static toTransactionResponse(
-    transaction: ITransaction
+    transaction: ITransaction,
   ): TransactionResponseDTO {
     return {
       id: transaction._id.toString(),
@@ -15,12 +15,12 @@ export class SharedMapper {
       status: transaction.status,
       description: transaction.description,
       createdAt: new Date(transaction.createdAt),
-    }
+    };
   }
 
   static toTransactionResponseList(
-    transactions: ITransaction[]
+    transactions: ITransaction[],
   ): TransactionResponseDTO[] {
-    return transactions.map(this.toTransactionResponse)
+    return transactions.map(this.toTransactionResponse);
   }
 }

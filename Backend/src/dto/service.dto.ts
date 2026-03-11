@@ -1,11 +1,11 @@
-import { IBooking } from "../interface/model/booking.model.interface";
-import { IWorker } from "../interface/model/worker.model.interface";
+import { IBooking } from '../interface/model/booking.model.interface';
+import { IWorker } from '../interface/model/worker.model.interface';
 import {
   BookingDetails,
   VerifiedPaymentResult,
-} from "../interface/service/services/booking-service.sevice.interface";
-import { serviceCreateDto } from "./admin/management.dto";
-import { responsePart } from "./shared/responsePart";
+} from '../interface/service/services/booking-service.sevice.interface';
+import { serviceCreateDto } from './admin/management.dto';
+import { responsePart } from './shared/responsePart';
 
 export interface setBasicBookingDetailsResponse extends responsePart {
   bookingId: string | null;
@@ -39,7 +39,7 @@ export interface getWorkerAvailablityResponseDto extends responsePart {
       availableTimes: {
         start: string;
         end: string;
-        status: "available" | "unavailable" | "break" | "booked";
+        status: 'available' | 'unavailable' | 'break' | 'booked';
       }[];
     }[];
   };

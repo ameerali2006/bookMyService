@@ -1,6 +1,4 @@
-
-
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface IReview extends Document{
    _id: Types.ObjectId;
@@ -8,10 +6,10 @@ export interface IReview extends Document{
   workerId: Types.ObjectId|string;
   userId: Types.ObjectId|string;
 
-  rating: number;        
+  rating: number;
   comment: string;
 
-  isVisible?: boolean;   
+  isVisible?: boolean;
   createdAt: Date;
   updatedAt: Date;
-} 
+}

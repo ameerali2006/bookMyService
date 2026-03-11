@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,6 +19,9 @@ import {
   Navigation,
   CheckCircle2,
   Circle,
+  Wrench,
+  CreditCard,
+  ArrowLeft,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -74,7 +75,11 @@ export interface IPaymentItem {
   total: number;
 }
 
-export type BookingStatus = "confirmed" | "in-progress" | "completed"|"awaiting-final-payment";
+export type BookingStatus =
+  | "confirmed"
+  | "in-progress"
+  | "completed"
+  | "awaiting-final-payment";
 export type PaymentMethod = "cash" | "card" | "upi" | "wallet";
 
 export interface IBooking {
@@ -101,11 +106,100 @@ export interface IBooking {
   updatedAt: string;
   verification: boolean;
 }
+
 export interface IBookingPopulated
   extends Omit<IBooking, "userId" | "serviceId"> {
   userId: IUser;
   serviceId: IService;
 }
+
+// ─── Status config ────────────────────────────────────────────────────────────
+const STATUS_CONFIG: Record<
+  BookingStatus,
+  { label: string; dot: string; badge: string }
+> = {
+  confirmed: {
+    label: "Confirmed",
+    dot: "bg-sky-400",
+    badge: "bg-sky-50 text-sky-700 border-sky-200",
+  },
+  "in-progress": {
+    label: "In Progress",
+    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  completed: {
+    label: "Completed",
+    dot: "bg-emerald-400",
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  "awaiting-final-payment": {
+    label: "Awaiting Payment",
+    dot: "bg-violet-400",
+    badge: "bg-violet-50 text-violet-700 border-violet-200",
+  },
+};
+
+const TIMELINE_STEPS: { key: BookingStatus; label: string }[] = [
+  { key: "confirmed", label: "Confirmed" },
+  { key: "in-progress", label: "In Progress" },
+  { key: "completed", label: "Completed" },
+];
+
+const STEP_ORDER: BookingStatus[] = [
+  "confirmed",
+  "in-progress",
+  "awaiting-final-payment",
+  "completed",
+];
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function SectionCard({
+  icon,
+  title,
+  action,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <span className="text-slate-500">{icon}</span>
+          <h2 className="font-semibold text-slate-800 text-sm tracking-wide uppercase">
+            {title}
+          </h2>
+        </div>
+        {action}
+      </div>
+      <div className="px-5 py-4">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2.5 border-b border-slate-50 last:border-0">
+      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide pt-0.5 min-w-[110px]">
+        {label}
+      </span>
+      <span className="text-sm text-slate-700 text-right">{value}</span>
+    </div>
+  );
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function WorkerBookingDetailsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -115,7 +209,6 @@ export default function WorkerBookingDetailsPage() {
   const [additionalItems, setAdditionalItems] = useState<IAdditionalItem[]>([]);
   const [editingDescription, setEditingDescription] = useState(false);
   const [description, setDescription] = useState("");
-
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
   const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
@@ -123,18 +216,16 @@ export default function WorkerBookingDetailsPage() {
   useEffect(() => {
     loadBooking();
   }, [bookingId]);
+
   const loadBooking = async () => {
     if (!bookingId) return;
-
     try {
       setLoading(true);
       const res = await workerService.getBookingDetails(bookingId);
-      console.log(res);
-
       setBooking(res.data.booking);
       setAdditionalItems(res.data.booking.additionalItems || []);
       setDescription(res.data.booking.description || "");
-    } catch (error) {
+    } catch {
       ErrorToast("Failed to load booking details");
     } finally {
       setLoading(false);
@@ -146,7 +237,10 @@ export default function WorkerBookingDetailsPage() {
       <WorkerLayout>
         <Navbar />
         <div className="flex justify-center items-center min-h-[60vh]">
-          <p className="text-muted-foreground">Loading booking details...</p>
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 rounded-full border-2 border-slate-300 border-t-slate-700 animate-spin" />
+            <p className="text-sm text-slate-500">Loading booking details…</p>
+          </div>
         </div>
       </WorkerLayout>
     );
@@ -157,87 +251,39 @@ export default function WorkerBookingDetailsPage() {
       <WorkerLayout>
         <Navbar />
         <div className="flex justify-center items-center min-h-[60vh]">
-          <p className="text-muted-foreground">Booking not found</p>
+          <p className="text-slate-500">Booking not found</p>
         </div>
       </WorkerLayout>
     );
   }
-  console.log(
-    booking.date.split("T")[0],
-    new Date().toISOString().split("T")[0]
-  );
+
   const isToday =
     booking.date.split("T")[0] === new Date().toISOString().split("T")[0];
   const isEditable =
     booking.status === "confirmed" || booking.status === "in-progress";
-  const isCompleted = booking.status === "completed";
+  const isInProgress = booking.status === "in-progress";
+  const statusCfg = STATUS_CONFIG[booking.status] ?? STATUS_CONFIG.confirmed;
+  const currentStepIdx = STEP_ORDER.indexOf(booking.status);
 
-  const getStatusColor = (status: BookingStatus) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-      case "in-progress":
-        return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-      case "completed":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getPaymentMethodBadge = (method: string) => {
-    return (
-      <Badge variant="outline" className="capitalize">
-        {method}
-      </Badge>
-    );
-  };
-  
-  const handleVerify = async (otp: string) => {
-    if (!booking?._id) {
-      ErrorToast("Booking not found");
-      return;
-    }
-
-    try {
-      const response = await workerService.verifyWorker(booking._id, otp);
-
-      if (!response.data.success) {
-        ErrorToast(response.data.message || "Verification failed");
-        return;
-      }
-
-      SuccessToast("Worker verified successfully");
-
-      loadBooking();
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      ErrorToast(error?.response?.data?.message || "Something went wrong");
-    }
-  };
   const formatAddress = () => {
     const { street, city, state, postalCode, country } = booking.address;
     return `${street}, ${city}, ${state} ${postalCode}, ${country}`;
   };
 
   const calculateDuration = () => {
-    const start = new Date(
-      `${booking.date.split("T")[0]}T${booking.startTime}`
-    );
+    const start = new Date(`${booking.date.split("T")[0]}T${booking.startTime}`);
     const end = new Date(`${booking.date.split("T")[0]}T${booking.endTime}`);
     const diffMs = end.getTime() - start.getTime();
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    return diffHrs > 0 ? `${diffHrs}h ${diffMins}m` : `${diffMins}m`;
+    const h = Math.floor(diffMs / 3600000);
+    const m = Math.floor((diffMs % 3600000) / 60000);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
   };
 
   const openMap = () => {
     const [lng, lat] = booking.address.location.coordinates;
-    window.open(
-      `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-      "_blank"
-    );
+    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
   };
+
   const handleReachedLocation = async () => {
     try {
       const res = await workerService.reachedCustomerLocation(booking._id);
@@ -246,550 +292,491 @@ export default function WorkerBookingDetailsPage() {
       ErrorToast("Failed to verify arrival");
     }
   };
-  const handleComplated=async()=>{
-     if (!booking?._id) {
-        ErrorToast("Booking not found");
-        return;
-      }
 
-      try {
-        const res = await workerService.workComplated(booking._id);
+  const handleCompleted = async () => {
+    if (!booking?._id) return ErrorToast("Booking not found");
+    try {
+      const res = await workerService.workComplated(booking._id);
+      if (!res.data.success) return ErrorToast(res.data.message || "Failed to complete work");
+      SuccessToast("Work completed successfully");
+      loadBooking();
+    } catch {
+      ErrorToast("Something went wrong while completing work");
+    }
+  };
 
-        if (!res.data.success) {
-          ErrorToast(res.data.message || "Failed to complete work");
-          return;
-        }
+  const handleVerify = async (otp: string) => {
+    if (!booking?._id) return ErrorToast("Booking not found");
+    try {
+      const response = await workerService.verifyWorker(booking._id, otp);
+      if (!response.data.success) return ErrorToast(response.data.message || "Verification failed");
+      SuccessToast("Worker verified successfully");
+      loadBooking();
+    } catch (error: any) {
+      ErrorToast(error?.response?.data?.message || "Something went wrong");
+    }
+  };
 
-        SuccessToast("Work completed successfully");
-
-        
-        loadBooking()
-
-      } catch (error) {
-        console.error("Complete work error:", error);
-        ErrorToast("Something went wrong while completing work");
-      }
-  }
   const handleAddItem = async () => {
-    //   if (!newItemName.trim() || !newItemPrice) return
-    //   const updated = [
-    //     ...additionalItems,
-    //     { name: newItemName.trim(), price: Number(newItemPrice) },
-    //   ]
-    //   try {
-    //     await workerBookingService.updateAdditionalItems(booking._id, updated)
-    //     setAdditionalItems(updated)
-    //     setNewItemName("")
-    //     setNewItemPrice("")
-    //   } catch {
-    //     ErrorToast("Failed to add item")
-    //   }
+    // TODO: wire up API
   };
 
-  const handleRemoveItem = async (id: string) => {
-    //   const updated = additionalItems.filter(i => i._id !== id)
-    //   try {
-    //     await workerBookingService.updateAdditionalItems(booking._id, updated)
-    //     setAdditionalItems(updated)
-    //   } catch {
-    //     ErrorToast("Failed to remove item")
-    //   }
+  const handleRemoveItem = async (_id: string) => {
+    // TODO: wire up API
   };
-  const calculateItemsTotal = () => {
-    return additionalItems.reduce((sum, item) => sum + item.price, 0);
-  };
+
+  const calculateItemsTotal = () =>
+    additionalItems.reduce((s, i) => s + i.price, 0);
 
   const handleDescriptionSave = () => {
     setBooking({ ...booking, description });
     setEditingDescription(false);
-    // In real app: API call to persist
   };
-  const isInProgress = booking.status === "in-progress"
-  const getActionButton = () => {
-    if (!isToday) {
-      return { label: "Go to Customer Location", action: openMap };
-    }
 
-    if (booking.status === "awaiting-final-payment") {
-      return { label: "Verify Payment", action: handleReachedLocation };
-    }
-
-    if (!isInProgress) {
-      return { label: "Reached to Customer Location", action: handleReachedLocation };
-    }
-
-    return { label: "Work Completed", action: handleComplated };
+  const getActionButton = (): { label: string; action: () => void; variant?: "default" | "emerald" } => {
+    if (!isToday) return { label: "Navigate to Customer", action: openMap };
+    if (booking.status === "awaiting-final-payment") return { label: "Verify Payment", action: handleReachedLocation, variant: "emerald" };
+    if (!isInProgress) return { label: "Mark Arrived", action: handleReachedLocation };
+    return { label: "Mark Work Complete", action: handleCompleted, variant: "emerald" };
   };
-  const { label, action } = getActionButton();
+
+  const { label, action, variant } = getActionButton();
+
   return (
     <WorkerLayout>
       <Navbar />
 
-      <div className="min-h-screen bg-muted/30">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Booking ID</p>
-                  <p className="font-mono font-semibold text-lg">
-                    {booking._id}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {isToday && (
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-500/10 text-blue-600 border-blue-500/20"
-                  >
-                    Today
-                  </Badge>
-                )}
-                <Badge className={cn("border", getStatusColor(booking.status))}>
-                  {booking.status.replace("-", " ").toUpperCase()}
-                </Badge>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(booking.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+      <div className="min-h-screen bg-slate-50 font-sans">
+
+        {/* ── Top bar ── */}
+        <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button className="text-slate-400 hover:text-slate-700 transition-colors">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div>
+                <p className="text-xs text-slate-400 leading-none mb-0.5">Booking</p>
+                <p className="font-mono text-sm font-semibold text-slate-700 truncate max-w-[180px] sm:max-w-none">
+                  #{booking._id.slice(-10).toUpperCase()}
                 </p>
               </div>
+            </div>
+            <div className="flex items-center gap-2.5">
+              {isToday && (
+                <span className="hidden sm:inline-flex text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200 rounded-full px-2.5 py-1">
+                  Today
+                </span>
+              )}
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 text-xs font-semibold border rounded-full px-3 py-1",
+                  statusCfg.badge
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", statusCfg.dot)} />
+                {statusCfg.label}
+              </span>
+              <span className="hidden sm:block text-xs text-slate-400">
+                {new Date(booking.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 max-w-5xl">
-          <div className="grid gap-6">
-            {/* Customer Information Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  Customer Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage
-                        src={booking.userId.image || "/placeholder.svg"}
-                        alt={booking.userId.name}
-                      />
-                      <AvatarFallback className="text-lg">
-                        {booking.userId.name
-                          .split(" ")
-                          .map((n: string) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {booking.userId.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                        <Phone className="h-4 w-4" />
-                        {booking.userId.phone}
-                      </p>
-                      <p className="text-sm text-muted-foreground flex items-start gap-2 mt-2">
-                        <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span>{formatAddress()}</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    {/* <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={openMap}
-                      className="rounded-full"
-                    >
-                      <MapPin className="h-4 w-4" />
-                    </Button>
-                    {isToday && booking.status=="awaiting-final-payment" && (
-                      <Button
-                        onClick={handleReachedLocation}
-                        className="gap-2 bg-emerald-600"
-                      >
-                        <Navigation className="h-4 w-4" />
-                       verify payment 
-                      </Button>
-                    )}
-                    
-                    {isToday && !isInProgress && !booking.status=="awaiting-final-payment" && (
-                      <Button
-                        onClick={handleReachedLocation}
-                        className="gap-2"
-                      >
-                        <Navigation className="h-4 w-4" />
-                        Reached to Customer Location
-                      </Button>
-                    )}
+        {/* ── Content ── */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
-                    
-                    {isToday && isInProgress && (
-                      <Button
-                        onClick={()=>handleComplated()}
-                        className="gap-2 "
-                      >
-                        <Navigation className="h-4 w-4" />
-                        Work Complated
-                      </Button>
-                    )}
+          {/* ── Customer card ── */}
+          <SectionCard icon={<Phone className="h-4 w-4" />} title="Customer">
+            <div className="flex items-start gap-4">
+              <Avatar className="h-14 w-14 rounded-xl shrink-0">
+                <AvatarImage src={booking.userId.image || "/placeholder.svg"} alt={booking.userId.name} />
+                <AvatarFallback className="rounded-xl bg-slate-100 text-slate-600 font-semibold">
+                  {booking.userId.name.split(" ").map((n: string) => n[0]).join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-slate-900 text-base leading-tight">{booking.userId.name}</h3>
+                <a href={`tel:${booking.userId.phone}`} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mt-1 transition-colors">
+                  <Phone className="h-3.5 w-3.5" />
+                  {booking.userId.phone}
+                </a>
+                <p className="text-sm text-slate-500 flex items-start gap-1.5 mt-1.5">
+                  <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" />
+                  <span className="leading-snug">{formatAddress()}</span>
+                </p>
+              </div>
+            </div>
 
-                    
-                    {!isToday && (
-                      <Button
-                        onClick={openMap}
-                        className="gap-2"
-                      >
-                        <Navigation className="h-4 w-4" />
-                        Go to Customer Location
-                      </Button>
-                    )} */}
-                      
-
-                  <Button onClick={action} className="gap-2">
-                    <Navigation className="h-4 w-4" />
-                    {label}
-                  </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            {booking.verification && (
-              <OtpQrVerification
-                bookingId={booking._id}
-                onVerified={(otp) => {
-                  handleVerify(otp);
-                }}
-              />
-            )}
-
-            {/* Service Details Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Service Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {booking.serviceId.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Category: {booking.serviceId.category}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-muted p-2">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Booking Date
-                      </p>
-                      <p className="font-medium">
-                        {new Date(booking.date).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-muted p-2">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Time & Duration
-                      </p>
-                      <p className="font-medium">
-                        {booking.startTime} – {booking.endTime} (
-                        {calculateDuration()})
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Status Timeline */}
-                <div>
-                  <p className="text-sm font-medium mb-4">Status Timeline</p>
-                  <div className="flex items-center justify-between relative">
-                    <div className="absolute top-4 left-0 right-0 h-0.5 bg-border" />
-                    {["confirmed", "in-progress", "completed"].map(
-                      (status, index) => {
-                        const isActive =
-                          status === booking.status ||
-                          (booking.status === "in-progress" &&
-                            status === "confirmed") ||
-                          (booking.status === "completed" &&
-                            status !== "completed");
-                        return (
-                          <div
-                            key={status}
-                            className="flex flex-col items-center gap-2 relative z-10"
-                          >
-                            <div
-                              className={cn(
-                                "rounded-full p-2 border-2 bg-background",
-                                isActive ? "border-primary" : "border-muted"
-                              )}
-                            >
-                              {isActive ? (
-                                <CheckCircle2 className="h-4 w-4 text-primary" />
-                              ) : (
-                                <Circle className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
-                            <p
-                              className={cn(
-                                "text-xs capitalize",
-                                isActive
-                                  ? "text-foreground font-medium"
-                                  : "text-muted-foreground"
-                              )}
-                            >
-                              {status.replace("-", " ")}
-                            </p>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Worker Notes / Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Booking Description
-                  </span>
-                  {isEditable && !editingDescription && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingDescription(true)}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {editingDescription ? (
-                  <div className="space-y-3">
-                    <textarea
-                      className="w-full min-h-24 p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Enter booking description..."
-                    />
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={handleDescriptionSave}>
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setDescription(booking.description);
-                          setEditingDescription(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm leading-relaxed">
-                    {booking.description}
-                  </p>
+            {/* Action strip */}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openMap}
+                className="gap-2 flex-1 sm:flex-none text-slate-600 border-slate-200 hover:bg-slate-50"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                Open Map
+              </Button>
+              <Button
+                size="sm"
+                onClick={action}
+                className={cn(
+                  "gap-2 flex-1 sm:flex-none",
+                  variant === "emerald"
+                    ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    : "bg-slate-900 hover:bg-slate-800 text-white"
                 )}
-              </CardContent>
-            </Card>
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                {label}
+              </Button>
+            </div>
+          </SectionCard>
 
-            {/* Payment Summary (Worker View) */}
-            {/* <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Payment Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Total Amount</p>
-                  <p className="text-2xl font-bold">${booking.totalAmount.toFixed(2)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Remaining Amount</p>
-                  <p className="text-2xl font-bold text-amber-600">${booking.remainingAmount.toFixed(2)}</p>
+          {/* ── OTP Verification ── */}
+          {booking.verification && (
+            <OtpQrVerification
+              bookingId={booking._id}
+              onVerified={(otp) => handleVerify(otp)}
+            />
+          )}
+
+          {/* ── Service details ── */}
+          <SectionCard icon={<Wrench className="h-4 w-4" />} title="Service Details">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="font-semibold text-slate-900">{booking.serviceId.name}</h3>
+                <span className="inline-block mt-1 text-xs font-medium bg-slate-100 text-slate-600 rounded-md px-2 py-0.5">
+                  {booking.serviceId.category}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3 mb-4">
+              <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
+                <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+                <div>
+                  <p className="text-[11px] text-slate-400 uppercase font-medium tracking-wide">Date</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {new Date(booking.date).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
                 </div>
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Payment Method</p>
-                {getPaymentMethodBadge(booking.paymentMethod)}
+              <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
+                <Clock className="h-4 w-4 text-slate-400 shrink-0" />
+                <div>
+                  <p className="text-[11px] text-slate-400 uppercase font-medium tracking-wide">Time</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {booking.startTime} – {booking.endTime}{" "}
+                    <span className="text-slate-400 text-xs">({calculateDuration()})</span>
+                  </p>
+                </div>
               </div>
-            </CardContent>
-          </Card> */}
+            </div>
 
-            {/* Additional Items Section */}
-            {(isEditable || additionalItems.length > 0) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Plus className="h-5 w-5" />
-                      Additional Items
-                    </span>
-                    {additionalItems.length > 0 && (
-                      <Badge variant="secondary">
-                        {additionalItems.length}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {additionalItems.length > 0 ? (
-                    <div className="space-y-2">
-                      {additionalItems.map((item) => (
-                        <div
-                          key={item._id}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              ₹{item.price.toFixed(2)}
-                            </p>
-                          </div>
-                          {isEditable && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveItem(item._id!)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      <Separator />
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <p className="font-semibold">Items Total</p>
-                        <p className="font-bold text-lg">
-                          ₹{calculateItemsTotal().toFixed(2)}
-                        </p>
+            {/* Timeline */}
+            <div className="pt-2">
+              <p className="text-[11px] text-slate-400 uppercase font-medium tracking-wide mb-4">Progress</p>
+              <div className="relative flex items-center justify-between">
+                {/* Track line */}
+                <div className="absolute top-4 left-0 right-0 h-px bg-slate-200" />
+                <div
+                  className="absolute top-4 left-0 h-px bg-slate-700 transition-all duration-500"
+                  style={{
+                    width: `${
+                      currentStepIdx === 0
+                        ? "0%"
+                        : currentStepIdx >= STEP_ORDER.length - 1
+                        ? "100%"
+                        : `${(currentStepIdx / (STEP_ORDER.length - 1)) * 100}%`
+                    }`,
+                  }}
+                />
+                {TIMELINE_STEPS.map((step, i) => {
+                  const stepIdx = STEP_ORDER.indexOf(step.key);
+                  const done = currentStepIdx >= stepIdx;
+                  return (
+                    <div key={step.key} className="relative z-10 flex flex-col items-center gap-2">
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-full border-2 flex items-center justify-center bg-white transition-all",
+                          done ? "border-slate-800" : "border-slate-200"
+                        )}
+                      >
+                        {done ? (
+                          <CheckCircle2 className="h-4 w-4 text-slate-800" />
+                        ) : (
+                          <Circle className="h-4 w-4 text-slate-300" />
+                        )}
                       </div>
+                      <span className={cn("text-xs font-medium", done ? "text-slate-700" : "text-slate-400")}>
+                        {step.label}
+                      </span>
                     </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No additional items added yet
-                    </p>
-                  )}
+                  );
+                })}
+              </div>
+            </div>
+          </SectionCard>
 
-                  {isEditable && (
-                    <>
-                      <Separator />
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium">Add New Item</p>
-                        <div className="grid sm:grid-cols-3 gap-3">
-                          <div className="sm:col-span-2 space-y-2">
-                            <Label htmlFor="item-name">Item Name</Label>
-                            <Input
-                              id="item-name"
-                              placeholder="e.g., Replacement Parts"
-                              value={newItemName}
-                              onChange={(e) => setNewItemName(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="item-price">Price (₹)</Label>
-                            <Input
-                              id="item-price"
-                              type="number"
-                              placeholder="0.00"
-                              value={newItemPrice}
-                              onChange={(e) => setNewItemPrice(e.target.value)}
-                              min="0"
-                              step="0.01"
-                            />
-                          </div>
-                        </div>
-                        <Button
-                          onClick={handleAddItem}
-                          className="w-full sm:w-auto gap-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Item
-                        </Button>
+          {/* ── Description ── */}
+          <SectionCard
+            icon={<FileText className="h-4 w-4" />}
+            title="Description"
+            action={
+              isEditable && !editingDescription ? (
+                <button
+                  onClick={() => setEditingDescription(true)}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900 border border-slate-200 hover:border-slate-400 rounded-lg px-3 py-1.5 transition-all"
+                >
+                  Edit
+                </button>
+              ) : undefined
+            }
+          >
+            {editingDescription ? (
+              <div className="space-y-3">
+                <textarea
+                  className="w-full min-h-24 p-3 text-sm border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all bg-slate-50"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter booking description…"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleDescriptionSave} className="bg-slate-900 text-white hover:bg-slate-800">
+                    Save
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setDescription(booking.description); setEditingDescription(false); }}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {booking.description || <span className="text-slate-400 italic">No description provided.</span>}
+              </p>
+            )}
+          </SectionCard>
+
+          {/* ── Additional items ── */}
+          {(isEditable || additionalItems.length > 0) && (
+            <SectionCard
+              icon={<Plus className="h-4 w-4" />}
+              title="Additional Items"
+              action={
+                additionalItems.length > 0 ? (
+                  <span className="text-xs font-semibold bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">
+                    {additionalItems.length}
+                  </span>
+                ) : undefined
+              }
+            >
+              {additionalItems.length > 0 ? (
+                <div className="space-y-2 mb-4">
+                  {additionalItems.map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-xl border border-slate-100"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{item.name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">₹{item.price.toFixed(2)}</p>
                       </div>
-                    </>
+                      {isEditable && (
+                        <button
+                          onClick={() => handleRemoveItem(item._id!)}
+                          className="text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-4 py-3 bg-slate-900 text-white rounded-xl">
+                    <p className="text-sm font-semibold">Total</p>
+                    <p className="font-bold">₹{calculateItemsTotal().toFixed(2)}</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-6">No additional items added yet</p>
+              )}
+
+              {isEditable && (
+                <div className="space-y-3 pt-3 border-t border-slate-100">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Add Item</p>
+                  <div className="grid sm:grid-cols-3 gap-2.5">
+                    <div className="sm:col-span-2 space-y-1">
+                      <Label htmlFor="item-name" className="text-xs text-slate-500">Item Name</Label>
+                      <Input
+                        id="item-name"
+                        placeholder="e.g. Replacement Parts"
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        className="text-sm rounded-xl border-slate-200"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="item-price" className="text-xs text-slate-500">Price (₹)</Label>
+                      <Input
+                        id="item-price"
+                        type="number"
+                        placeholder="0.00"
+                        value={newItemPrice}
+                        onChange={(e) => setNewItemPrice(e.target.value)}
+                        min="0"
+                        step="0.01"
+                        className="text-sm rounded-xl border-slate-200"
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleAddItem} size="sm" className="gap-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl">
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Item
+                  </Button>
+                </div>
+              )}
+            </SectionCard>
+          )}
+
+          {/* ── Payment breakdown ── */}
+           {/* ── Payment Summary ── */}
+          <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+            {/* Dark header band */}
+            <div className="bg-slate-900 px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <CreditCard className="h-4 w-4 text-slate-400" />
+                <h2 className="font-semibold text-white text-sm tracking-wide uppercase">Payment Summary</h2>
+              </div>
+              <span className={cn(
+                "text-xs font-semibold border rounded-full px-2.5 py-1 capitalize",
+                booking.paymentMethod === "cash"
+                  ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                  : booking.paymentMethod === "upi"
+                  ? "bg-violet-500/20 text-violet-300 border-violet-500/30"
+                  : "bg-sky-500/20 text-sky-300 border-sky-500/30"
+              )}>
+                {booking.paymentMethod}
+              </span>
+            </div>
+
+            {/* Amount stats row */}
+            <div className="bg-white grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100">
+              <div className="px-5 py-4">
+                <p className="text-[11px] text-slate-400 uppercase font-medium tracking-wide mb-1">Total Amount</p>
+                <p className="text-2xl font-bold text-slate-900">₹{booking.totalAmount.toFixed(2)}</p>
+              </div>
+              <div className="px-5 py-4">
+                <p className="text-[11px] text-slate-400 uppercase font-medium tracking-wide mb-1">Remaining</p>
+                <p className={cn(
+                  "text-2xl font-bold",
+                  booking.remainingAmount > 0 ? "text-amber-600" : "text-emerald-600"
+                )}>
+                  ₹{booking.remainingAmount.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            {/* Advance payment row */}
+            {booking.advanceAmount !== undefined && (
+              <div className="bg-white px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">Advance Paid</span>
+                  {booking.advancePaymentStatus && (
+                    <span className={cn(
+                      "text-[10px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5",
+                      booking.advancePaymentStatus === "paid"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-700"
+                    )}>
+                      {booking.advancePaymentStatus}
+                    </span>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                <p className="text-sm font-semibold text-slate-800">₹{booking.advanceAmount.toFixed(2)}</p>
+              </div>
             )}
 
-            {/* Payment Breakdown (Optional Display) */}
-            {/* {booking.paymentBreakdown && booking.paymentBreakdown.length > 0 && (
-            <Card>
-              <CardHeader>
-                <button onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)} className="w-full">
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5" />
-                      Payment Breakdown
-                    </span>
-                    {isBreakdownExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                  </CardTitle>
+            {/* Breakdown toggle */}
+            {booking.paymentBreakdown && booking.paymentBreakdown.length > 0 && (
+              <>
+                <button
+                  onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
+                  className="w-full bg-white flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                >
+                  <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    {isBreakdownExpanded ? "Hide" : "View"} Breakdown
+                  </span>
+                  {isBreakdownExpanded
+                    ? <ChevronUp className="h-4 w-4 text-slate-400" />
+                    : <ChevronDown className="h-4 w-4 text-slate-400" />}
                 </button>
-              </CardHeader>
-              {isBreakdownExpanded && (
-                <CardContent>
-                  <div className="space-y-3">
-                    {booking.paymentBreakdown.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+
+                {isBreakdownExpanded && (
+                  <div className="bg-slate-50 px-5 py-4 space-y-2">
+                    {booking.paymentBreakdown.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-100"
+                      >
                         <div>
-                          <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-muted-foreground">
-                            ${item.rate.toFixed(2)} {item.label} × {item.quantity}
+                          <p className="text-sm font-medium text-slate-800">{item.title}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            ₹{item.rate.toFixed(2)} / {item.label} × {item.quantity}
                           </p>
                         </div>
-                        <p className="font-semibold">${item.total.toFixed(2)}</p>
+                        <p className="text-sm font-semibold text-slate-800">₹{item.total.toFixed(2)}</p>
                       </div>
                     ))}
+
+                    {/* Breakdown total */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-slate-900 rounded-xl mt-1">
+                      <p className="text-sm font-semibold text-slate-300">Subtotal</p>
+                      <p className="text-sm font-bold text-white">
+                        ₹{booking.paymentBreakdown.reduce((s, i) => s + i.total, 0).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
+                )}
+              </>
+            )}
+
+            {/* Payment status footer */}
+            <div className={cn(
+              "px-5 py-3 flex items-center justify-between",
+              booking.remainingAmount === 0
+                ? "bg-emerald-50"
+                : "bg-amber-50"
+            )}>
+              <div className="flex items-center gap-2">
+                <span className={cn(
+                  "h-2 w-2 rounded-full",
+                  booking.remainingAmount === 0 ? "bg-emerald-500" : "bg-amber-400"
+                )} />
+                <p className={cn(
+                  "text-xs font-medium",
+                  booking.remainingAmount === 0 ? "text-emerald-700" : "text-amber-700"
+                )}>
+                  {booking.remainingAmount === 0 ? "Payment fully settled" : "Payment pending collection"}
+                </p>
+              </div>
+              {booking.finalPaymentId && (
+                <p className="text-[10px] font-mono text-slate-400">#{booking.finalPaymentId.slice(-8)}</p>
               )}
-            </Card>
-          )} */}
+            </div>
           </div>
+          {/* Bottom padding */}
+          <div className="h-6" />
         </div>
       </div>
     </WorkerLayout>

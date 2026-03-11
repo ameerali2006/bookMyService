@@ -1,4 +1,6 @@
-import { getCalenderDetailsResponseDto, getProfileDetailsResponseDto, updateCalenderDetailsResponseDto, updateWorkerProfileResponseDto, updateWorkingDetailsResponseDto, WorkerProfileDTO } from '../../../dto/worker/working-details.dto';
+import {
+  getCalenderDetailsResponseDto, getProfileDetailsResponseDto, updateCalenderDetailsResponseDto, updateWorkerProfileResponseDto, updateWorkingDetailsResponseDto, WorkerProfileDTO,
+} from '../../../dto/worker/working-details.dto';
 import {
   ICustomSlot, IDaySchedule, IHoliday, IWorkingDetailsDocument,
 } from '../../model/working-details.interface';

@@ -13,7 +13,7 @@ export interface MessageDTO {
   createdAt: string;
   isOwn?: boolean;
 }
-export type MessageType = "TEXT" | "IMAGE" | "VIDEO" | "AUDIO";
+export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO';
 
 export interface ChatInboxDTO {
   id: string;

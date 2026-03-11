@@ -16,12 +16,12 @@ export interface IRating {
 }
 export interface IPaymentItem {
   title: string;
-  rate: number;      
-  rateLabel: string; 
-  quantity: number;  
-  total: number;     
+  rate: number;
+  rateLabel: string;
+  quantity: number;
+  total: number;
 }
-export type  BookingStatus= 'pending'| 'confirmed'| 'in-progress' | 'awaiting-final-payment'| 'completed'| 'cancelled'
+export type BookingStatus= 'pending'| 'confirmed'| 'in-progress' | 'awaiting-final-payment'| 'completed'| 'cancelled'
 
 export interface IBooking extends Document{
   _id: Types.ObjectId;
@@ -68,6 +68,5 @@ export type IBookingPopulated = Omit<IBooking, 'workerId' | 'userId' | 'serviceI
   serviceId: IService;
   address:IAddress;
   reviewId:IReview
-
 
 };

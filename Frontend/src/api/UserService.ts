@@ -140,7 +140,14 @@ export const userService = {
   getInbox: async (userId: string) => {
     return await userAxios.get("/chat/chatInbox", { params: { userId } });
   },
-  addReview: async (comment:string,rating:number,bookingId:string) => {
-    return await userAxios.post("/review/addReview",{comment,rating,bookingId});
+  addReview: async (comment: string, rating: number, bookingId: string) => {
+    return await userAxios.post("/review/addReview", {
+      comment,
+      rating,
+      bookingId,
+    });
+  },
+  async walletPayment(data: { bookingId: string; addressId:string, paymentType: "advance" | "final" }) {
+    return await userAxios.post("/wallet/payment", data);
   },
 };

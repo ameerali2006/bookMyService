@@ -1,16 +1,15 @@
 // repository/review.repository.ts
 
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
-import { IReview } from "../../interface/model/review.model.interface";
-import { IReviewRepository } from "../../interface/repository/review.repository.interface";
-import { BaseRepository } from "./base.repository";
-import { Review } from "../../model/review.model";
+import { IReview } from '../../interface/model/review.model.interface';
+import { IReviewRepository } from '../../interface/repository/review.repository.interface';
+import { BaseRepository } from './base.repository';
+import { Review } from '../../model/review.model';
 
 export class ReviewRepository
   extends BaseRepository<IReview>
-  implements IReviewRepository
-{
+  implements IReviewRepository {
   constructor() {
     super(Review);
   }
@@ -24,7 +23,7 @@ export class ReviewRepository
   async findByWorkerId(
     workerId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<IReview[]> {
     const skip = (page - 1) * limit;
 
@@ -32,7 +31,7 @@ export class ReviewRepository
       workerId: new Types.ObjectId(workerId),
       isVisible: true,
     })
-      .populate("userId", "name profileImage")
+      .populate('userId', 'name profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -51,8 +50,8 @@ export class ReviewRepository
       },
       {
         $group: {
-          _id: "$workerId",
-          averageRating: { $avg: "$rating" },
+          _id: '$workerId',
+          averageRating: { $avg: '$rating' },
           totalReviews: { $sum: 1 },
         },
       },

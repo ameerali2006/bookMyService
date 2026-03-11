@@ -14,7 +14,7 @@ const startServer = async (): Promise<void> => {
     socketServer.listen(port, () => {
       console.log(`🚀 Server running on port ${port}`);
     });
-  } catch (error) { 
+  } catch (error) {
     console.error('❌ Server startup error:', error);
   }
 };

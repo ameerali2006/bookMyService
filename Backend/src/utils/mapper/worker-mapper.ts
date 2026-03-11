@@ -1,5 +1,7 @@
 import { responseDto } from '../../dto/worker/auth/worker-register.dto';
-import { allBookingDto, ApprovedServices, ServiceRequest, WorkerProfileDTO } from '../../dto/worker/working-details.dto';
+import {
+  allBookingDto, ApprovedServices, ServiceRequest, WorkerProfileDTO,
+} from '../../dto/worker/working-details.dto';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { WorkerModel } from '../../model/worker.model';
@@ -11,11 +13,11 @@ export class WorkerMapper {
       name: worker.name,
       email: worker.email,
       image: worker?.profileImage,
-      location:{
-        lat:worker.location.coordinates[1],
-        lng:worker.location.coordinates[0],
-        address:worker.zone,
-      }
+      location: {
+        lat: worker.location.coordinates[1],
+        lng: worker.location.coordinates[0],
+        address: worker.zone,
+      },
     };
   }
 
@@ -34,12 +36,12 @@ export class WorkerMapper {
         lat: booking?.address?.location?.coordinates?.[1] ?? 0,
         lng: booking?.address?.location?.coordinates?.[0] ?? 0,
       },
-      
 
     };
   }
+
   static mapServiceRequest(booking:IBookingPopulated[]):ServiceRequest[] {
-    return booking.map(b=>this.serviceRequest(b))
+    return booking.map((b) => this.serviceRequest(b));
   }
 
   static mapWorkerToProfileDTO = (worker: IWorker): WorkerProfileDTO => ({
@@ -62,20 +64,22 @@ export class WorkerMapper {
     },
     documents: worker.documents || '',
   });
+
   static ApprovedService = (b: IBookingPopulated): ApprovedServices => ({
-    
-        id: b._id.toString(),
-        
-        customerName: b.userId.name,
-        serviceName: b.serviceId.category,
-        date: b.date,
-        startTime: b.startTime,
-        endTime: b.endTime,
-        status: b.status as | 'confirmed'| 'in-progress' | 'awaiting-final-payment',
-      
+
+    id: b._id.toString(),
+
+    customerName: b.userId.name,
+    serviceName: b.serviceId.category,
+    date: b.date,
+    startTime: b.startTime,
+    endTime: b.endTime,
+    status: b.status as | 'confirmed'| 'in-progress' | 'awaiting-final-payment',
+
   });
+
   static toAllWorkerBookingDto(
-    booking: IBookingPopulated
+    booking: IBookingPopulated,
   ): allBookingDto {
     return {
       id: booking._id.toString(),
@@ -85,16 +89,16 @@ export class WorkerMapper {
 
       serviceName: booking.serviceId.category,
 
-      date: booking.date.toISOString().split("T")[0],
+      date: booking.date.toISOString().split('T')[0],
       time: booking.startTime,
 
       address:
-        typeof booking.address === "string"
+        typeof booking.address === 'string'
           ? booking.address
-          : booking.address?.buildingName ??
-            booking.address?.street ??
-            booking.address?.area ??
-            "",
+          : booking.address?.buildingName
+            ?? booking.address?.street
+            ?? booking.address?.area
+            ?? '',
 
       status: booking.status,
       workerResponse: booking.workerResponse,

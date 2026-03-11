@@ -1,20 +1,18 @@
-import mongoose from "mongoose";
-import { SlotLockModel } from "../../model/slot-lock.model";
-import { ISlotLockRepository } from "../../interface/repository/slot-lock.repository.interface";
-import { injectable } from "tsyringe";
-import { normalizeDay } from "../../utils/time&Intervals";
+import mongoose from 'mongoose';
+import { injectable } from 'tsyringe';
+import { SlotLockModel } from '../../model/slot-lock.model';
+import { ISlotLockRepository } from '../../interface/repository/slot-lock.repository.interface';
+import { normalizeDay } from '../../utils/time&Intervals';
 
 @injectable()
 export class SlotLockRepository implements ISlotLockRepository {
-
   async acquireLock(
     workerId: string,
     date:Date,
     startTime: Date,
     endTime: Date,
-    userId: string
+    userId: string,
   ): Promise<boolean> {
-
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -22,7 +20,7 @@ export class SlotLockRepository implements ISlotLockRepository {
       const bookingDay = normalizeDay(date);
       const conflict = await SlotLockModel.findOne({
         workerId,
-        date:bookingDay,
+        date: bookingDay,
         startTime: { $lt: endTime },
         endTime: { $gt: startTime },
       }).session(session);
@@ -35,7 +33,7 @@ export class SlotLockRepository implements ISlotLockRepository {
       /* 🔐 LOCK SLOT */
       await SlotLockModel.create([{
         workerId,
-        date:bookingDay,
+        date: bookingDay,
         startTime,
         endTime,
         lockedBy: userId,
@@ -44,7 +42,6 @@ export class SlotLockRepository implements ISlotLockRepository {
 
       await session.commitTransaction();
       return true;
-
     } catch (err) {
       await session.abortTransaction();
       throw err;

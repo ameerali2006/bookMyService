@@ -21,7 +21,7 @@ interface Worker {
   name: string
   experience: string
   fees:number
-  image: string
+  profileImage: string
   zone: string
   distance:number
 
@@ -155,7 +155,7 @@ export default function WorkerListingPage() {
                 <CardContent className="p-6">
                     <div className="flex items-start space-x-4">
                     <Avatar className="h-16 w-16">
-                        <AvatarImage src={worker.image || "/placeholder.svg"} alt={worker.name} />
+                        <AvatarImage src={worker.profileImage || "https://i.pinimg.com/236x/05/78/16/05781612d2cbadf5e423cd0cef59b4f1.jpg"} alt={worker.name} />
                         <AvatarFallback>
                         {worker.name
                             .split(" ")

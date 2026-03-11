@@ -1,14 +1,16 @@
-import { inject, injectable } from "tsyringe";
-import { IReviewService } from "../../interface/service/review.service.Interface";
-import { TYPES } from "../../config/constants/types";
-import { IReviewRepository } from "../../interface/repository/review.repository.interface";
-import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
+import { inject, injectable } from 'tsyringe';
+import { IReviewService } from '../../interface/service/review.service.Interface';
+import { TYPES } from '../../config/constants/types';
+import { IReviewRepository } from '../../interface/repository/review.repository.interface';
+import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
+
 @injectable()
 export class ReviewService implements IReviewService {
   constructor(
     @inject(TYPES.ReviewRepository) private reviewRepo: IReviewRepository,
     @inject(TYPES.BookingRepository) private bookingRepo: IBookingRepository,
   ) {}
+
   async addReview(
     comment: string,
     rating: number,
@@ -26,7 +28,7 @@ export class ReviewService implements IReviewService {
       if (!booking) {
         return {
           success: false,
-          message: "Booking not found",
+          message: 'Booking not found',
         };
       }
 
@@ -34,15 +36,15 @@ export class ReviewService implements IReviewService {
       if (booking.userId.toString() !== userId) {
         return {
           success: false,
-          message: "Unauthorized",
+          message: 'Unauthorized',
         };
       }
 
       // 3. check completed
-      if (booking.status !== "completed") {
+      if (booking.status !== 'completed') {
         return {
           success: false,
-          message: "You can only review completed bookings",
+          message: 'You can only review completed bookings',
         };
       }
 
@@ -52,7 +54,7 @@ export class ReviewService implements IReviewService {
       if (existingReview) {
         return {
           success: false,
-          message: "Review already submitted",
+          message: 'Review already submitted',
         };
       }
 
@@ -67,7 +69,7 @@ export class ReviewService implements IReviewService {
       if (!review) {
         return {
           success: false,
-          message: "Review already submitted",
+          message: 'Review already submitted',
         };
       }
 
@@ -78,7 +80,7 @@ export class ReviewService implements IReviewService {
 
       return {
         success: true,
-        message: "Review added successfully",
+        message: 'Review added successfully',
         review: {
           comment: review.comment,
           rating: review.rating,
@@ -89,7 +91,7 @@ export class ReviewService implements IReviewService {
       console.error(error);
       return {
         success: false,
-        message: "Failed to add review",
+        message: 'Failed to add review',
       };
     }
   }
