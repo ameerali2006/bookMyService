@@ -43,6 +43,8 @@ export interface WorkerProfileDTO {
     lat: number;
     lng: number;
   };
+  description:string
+  skills:string[]
   documents?: string;
 }
 export interface ServiceRequest {

@@ -147,7 +147,10 @@ export const userService = {
       bookingId,
     });
   },
-  async walletPayment(data: { bookingId: string; addressId:string, paymentType: "advance" | "final" }) {
+   walletPayment:async (data: { bookingId: string; addressId:string, paymentType: "advance" | "final" })=> {
     return await userAxios.post("/wallet/payment", data);
+  },
+  getWorkerProfile: async (workerId: string) => {
+    return await userAxios.get("/workers/workerProfile", { params: { workerId } });
   },
 };

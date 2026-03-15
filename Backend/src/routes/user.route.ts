@@ -59,5 +59,7 @@ export class UserRoute extends BaseRoute {
     this.router.get('/chat/chatHistory', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => chatController.getChatHistory(req, res, next));
     this.router.post('/review/addReview', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => reviewController.addReview(req, res, next));
     this.router.post('/wallet/payment', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.walletPayment(req, res, next));
+    this.router.get('/workers/workerProfile', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => serviceController.getWorkerProfile(req, res, next));
+
   }
 }

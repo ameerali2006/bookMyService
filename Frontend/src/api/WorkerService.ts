@@ -59,6 +59,8 @@ export const workerService = {
     name?: string;
     phone?: string;
     experience?: string;
+    description?:string
+    skills?:string[]
     fees?: number;
     image?: string;
   }) => {

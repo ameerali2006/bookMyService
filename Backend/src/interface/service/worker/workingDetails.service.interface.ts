@@ -8,7 +8,8 @@ import {
 export interface updateWorker{
   name: string
   phone: string
-
+  description:string
+  skills:string[]
   experience:'0-1' | '2-5' | '6-10' | '10+'
   fees: number
   image:string

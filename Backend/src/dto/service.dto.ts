@@ -6,6 +6,7 @@ import {
 } from '../interface/service/services/booking-service.sevice.interface';
 import { serviceCreateDto } from './admin/management.dto';
 import { responsePart } from './shared/responsePart';
+import { IWorkerListItem } from './user/worker-listing-home.dto';
 
 export interface setBasicBookingDetailsResponse extends responsePart {
   bookingId: string | null;
@@ -45,5 +46,5 @@ export interface getWorkerAvailablityResponseDto extends responsePart {
   };
 }
 export interface getNearByWorkersResponseDto extends responsePart {
-  data:{workers:IWorker[], totalCount:number}|null
+  data: { workers: IWorkerListItem[]; totalCount: number }|null
 }
