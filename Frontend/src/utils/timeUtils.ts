@@ -40,3 +40,10 @@ export function getTimeBasedIndicator(
   // Otherwise, no indicator needed
   return null
 }
+export function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso));
+}

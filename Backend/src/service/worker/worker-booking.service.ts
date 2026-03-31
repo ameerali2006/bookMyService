@@ -11,7 +11,6 @@ import {
   getWorkerAprrovalpageDetailsResponseDto,
   reachedCustomerLocationResponseDto,
   workerComplateWorkResponseDto,
-
   ApprovedServices,
   IWorkerRequestResponse,
 } from '../../dto/worker/working-details.dto';
@@ -26,13 +25,17 @@ import {
 import { IWalletService } from '../../interface/service/wallet.service.interface';
 import { IUserRepository } from '../../interface/repository/user.repository.interface';
 import { IEmailService } from '../../interface/helpers/email-service.service.interface';
-import { IBooking, IBookingPopulated } from '../../interface/model/booking.model.interface';
+import {
+  IBooking,
+  IBookingPopulated,
+} from '../../interface/model/booking.model.interface';
 import { WorkerMapper } from '../../utils/mapper/worker-mapper';
 import { IWorkerHelperService } from '../../interface/service/helper-service.service.interface';
 import { MESSAGES } from '../../config/constants/message';
 import { IHashService } from '../../interface/helpers/hash.interface';
 import { STATUS_CODES } from '../../config/constants/status-code';
 import { WorkerBookingListRequest } from '../../controller/validation/allBookingList.zod';
+import { INotificationService } from '../../interface/service/notification.service.interface';
 
 @injectable()
 export class WorkerBookingService implements IWorkerBookingService {
@@ -43,12 +46,12 @@ export class WorkerBookingService implements IWorkerBookingService {
     @inject(TYPES.EmailService) private emailService: IEmailService,
     @inject(TYPES.WorkerHelperService)
     private workerHelper: IWorkerHelperService,
-     @inject(TYPES.PasswordService) private _hash:IHashService,
+    @inject(TYPES.PasswordService) private _hash: IHashService,
+    @inject(TYPES.NotificationService)
+    private notification: INotificationService,
   ) {}
 
-  async approveService(
-    data: serviceData,
-  ): Promise<responsePart> {
+  async approveService(data: serviceData): Promise<responsePart> {
     try {
       const {
         bookingId,
@@ -166,6 +169,12 @@ export class WorkerBookingService implements IWorkerBookingService {
         totalAmount,
         remainingAmount,
       });
+      await this.notification.createNotification({
+        title: 'booking Approve',
+        message: 'worker  Approved your booking',
+        type: 'booking',
+        userId: booking.userId._id.toString(),
+      });
 
       return { success: true, message: 'Service approved successfully' };
     } catch (error) {
@@ -217,7 +226,9 @@ export class WorkerBookingService implements IWorkerBookingService {
         updateBooking,
       );
 
-      if (!updatedBooking) { return { success: false, message: 'user booking updation failed' }; }
+      if (!updatedBooking) {
+        return { success: false, message: 'user booking updation failed' };
+      }
 
       const user = await this.userRepo.findById(booking.userId as string);
 
@@ -230,6 +241,12 @@ export class WorkerBookingService implements IWorkerBookingService {
           refundAmount,
         });
       }
+      await this.notification.createNotification({
+        title: 'booking rejected',
+        message: 'worker  rejected your booking',
+        type: 'booking',
+        userId: booking.userId.toString(),
+      });
 
       return {
         success: true,
@@ -243,7 +260,9 @@ export class WorkerBookingService implements IWorkerBookingService {
     }
   }
 
-  async getServiceRequests(filter: IRequestFilters): Promise<getServiceRequestsResponseDto> {
+  async getServiceRequests(
+    filter: IRequestFilters,
+  ): Promise<getServiceRequestsResponseDto> {
     try {
       console.log(filter);
       const { data: bookings, total } = await this.bookingRepo.findServiceRequests(filter);
@@ -311,6 +330,7 @@ export class WorkerBookingService implements IWorkerBookingService {
         search,
         status,
       });
+      console.log({ items, total });
       if (!items) {
         return {
           success: false,
@@ -318,16 +338,15 @@ export class WorkerBookingService implements IWorkerBookingService {
         };
       }
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const normalizeDate = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+      const today = normalizeDate(new Date());
 
       const todayBookings = [];
       const upcomingBookings = [];
 
       for (const b of items) {
-        const bookingDate = new Date(b.date);
-        bookingDate.setHours(0, 0, 0, 0);
-
+        const bookingDate = normalizeDate(new Date(b.date));
         const mapped = WorkerMapper.ApprovedService(b);
 
         if (bookingDate.getTime() === today.getTime()) {
@@ -358,7 +377,9 @@ export class WorkerBookingService implements IWorkerBookingService {
     }
   }
 
-  async getWorkerAprrovalpageDetails(bookingId: string): Promise<getWorkerAprrovalpageDetailsResponseDto> {
+  async getWorkerAprrovalpageDetails(
+    bookingId: string,
+  ): Promise<getWorkerAprrovalpageDetailsResponseDto> {
     try {
       if (!bookingId) {
         return {
@@ -387,7 +408,9 @@ export class WorkerBookingService implements IWorkerBookingService {
     }
   }
 
-  async reachedCustomerLocation(bookingid: string): Promise<reachedCustomerLocationResponseDto> {
+  async reachedCustomerLocation(
+    bookingid: string,
+  ): Promise<reachedCustomerLocationResponseDto> {
     try {
       if (!bookingid) {
         return {
@@ -411,12 +434,20 @@ export class WorkerBookingService implements IWorkerBookingService {
           message: 'booking details is not fount ',
         };
       }
+      await this.notification.createNotification({
+        title: 'worker reached',
+        message: 'worker reached to your location',
+        type: 'booking',
+        userId: booking.booking?.userId._id.toString(),
+      });
+
       return {
         success: true,
         message: 'successfully generated otp',
         booking: booking.booking,
       };
     } catch (error) {
+      console.log(error);
       return {
         success: false,
         message: 'Internal error',
@@ -439,6 +470,7 @@ export class WorkerBookingService implements IWorkerBookingService {
         };
       }
       const booking = await this.bookingRepo.findById(bookingId);
+      console.log(booking);
       if (!booking) {
         return {
           success: false,
@@ -451,18 +483,30 @@ export class WorkerBookingService implements IWorkerBookingService {
           message: 'worker varification failed',
         };
       }
-      const updatebooking = await this.bookingRepo.updateStatusWithOTP(bookingId, 'in-progress');
+      const updatebooking = await this.bookingRepo.updateStatusWithOTP(
+        bookingId,
+        'in-progress',
+      );
       if (!updatebooking) {
         return {
           success: false,
           message: 'worker varification failed',
         };
       }
+
+      await this.notification.createNotification({
+        title: 'worker verified',
+        message: 'worker successfully verified',
+        type: 'booking',
+        userId: booking.userId.toString(),
+      });
+
       return {
         success: true,
         message: 'worker successfully verified',
       };
     } catch (error) {
+      console.error(error);
       return {
         success: false,
         message: 'internal error',
@@ -470,23 +514,26 @@ export class WorkerBookingService implements IWorkerBookingService {
     }
   }
 
-  async workerComplateWork(bookingId: string): Promise<workerComplateWorkResponseDto> {
+  async workerComplateWork(
+    bookingId: string,
+  ): Promise<workerComplateWorkResponseDto> {
     try {
       if (!bookingId) {
         return {
           status: STATUS_CODES.BAD_REQUEST,
           success: false,
           message: 'booking Id is not fount',
-
         };
       }
-      const updateBooking = await this.bookingRepo.updateStatus(bookingId, 'awaiting-final-payment');
+      const updateBooking = await this.bookingRepo.updateStatus(
+        bookingId,
+        'awaiting-final-payment',
+      );
       if (!updateBooking) {
         return {
           status: STATUS_CODES.BAD_REQUEST,
           success: false,
           message: 'booking updatetion failed',
-
         };
       }
       const booking = await this.bookingRepo.findByIdPopulated(bookingId);
@@ -495,9 +542,15 @@ export class WorkerBookingService implements IWorkerBookingService {
           status: STATUS_CODES.BAD_REQUEST,
           success: false,
           message: 'booking is not fount',
-
         };
       }
+      await this.notification.createNotification({
+        title: ' work complated',
+        message: ' work is complate',
+        type: 'booking',
+        userId: booking.userId._id.toString(),
+      });
+
       return {
         status: STATUS_CODES.OK,
         success: true,
@@ -516,20 +569,18 @@ export class WorkerBookingService implements IWorkerBookingService {
   async getWorkerBookings(
     workerId: string,
     query: WorkerBookingListRequest,
-  ):Promise<{success:boolean, message:string, data?:{
-      bookings:allBookingDto[],
-      total:number,
-      page:number,
-      limit:number,
-    }}> {
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: {
+      bookings: allBookingDto[];
+      total: number;
+      page: number;
+      limit: number;
+    };
+  }> {
     const {
-      page,
-      limit,
-      search,
-      workerResponses,
-      statuses,
-      from,
-      to,
+      page, limit, search, workerResponses, statuses, from, to,
     } = query;
 
     const { items, total } = await this.bookingRepo.allBookingList({
@@ -551,9 +602,7 @@ export class WorkerBookingService implements IWorkerBookingService {
       success: true,
       message: 'successfully fetch data',
       data: {
-        bookings: items.map(
-          WorkerMapper.toAllWorkerBookingDto,
-        ),
+        bookings: items.map(WorkerMapper.toAllWorkerBookingDto),
         total,
         page,
         limit,

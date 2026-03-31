@@ -1,17 +1,17 @@
-import { inject, injectable } from "tsyringe";
-import { IWorker } from "../../interface/model/worker.model.interface";
-import { IServiceDetails } from "../../interface/service/services/Service-details.service.interface";
-import { TYPES } from "../../config/constants/types";
-import { IWorkerAggregation } from "../../interface/repository/worker-aggregation.repository.interface";
-import { serviceCreateDto } from "../../dto/admin/management.dto";
-import { STATUS_CODES } from "../../config/constants/status-code";
-import { CustomError } from "../../utils/custom-error";
-import { MESSAGES } from "../../config/constants/message";
-import { IServiceRepository } from "../../interface/repository/service.repository.interface";
-import { IWorkingDetailsRepository } from "../../interface/repository/working-details.interface";
-import { IBookingRepository } from "../../interface/repository/booking.repository.interface";
-import { IWorkingHelper } from "../../interface/service/working-helper.service.interface";
-import { IWorkingDetails } from "../../interface/model/working-details.interface";
+import { inject, injectable } from 'tsyringe';
+import { IWorker } from '../../interface/model/worker.model.interface';
+import { IServiceDetails } from '../../interface/service/services/Service-details.service.interface';
+import { TYPES } from '../../config/constants/types';
+import { IWorkerAggregation } from '../../interface/repository/worker-aggregation.repository.interface';
+import { serviceCreateDto } from '../../dto/admin/management.dto';
+import { STATUS_CODES } from '../../config/constants/status-code';
+import { CustomError } from '../../utils/custom-error';
+import { MESSAGES } from '../../config/constants/message';
+import { IServiceRepository } from '../../interface/repository/service.repository.interface';
+import { IWorkingDetailsRepository } from '../../interface/repository/working-details.interface';
+import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
+import { IWorkingHelper } from '../../interface/service/working-helper.service.interface';
+import { IWorkingDetails } from '../../interface/model/working-details.interface';
 import {
   buildLabeledTimeline,
   dateKey,
@@ -22,14 +22,14 @@ import {
   mergeIntervals,
   subtractIntervals,
   toMinutes,
-} from "../../utils/time&Intervals";
+} from '../../utils/time&Intervals';
 import {
   IWorkerListItem,
   IWorkerProfileResponse,
-} from "../../dto/user/worker-listing-home.dto";
-import { IReviewService } from "../../interface/service/review.service.Interface";
-import { IReviewRepository } from "../../interface/repository/review.repository.interface";
-import { IWorkerRepository } from "../../interface/repository/worker.repository.interface";
+} from '../../dto/user/worker-listing-home.dto';
+
+import { IReviewRepository } from '../../interface/repository/review.repository.interface';
+import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
 
 @injectable()
 export class ServiceDetails implements IServiceDetails {
@@ -59,7 +59,7 @@ export class ServiceDetails implements IServiceDetails {
   }> {
     try {
       if (!lat || !lng || !serviceId) {
-        throw new Error("Latitude, longitude and serviceId are required");
+        throw new Error('Latitude, longitude and serviceId are required');
       }
       console.log({
         serviceId,
@@ -82,12 +82,12 @@ export class ServiceDetails implements IServiceDetails {
 
       console.log(data);
       if (!data) {
-        return { success: false, message: "Worker not Found", data: null };
+        return { success: false, message: 'Worker not Found', data: null };
       }
-      return { success: true, message: "Data fetched Successfully", data };
+      return { success: true, message: 'Data fetched Successfully', data };
     } catch (error) {
       console.error(error);
-      return { success: false, message: "Worker not Found", data: null };
+      return { success: false, message: 'Worker not Found', data: null };
     }
   }
 
@@ -106,7 +106,7 @@ export class ServiceDetails implements IServiceDetails {
         return {
           status: STATUS_CODES.BAD_REQUEST,
           success: false,
-          message: "Latitude and longitude are required",
+          message: 'Latitude and longitude are required',
         };
       }
       console.log({ lat, lng, maxDistance });
@@ -122,22 +122,21 @@ export class ServiceDetails implements IServiceDetails {
         return {
           status: STATUS_CODES.OK,
           success: true,
-          message: "No services found nearby",
+          message: 'No services found nearby',
           services: [],
         };
       }
 
-      const services =
-        await this._serviceRepo.findActiveServicesByIds(serviceIds);
+      const services = await this._serviceRepo.findActiveServicesByIds(serviceIds);
 
       return {
         status: STATUS_CODES.OK,
         success: true,
-        message: "Nearby services found",
+        message: 'Nearby services found',
         services,
       };
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
 
       if (error instanceof CustomError) {
         throw error;
@@ -161,7 +160,7 @@ export class ServiceDetails implements IServiceDetails {
   }
 
   private timeToMinutes(time: string) {
-    const [h, m] = time.split(":").map(Number);
+    const [h, m] = time.split(':').map(Number);
     return h * 60 + m;
   }
 
@@ -177,7 +176,7 @@ export class ServiceDetails implements IServiceDetails {
         availableTimes: {
           start: string;
           end: string;
-          status: "available" | "unavailable" | "break" | "booked";
+          status: 'available' | 'unavailable' | 'break' | 'booked';
         }[];
       }[];
     };
@@ -189,19 +188,19 @@ export class ServiceDetails implements IServiceDetails {
         return {
           status: 404,
           success: false,
-          message: "Working details not found",
+          message: 'Working details not found',
         };
       }
 
       // 2) Apply week rotation if needed (prefer non-destructive rotation)
       const daysOfWeek = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
       ];
       const today = new Date();
       const todayName = daysOfWeek[today.getDay()];
@@ -223,7 +222,7 @@ export class ServiceDetails implements IServiceDetails {
         date: Date;
         startTime: string;
         endTime?: string | null;
-        advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+        advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
       }> = await this._booking.findByWorkerAndRange(
         workerId,
         startBounds,
@@ -236,7 +235,7 @@ export class ServiceDetails implements IServiceDetails {
         Array<{
           startTime: string;
           endTime?: string | null;
-          advancePaymentStatus?: "unpaid" | "paid" | "failed" | "refunded";
+          advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
         }>
       >();
 
@@ -328,7 +327,7 @@ export class ServiceDetails implements IServiceDetails {
             }
 
             // Case 2: No endTime, advance paid -> block 60 min buffer.
-            if (b.advancePaymentStatus === "paid") {
+            if (b.advancePaymentStatus === 'paid') {
               return { start: s, end: s + 60 };
             }
 
@@ -345,16 +344,15 @@ export class ServiceDetails implements IServiceDetails {
         const labeled = buildLabeledTimeline(available, breakCuts, bookedCuts);
 
         // Enabled if not holiday, schedule enabled, and has some available segment
-        const enabled =
-          !isHoliday &&
-          !!daySchedule?.enabled &&
-          labeled.some((x) => x.status === "available");
+        const enabled = !isHoliday
+          && !!daySchedule?.enabled
+          && labeled.some((x) => x.status === 'available');
 
         results.push({
           date: dk,
           day:
-            daySchedule?.day ??
-            target.toLocaleString("en-US", { weekday: "long" }),
+            daySchedule?.day
+            ?? target.toLocaleString('en-US', { weekday: 'long' }),
           enabled,
           availableTimes: labeled.map((seg) => ({
             start: fromMinutes(seg.start),
@@ -368,7 +366,7 @@ export class ServiceDetails implements IServiceDetails {
       return {
         status: 200,
         success: true,
-        message: "Availability fetched successfully",
+        message: 'Availability fetched successfully',
         data: { dates: results },
       };
     } catch (err) {
@@ -376,10 +374,11 @@ export class ServiceDetails implements IServiceDetails {
       return {
         status: 500,
         success: false,
-        message: "Failed to fetch availability",
+        message: 'Failed to fetch availability',
       };
     }
   }
+
   async getWorkerProfile(workerId: string): Promise<{
     success: boolean;
     message: string;
@@ -391,15 +390,14 @@ export class ServiceDetails implements IServiceDetails {
       if (!worker) {
         return {
           success: false,
-          message: "Worker not found",
+          message: 'Worker not found',
           data: null,
         };
       }
 
       const reviews = await this._reviewRepo.getRecentReviewsByWorker(workerId);
 
-      const ratingSummary =
-        await this._reviewRepo.getWorkerRatingSummary(workerId);
+      const ratingSummary = await this._reviewRepo.getWorkerRatingSummary(workerId);
 
       const response: IWorkerProfileResponse = {
         ...worker.toObject(),
@@ -410,13 +408,13 @@ export class ServiceDetails implements IServiceDetails {
 
       return {
         success: true,
-        message: "Worker profile fetched successfully",
+        message: 'Worker profile fetched successfully',
         data: response,
       };
     } catch (error) {
       return {
         success: false,
-        message: "Failed to fetch worker profile",
+        message: 'Failed to fetch worker profile',
         data: null,
       };
     }

@@ -1,8 +1,9 @@
 // interface/repository/review.repository.interface.ts
 
-import { IReviewResponse } from "../../dto/user/worker-listing-home.dto";
-import { IReview } from "../model/review.model.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { responseReview } from '../../dto/shared/review.dto';
+import { IReviewResponse } from '../../dto/user/worker-listing-home.dto';
+import { IReview } from '../model/review.model.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IReviewRepository extends IBaseRepository<IReview> {
   findByBookingId(bookingId: string): Promise<IReview | null>;
@@ -20,4 +21,10 @@ export interface IReviewRepository extends IBaseRepository<IReview> {
   getWorkerRatingSummary(
     workerId: string,
   ): Promise<{ avgRating: number; totalReviews: number }>;
+  getAllReviews(query: {
+    search: string;
+    sort: 'latest' | 'oldest' | 'rating_high' | 'rating_low';
+    skip: number;
+    limit: number;
+  }): Promise<{ data: responseReview[]; total: number }>;
 }

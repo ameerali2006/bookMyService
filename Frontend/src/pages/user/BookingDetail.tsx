@@ -30,6 +30,7 @@ import type { RootState } from "@/redux/store";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
 import ReviewModal from "@/components/user/Review";
 import type { IAddress } from "@/interface/user/address";
+import { generateBookingCode } from "@/utils/booking-convert";
 
 // -----------------------
 // INTERFACE
@@ -287,7 +288,7 @@ export function BookingDetailPage() {
 
   return (
     <>
-      <Header />
+      
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-18 py-8 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
@@ -299,7 +300,7 @@ export function BookingDetailPage() {
                 </h1>
                 <p className="text-slate-500 mt-2 flex items-center gap-2">
                   <span className="text-sm font-mono bg-slate-200 px-3 py-1 rounded-full">
-                    {booking.id}
+                    {generateBookingCode( booking.id)}
                   </span>
                 </p>
               </div>
@@ -966,7 +967,7 @@ export function BookingDetailPage() {
           });
         }}
       />
-      <Footer />
+    
     </>
   );
 }

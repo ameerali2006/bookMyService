@@ -73,6 +73,7 @@ const BookingSchema = new Schema<IBooking>(
     },
 
     otp: { type: String },
+    isSettled: { type: Boolean, default: false },
 
     reviewId: {
       type: Schema.Types.ObjectId,

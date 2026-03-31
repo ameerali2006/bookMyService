@@ -18,6 +18,7 @@ import UserWallet from "./pages/user/UserWallet";
 import UserChatPage from "./pages/user/ChatPage";
 import UserLayout from "./layout/userLayout";
 import NotFound from "./components/shared/NotFound";
+import ContactPage from "./pages/user/Contact";
 
 
 
@@ -48,6 +49,10 @@ const User = () => {
           path={USER_ROUTES.RESET_PASSWORD}
           element={<IsLogout><UserResetPassword /></IsLogout>}
         />
+        <Route
+                  path={USER_ROUTES.CHAT}
+                  element={<IsLogin><UserChatPage /></IsLogin>}
+                />
 
         <Route element={<UserLayout />}>
           
@@ -63,7 +68,7 @@ const User = () => {
         />
         <Route
           path={USER_ROUTES.SERVICES.LIST}
-          element={<IsLogin><WorkerListingPage /></IsLogin>}
+          element={<WorkerListingPage />}
         />
         <Route
           path={USER_ROUTES.SERVICES.BOOK_DETAILS}
@@ -93,12 +98,13 @@ const User = () => {
           path={USER_ROUTES.WALLET}
           element={<IsLogin><UserWallet /></IsLogin>}
         />
-        <Route
-                  path={USER_ROUTES.CHAT}
-                  element={<IsLogin><UserChatPage /></IsLogin>}
-                />
+         <Route
+          path={"/contact"}
+          element={<IsLogin><ContactPage /></IsLogin>}
+        />
         </Route>
         <Route path="*" element={<NotFound />} />
+       
       </Routes>
       
     </Suspense> 

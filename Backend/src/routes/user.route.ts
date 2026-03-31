@@ -7,6 +7,7 @@ import {
   blockStatusMiddleware,
   bookingController,
   chatController,
+  notificationController,
   reviewController,
   serviceController,
   stripeController,
@@ -39,9 +40,9 @@ export class UserRoute extends BaseRoute {
     this.router.get('/getService', (req: Request, res: Response, next: NextFunction) => serviceController.getServices(req, res, next));
     this.router.post('/refresh-token', (req: Request, res: Response, next: NextFunction) => authController.handleTokenRefresh(req, res));
     // add verify and auth middle ware
-    this.router.get('/profile/userDetails', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, userController.userProfileDetails);
+    this.router.get('/profile/userDetails', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.userProfileDetails(req, res, next));
     this.router.put('/profile/updateUserDetails', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.updateProfileDetails(req, res, next));
-    this.router.get('/workers/nearby', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => serviceController.getNearByWorkers(req, res, next));
+    this.router.get('/workers/nearby', (req: Request, res: Response, next: NextFunction) => serviceController.getNearByWorkers(req, res, next));
     this.router.get('/workers/availability', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => serviceController.getWorkerAvailability(req, res, next));
     this.router.get('/addresses', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.getUserAddresses(req, res, next));
     this.router.post('/addAddress', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.addUserAddress(req, res, next));
@@ -60,6 +61,8 @@ export class UserRoute extends BaseRoute {
     this.router.post('/review/addReview', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => reviewController.addReview(req, res, next));
     this.router.post('/wallet/payment', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => userController.walletPayment(req, res, next));
     this.router.get('/workers/workerProfile', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => serviceController.getWorkerProfile(req, res, next));
-
+    this.router.get('/notifications', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => notificationController.getNotifications(req, res, next));
+    this.router.patch('/notifications/:id/read', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => notificationController.markAsRead(req, res, next));
+    this.router.patch('/notifications/read-all', verifyAuth(), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => notificationController.markAllRead(req, res, next));
   }
 }

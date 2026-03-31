@@ -19,8 +19,10 @@ export class WorkerBookingController implements IWorkerBookingController {
   async approveService(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data = ApprovalSchema.parse(req.body);
-
+      console.log(data);
       const result = await this.bookingService.approveService(data);
+      console.log('dffdgfg');
+
       console.log(result);
 
       if (result.success) {
@@ -84,6 +86,7 @@ export class WorkerBookingController implements IWorkerBookingController {
         search,
         status,
       });
+      console.log(result);
 
       if (result.success) {
         res.status(STATUS_CODES.OK).json(result);
@@ -113,12 +116,14 @@ export class WorkerBookingController implements IWorkerBookingController {
     try {
       const { bookingId } = req.params;
       const result = await this.bookingService.reachedCustomerLocation(bookingId);
+      console.log(result);
       if (result.success) {
         res.status(STATUS_CODES.OK).json(result);
       } else {
         res.status(STATUS_CODES.BAD_REQUEST).json(result);
       }
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

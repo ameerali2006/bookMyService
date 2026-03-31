@@ -3,7 +3,7 @@ import { IMessagePopulated } from '../../interface/model/message.model.interface
 
 export class ChatMapper {
   static toMessageDTO(
-    message:IMessagePopulated,
+    message: IMessagePopulated,
     currentUserId: string,
   ): MessageDTO {
     console.log(message.senderId?.toString(), currentUserId.toString());
@@ -21,6 +21,12 @@ export class ChatMapper {
       },
       createdAt: message.createdAt?.toISOString(),
       isOwn: message.senderId._id?.toString() == currentUserId.toString(),
+      isDeleted: message.isDeleted,
+      reactions: message.reactions.map((a) => ({
+        emoji: a.emoji,
+        userId: a.userId.toString(),
+      })),
+      replyTo: null,
     };
   }
 

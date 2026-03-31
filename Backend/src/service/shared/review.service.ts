@@ -3,12 +3,21 @@ import { IReviewService } from '../../interface/service/review.service.Interface
 import { TYPES } from '../../config/constants/types';
 import { IReviewRepository } from '../../interface/repository/review.repository.interface';
 import { IBookingRepository } from '../../interface/repository/booking.repository.interface';
+import { INotificationService } from '../../interface/service/notification.service.interface';
+import { responseReview } from '../../dto/shared/review.dto';
 
+export type ReviewSortType =
+  | 'latest'
+  | 'oldest'
+  | 'rating_high'
+  | 'rating_low';
 @injectable()
 export class ReviewService implements IReviewService {
   constructor(
     @inject(TYPES.ReviewRepository) private reviewRepo: IReviewRepository,
     @inject(TYPES.BookingRepository) private bookingRepo: IBookingRepository,
+    @inject(TYPES.NotificationService)
+    private notification: INotificationService,
   ) {}
 
   async addReview(
@@ -77,6 +86,12 @@ export class ReviewService implements IReviewService {
       await this.bookingRepo.updateById(bookingId, {
         reviewId: review._id,
       });
+      await this.notification.createNotification({
+        title: 'new Review Add',
+        message: `user give ${rating} star for your work`,
+        type: 'booking',
+        workerId: booking.workerId.toString(),
+      });
 
       return {
         success: true,
@@ -93,6 +108,47 @@ export class ReviewService implements IReviewService {
         success: false,
         message: 'Failed to add review',
       };
+    }
+  }
+
+  async getAllReviews({
+    search,
+    sort,
+    page,
+    limit,
+  }: {
+    search: string;
+    sort: string;
+    page: number;
+    limit: number;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    reviews: responseReview[];
+    total: number;
+  }> {
+    try {
+      const skip = (page - 1) * limit;
+
+      const allowedSorts = ['latest', 'oldest', 'rating_high', 'rating_low'];
+      const safeSort = allowedSorts.includes(sort) ? sort : 'latest';
+
+      const { data, total } = await this.reviewRepo.getAllReviews({
+        search,
+        sort: safeSort as ReviewSortType,
+        skip,
+        limit,
+      });
+
+      return {
+        success: true,
+        message: 'Reviews fetched successfully',
+        reviews: data,
+        total,
+      };
+    } catch (error) {
+      console.error('Service Error:', error);
+      throw error; // let controller handle response
     }
   }
 }

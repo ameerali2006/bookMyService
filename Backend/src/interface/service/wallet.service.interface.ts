@@ -6,6 +6,7 @@ export interface IAddBalanceInput {
   role: 'user' | 'worker' | 'admin';
   amount: number;
   description?: string;
+  type?: 'REFUND' | 'TOPUP' | 'PAYOUT' | 'COMMISSION';
 }
 export interface IWalletService {
   addBalance(data: IAddBalanceInput): Promise<responsePart>;

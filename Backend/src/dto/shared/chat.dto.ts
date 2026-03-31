@@ -1,3 +1,5 @@
+import { Message } from '../../interface/service/chat.service.interface';
+
 export interface MessageDTO {
   id: string;
   chatId: string;
@@ -12,7 +14,15 @@ export interface MessageDTO {
   };
   createdAt: string;
   isOwn?: boolean;
+   isDeleted?: boolean;
+  replyTo?: Message | null;
+  reactions?: {
+    userId: string;
+    emoji: string;
+  }[];
+
 }
+
 export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO';
 
 export interface ChatInboxDTO {

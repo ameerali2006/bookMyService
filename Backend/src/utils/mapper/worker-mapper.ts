@@ -58,8 +58,8 @@ export class WorkerMapper {
     fees: worker.fees,
     isActive: worker.isActive,
     isVerified: worker.isVerified,
-    description:worker.description||"",
-    skills:worker.skills||[],
+    description: worker.description || '',
+    skills: worker.skills || [],
     location: {
       lat: worker.location?.coordinates[1] || 0,
       lng: worker.location?.coordinates[0] || 0,

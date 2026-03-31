@@ -50,8 +50,13 @@ export class SocketCore {
 
     this.io.on('connection', (socket) => {
       const customSocket = socket as CustomSocket;
+
       console.log(`🟢 ${customSocket.userType} connected: ${customSocket.userId} (${socket.id})`);
 
+      // ✅ JOIN ROOM (MOST IMPORTANT)
+      socket.join(customSocket.userId);
+
+      // optional tracking (you can keep or remove later)
       this.onlineUsers.set(customSocket.userId, {
         socketId: socket.id,
         userType: customSocket.userType,

@@ -1,11 +1,11 @@
-import { serviceCreateDto } from "../../../dto/admin/management.dto";
+import { serviceCreateDto } from '../../../dto/admin/management.dto';
 import {
   getNearByWorkersResponseDto,
   getServicesResponseDto,
   getWorkerAvailablityResponseDto,
-} from "../../../dto/service.dto";
-import { IWorkerProfileResponse } from "../../../dto/user/worker-listing-home.dto";
-import { IWorker } from "../../model/worker.model.interface";
+} from '../../../dto/service.dto';
+import { IWorkerProfileResponse } from '../../../dto/user/worker-listing-home.dto';
+import { IWorker } from '../../model/worker.model.interface';
 
 export interface IServiceDetails {
   getServices(

@@ -105,6 +105,7 @@ export default function UserChatPage() {
   const handleSendMessage = useCallback(
     (message: Message) => {
       sendMessage(message);
+      console.log(message)
     },
     [sendMessage]
   );

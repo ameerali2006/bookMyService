@@ -15,7 +15,14 @@ export interface Message {
   };
   createdAt: string;
   isOwn?: boolean;
+  isDeleted?: boolean;
+  replyTo?: Message | null;
+  reactions?: {
+    userId: string;
+    emoji: string;
+  }[];
 }
+
 export interface IChatService{
     createChat(bookingId: string): Promise<{success:boolean, message:string, chatId?: string }>;
     getChatId(bookingId:string):Promise<{success:boolean, message:string, chatId?: string }>

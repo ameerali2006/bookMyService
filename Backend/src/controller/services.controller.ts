@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { inject, injectable } from "tsyringe";
-import { IServiceConroller } from "../interface/controller/services.controller.interface";
-import { TYPES } from "../config/constants/types";
-import { STATUS_CODES } from "../config/constants/status-code";
+import { NextFunction, Request, Response } from 'express';
+import { inject, injectable } from 'tsyringe';
+import { IServiceConroller } from '../interface/controller/services.controller.interface';
+import { TYPES } from '../config/constants/types';
+import { STATUS_CODES } from '../config/constants/status-code';
 
-import { IServiceDetails } from "../interface/service/services/Service-details.service.interface";
+import { IServiceDetails } from '../interface/service/services/Service-details.service.interface';
 
 @injectable()
 export class ServiceController implements IServiceConroller {
@@ -40,8 +40,8 @@ export class ServiceController implements IServiceConroller {
   ): Promise<void> {
     try {
       const {
-        search = "",
-        sort = "asc",
+        search = '',
+        sort = 'asc',
         page = 1,
         pageSize = 10,
         serviceId,
@@ -74,13 +74,13 @@ export class ServiceController implements IServiceConroller {
       } else {
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: response.message || "Failed to fetch nearby workers",
+          message: response.message || 'Failed to fetch nearby workers',
         });
       }
     } catch (error: any) {
       res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: error.message || "Failed to fetch nearby workers",
+        message: error.message || 'Failed to fetch nearby workers',
       });
     }
   }
@@ -93,10 +93,11 @@ export class ServiceController implements IServiceConroller {
     try {
       const { workerId } = req.query;
       console.log(workerId);
-      if (!workerId)
+      if (!workerId) {
         res
           .status(STATUS_CODES.BAD_REQUEST)
-          .json({ error: "Missing workerId" });
+          .json({ error: 'Missing workerId' });
+      }
 
       const data = await this._serviceDetails.getWorkerAvailablity(
         workerId as string,
@@ -109,17 +110,18 @@ export class ServiceController implements IServiceConroller {
         .json({ error: err.message });
     }
   }
+
   async getWorkerProfile(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { workerId } = req.query as { workerId: string }
-      console.log(workerId)
+      const { workerId } = req.query as { workerId: string };
+      console.log(workerId);
 
       const response = await this._serviceDetails.getWorkerProfile(workerId);
-      console.log(response)
+      console.log(response);
 
       if (!response.success) {
         res.status(404).json(response);
@@ -130,7 +132,7 @@ export class ServiceController implements IServiceConroller {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to fetch worker profile",
+        message: 'Failed to fetch worker profile',
       });
     }
   }

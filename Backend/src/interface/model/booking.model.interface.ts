@@ -58,7 +58,7 @@ export interface IBooking extends Document{
   otp?: string;
 
   reviewId?: Types.ObjectId ;
-
+  isSettled:boolean
   createdAt?: Date;
   updatedAt?: Date;
 }

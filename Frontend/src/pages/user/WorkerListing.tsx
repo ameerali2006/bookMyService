@@ -58,7 +58,7 @@ export default function WorkerListingPage() {
   const [loading, setLoading] = useState(false);
   const param = useParams();
   const location = useSelector(
-    (state: RootState) => state.userTokenSlice.user?.location,
+    (state: RootState) => state.userTokenSlice.location,
   );
   const navigate = useNavigate();
 

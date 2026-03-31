@@ -157,6 +157,7 @@ export class BookingService implements IBookingService {
         date: booking.date.toISOString().split('T')[0],
         time,
         description: booking.description as string,
+        advancePaymentStatus: booking.advancePaymentStatus,
 
         advance: booking.advanceAmount,
       };

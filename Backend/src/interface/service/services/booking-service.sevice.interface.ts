@@ -15,6 +15,7 @@ export interface BookingDetails {
   date: string;
   time: string;
   description: string;
+  advancePaymentStatus?:'unpaid' | 'paid' | 'failed' | 'refunded'
   advance: number;
 }
 export interface IBookingService {

@@ -137,4 +137,6 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     workerId: string,
   ): Promise<IWorkerDashboardRepoResult>;
   getDashboardRawData(): Promise<IAdminDashboardRaw[]>
+  findUnsettledCompleted(): Promise<IBooking[]>;
+  markAsSettled(ids: string[]): Promise<void>;
 }

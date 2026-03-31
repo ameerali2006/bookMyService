@@ -65,6 +65,3 @@ export interface getUserAddressResponseDto extends responsePart{
 export interface addUserAddressResponseDto extends responsePart{
   address:Address|null
 }
-
-
-

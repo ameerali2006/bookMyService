@@ -39,6 +39,9 @@ import { IWorkerController } from '../../interface/controller/worker-controller.
 import { WorkerController } from '../../controller/worker/worker-controller.controller';
 import { IReviewController } from '../../interface/controller/review.controller.interface';
 import { ReviewController } from '../../controller/review.controller';
+import { io, onlineUsers } from '../socketServer';
+import { NotificationController } from '../../controller/notification.controller';
+import { INotificationController } from '../../interface/controller/notification.controller.interface';
 
 DependencyInjection.registerAll();
 
@@ -59,6 +62,7 @@ export const stripeController = container.resolve<IStripeController>(StripeContr
 export const workerbookingController = container.resolve<IWorkerBookingController>(WorkerBookingController);
 export const bookingSocketHandler = container.resolve(BookingSocketHandler);
 export const chatSocketHandler = container.resolve(ChatSocketHandler);
+export const notificationController = container.resolve<INotificationController>(NotificationController);
 export const chatController = container.resolve<IChatController>(ChatController);
 export const workerController = container.resolve<IWorkerController>(WorkerController);
 export const reviewController = container.resolve<IReviewController>(ReviewController);

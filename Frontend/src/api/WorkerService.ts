@@ -147,4 +147,16 @@ export const workerService = {
   getDashboard: async () => {
     return await workerAxios.get("/dashboard");
   },
+  getNotifications: async () => {
+      return await workerAxios.get("/notifications");
+    },
+  
+    markAsRead: async (notificationId: string) => {
+      return await workerAxios.patch(`/notifications/${notificationId}/read`);
+    },
+  
+   
+    markAllAsRead: async () => {
+      return await workerAxios.patch("/notifications/read-all");
+    },
 };

@@ -45,9 +45,9 @@ const emptyForm: AddressForm = {
   longitude: "",
 }
 
-export default function AddAddressModal({ open, onClose, initialData }: Props) {
+export default function  AddAddressModal({ open, onClose, initialData }: Props) {
   const { lat: savedLat, lng: savedLng } = useSelector(
-    (state: RootState) => state.userTokenSlice.user?.location as {lat:number,lng:number}
+    (state: RootState) => state.userTokenSlice.location as {lat:number,lng:number}
   )
 
   const [form, setForm] = React.useState<AddressForm>({

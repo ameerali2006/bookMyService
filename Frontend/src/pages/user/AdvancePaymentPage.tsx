@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/user/shared/Header";
-import Footer from "@/components/user/shared/Footer";
+
 import { userService } from "@/api/UserService";
 import AddAddressModal from "@/components/user/Profile/AddAddress";
 
 import { useParams } from "react-router-dom";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
 import { ErrorToast, SuccessToast } from "@/components/shared/Toaster";
-import NotFoundPage from "@/components/shared/PageNotFound";
+
 
 export type AddressLabel = "Home" | "Work" | "Shop";
 type Address = {
@@ -55,10 +54,10 @@ export default function AdvancePaymentPage() {
     return (
       <>
         <div className="w-full border-b border-border bg-background">
-          <Header />
+        
         </div>
         {/* <NotFoundPage/> */}
-        <Footer />
+        
       </>
     );
   }
@@ -76,8 +75,16 @@ export default function AdvancePaymentPage() {
       const res = await userService.getBookingDetails(bookingId as string);
       console.log(res);
       if (res.data.details) {
-        setBookingDetails(res.data.details);
+      const data = res.data.details;
+
+      // 🚀 KEY FIX HERE
+      if (data.advancePaymentStatus === "paid") {
+        window.location.replace(`/booking/${bookingId}/success?type=advance`);
+        return;
       }
+
+      setBookingDetails(data);
+    }
     } catch (err) {
       console.error("Failed to fetch booking details:", err);
     }
@@ -119,6 +126,7 @@ export default function AdvancePaymentPage() {
 
       if (res.data.success) {
         SuccessToast(res.data.message);
+        fetchBookingDetails()
         setTimeout(() => {
           window.location.href = `/booking/${bookingId}/success?type=advance`;
         }, 1200);
@@ -162,7 +170,7 @@ export default function AdvancePaymentPage() {
   return (
     <main className="min-h-[100dvh] bg-white">
       <div className="w-full border-b border-border bg-background">
-        <Header />
+        
       </div>
 
       <section className="mx-auto max-w-6xl grid grid-cols-1 pt-20 md:grid-cols-2 gap-6 p-6 bg-white">
@@ -337,7 +345,7 @@ export default function AdvancePaymentPage() {
         />
       )}
 
-      <Footer />
+      
     </main>
   );
 }

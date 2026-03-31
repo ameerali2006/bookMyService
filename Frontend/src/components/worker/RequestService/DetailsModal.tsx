@@ -132,7 +132,10 @@ export default function RequestDetailsModal({ request, onClose }: RequestDetails
     console.log("Service Approved:", approvalData)
 
     try {
+      
       const response =await workerService.serviceApprove(approvalData)
+      console.log(response)
+
       if(response.data.success){
         SuccessToast(response.data.message)
       }else{

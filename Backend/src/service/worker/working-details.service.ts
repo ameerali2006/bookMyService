@@ -202,7 +202,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
 
   async updateWorkerProfile(workerId: string, updateData: Partial<updateWorker>): Promise<updateWorkerProfileResponseDto> {
     try {
-      console.log(updateData)
+      console.log(updateData);
       const worker = await this._workerRepo.findById(workerId);
       if (!worker) {
         return {
@@ -213,7 +213,7 @@ export class WorkingDetailsManagement implements IWorkingDetailsManagement {
       }
 
       const updatedWorker = await this._workerRepo.updateById(workerId, updateData);
-      console.log(updatedWorker)
+      console.log(updatedWorker);
       if (!updatedWorker) {
         return {
           success: false,

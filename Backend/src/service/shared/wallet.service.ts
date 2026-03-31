@@ -51,7 +51,7 @@ export class WalletService implements IWalletService {
 
       const transactionPayload = {
         walletId: wallet._id.toString(),
-        type: 'REFUND',
+        type: data.type || 'TOPUP',
         amount,
         direction: 'CREDIT',
         balanceBefore,

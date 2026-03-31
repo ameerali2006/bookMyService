@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { generateBookingCode } from "@/utils/booking-convert"
 export interface Booking {
   id: string
   userId: string
@@ -125,7 +126,7 @@ export function BookingsTable({ bookings, onViewDetails, isLoading }: BookingsTa
             const statusConfig = STATUS_COLORS[booking.status]
             return (
               <TableRow key={booking.id} className="hover:bg-muted/50">
-                <TableCell className="font-mono text-sm font-medium">{booking.id}</TableCell>
+                <TableCell className="font-mono text-sm font-medium">{ generateBookingCode(booking.id)}</TableCell>
                 <TableCell>{booking.userName}</TableCell>
                 <TableCell>{booking.serviceName}</TableCell>
                 <TableCell className="text-sm">{booking.date} at {booking.time}</TableCell>

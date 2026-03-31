@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express';
 import { BaseRoute } from './base.route';
 import {
-  authWorkerController, bookingController, chatController, cloudinaryController, tokenController, workerbookingController, workerController, workingDetailsController,
+  authWorkerController, bookingController, chatController, cloudinaryController, notificationController, tokenController, workerbookingController, workerController, workingDetailsController,
 } from '../config/di/resolver';
 import { authorizeRole, verifyAuth } from '../middleware/auth.middleware';
 
@@ -47,5 +47,8 @@ export class WorkerRoute extends BaseRoute {
     this.router.get('/chat/chatInbox', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => chatController.getWorkerInboxUsers(req, res, next));
     this.router.get('/chat/chatHistory', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => chatController.getChatHistory(req, res, next));
     this.router.get('/dashboard', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => workerController.getDashboard(req, res, next));
+    this.router.get('/notifications', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => notificationController.getNotifications(req, res, next));
+    this.router.patch('/notifications/:id/read', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => notificationController.markAsRead(req, res, next));
+    this.router.patch('/notifications/read-all', verifyAuth(), authorizeRole(['worker']), (req: Request, res: Response, next: NextFunction) => notificationController.markAllRead(req, res, next));
   }
 }

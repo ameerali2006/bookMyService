@@ -48,6 +48,7 @@ export function useSocketChat({
     /* ================= RECEIVE MESSAGE ================= */
 
     socket.on("chat:receive", (message: Message) => {
+      console.log("brr",message)
       setMessages((prev) => [...prev, message]);
     });
 

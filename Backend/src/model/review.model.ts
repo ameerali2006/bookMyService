@@ -47,7 +47,6 @@ const ReviewSchema = new Schema<IReview>(
   { timestamps: true },
 );
 
-
 ReviewSchema.index({ workerId: 1, createdAt: -1 });
 ReviewSchema.index({ workerId: 1, rating: -1 });
 

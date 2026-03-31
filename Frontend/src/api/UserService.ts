@@ -153,4 +153,17 @@ export const userService = {
   getWorkerProfile: async (workerId: string) => {
     return await userAxios.get("/workers/workerProfile", { params: { workerId } });
   },
+  getNotifications: async () => {
+    return await userAxios.get("/notifications");
+  },
+
+  markAsRead: async (notificationId: string) => {
+    return await userAxios.patch(`/notifications/${notificationId}/read`);
+  },
+
+ 
+  markAllAsRead: async () => {
+    return await userAxios.patch("/notifications/read-all");
+  },
+
 };

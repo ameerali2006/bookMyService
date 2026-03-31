@@ -230,31 +230,58 @@ export class BookingRepository
     }).populate('userId serviceId workerId');
   }
 
+  async findUnsettledCompleted(): Promise<IBooking[]> {
+    return await Booking.find({
+      status: 'completed',
+      finalPaymentStatus: 'paid',
+      $or: [{ isSettled: false }, { isSettled: { $exists: false } }],
+    });
+  }
+
+  async markAsSettled(ids: string[]): Promise<void> {
+    const objectIds = ids.map((id) => new Types.ObjectId(id));
+
+    await Booking.updateMany(
+      { _id: { $in: objectIds } },
+      {
+        $set: {
+          isSettled: true,
+          updatedAt: new Date(),
+        },
+      },
+    );
+  }
+
   async findServiceRequests(
     filters: IRequestFilters,
   ): Promise<{ data: IBookingPopulated[]; total: number }> {
-    console.log('object');
     const {
-      workerId, search, status, date, page, limit,
+      workerId, search, status, page, limit,
     } = filters;
 
-    const query: Record<string, unknown> = { workerId };
+    // ✅ Start of today (00:00)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const query: Record<string, unknown> = {
+      workerId,
+      date: { $gte: todayStart }, // ✅ only upcoming from today
+    };
 
     if (status) query.workerResponse = status;
-    if (date) query.date = date;
 
     if (search) {
       query.$or = [{ 'userId.name': { $regex: search, $options: 'i' } }];
     }
 
     const skip = (page - 1) * limit;
-    console.log(query);
+
     const booking = await Booking.find(query)
-      .populate('userId', 'name phone ')
+      .populate('userId', 'name phone')
       .populate('serviceId', 'category')
       .populate('workerId', 'name')
       .populate('address')
-      .sort({ createdAt: -1 })
+      .sort({ date: 1 }) // ✅ nearest upcoming first
       .skip(skip)
       .limit(limit)
       .lean<IBookingPopulated[]>()
@@ -315,10 +342,16 @@ export class BookingRepository
     search?: string;
     status?: 'approved' | 'in-progress' | 'awaiting-final-payment';
   }): Promise<{ items: IBookingPopulated[] | null; total: number }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const query: FilterQuery<IBooking> = {
       workerId,
       workerResponse: 'accepted',
-      status: status || { $in: ['confirmed', 'in-progress', 'awaiting-final-payment'] },
+      status: status || {
+        $in: ['confirmed', 'in-progress', 'awaiting-final-payment'],
+      },
+      date: { $gte: today }, // 🔥 KEY FIX
     };
 
     if (search) {

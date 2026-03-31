@@ -52,4 +52,34 @@ export class ReviewController implements IReviewController {
       res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: 'server interfnal Error' });
     }
   }
+
+  async allReviewManagement(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const {
+        search = '',
+        sort = 'latest',
+        page = '1',
+        limit = '10',
+      } = req.query;
+
+      const result = await this.reviewService.getAllReviews({
+        search: String(search),
+        sort: String(sort),
+        page: Number(page),
+        limit: Number(limit),
+      });
+
+      res.status(STATUS_CODES.OK).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
 }

@@ -1,16 +1,15 @@
-import { injectable } from "inversify";
-import { Types } from "mongoose";
-import { WorkerModel } from "../../model/worker.model";
-import { BaseRepository } from "../shared/base.repository";
-import { IWorker } from "../../interface/model/worker.model.interface";
-import { IWorkerAggregation } from "../../interface/repository/worker-aggregation.repository.interface";
-import { IWorkerListItem } from "../../dto/user/worker-listing-home.dto";
+import { injectable } from 'inversify';
+import { Types } from 'mongoose';
+import { WorkerModel } from '../../model/worker.model';
+import { BaseRepository } from '../shared/base.repository';
+import { IWorker } from '../../interface/model/worker.model.interface';
+import { IWorkerAggregation } from '../../interface/repository/worker-aggregation.repository.interface';
+import { IWorkerListItem } from '../../dto/user/worker-listing-home.dto';
 
 @injectable()
 export class WorkerAggregation
   extends BaseRepository<IWorker>
-  implements IWorkerAggregation
-{
+  implements IWorkerAggregation {
   constructor() {
     super(WorkerModel);
   }
@@ -19,17 +18,17 @@ export class WorkerAggregation
     return WorkerModel.aggregate([
       {
         $geoNear: {
-          near: { type: "Point", coordinates: [lng, lat] },
-          distanceField: "distance",
+          near: { type: 'Point', coordinates: [lng, lat] },
+          distanceField: 'distance',
           maxDistance,
           spherical: true,
-          query: { isVerified: "approved" },
+          query: { isVerified: 'approved' },
         },
       },
       {
         $group: {
-          _id: "$category",
-          workers: { $push: "$$ROOT" },
+          _id: '$category',
+          workers: { $push: '$$ROOT' },
         },
       },
     ]);
@@ -51,31 +50,31 @@ export class WorkerAggregation
     const pipeline: any[] = [
       {
         $geoNear: {
-          near: { type: "Point", coordinates: [lng, lat] },
-          distanceField: "distance",
+          near: { type: 'Point', coordinates: [lng, lat] },
+          distanceField: 'distance',
           spherical: true,
           maxDistance,
           query: {
             category: serviceObjectId,
-            isVerified: "approved",
-            ...(search && { name: { $regex: search, $options: "i" } }),
+            isVerified: 'approved',
+            ...(search && { name: { $regex: search, $options: 'i' } }),
           },
         },
       },
 
       {
         $lookup: {
-          from: "reviews",
-          localField: "_id",
-          foreignField: "workerId",
-          as: "reviews",
+          from: 'reviews',
+          localField: '_id',
+          foreignField: 'workerId',
+          as: 'reviews',
         },
       },
 
       {
         $addFields: {
-          avgRating: { $ifNull: [{ $avg: "$reviews.rating" }, 0] },
-          totalReviews: { $size: "$reviews" },
+          avgRating: { $ifNull: [{ $avg: '$reviews.rating' }, 0] },
+          totalReviews: { $size: '$reviews' },
         },
       },
 
@@ -87,9 +86,9 @@ export class WorkerAggregation
 
       {
         $sort:
-          sort === "rating"
+          sort === 'rating'
             ? { avgRating: -1 }
-            : sort === "price"
+            : sort === 'price'
               ? { fees: 1 }
               : { distance: 1 },
       },
@@ -104,19 +103,19 @@ export class WorkerAggregation
       {
         $geoNear: {
           near: {
-            type: "Point" as const,
+            type: 'Point' as const,
             coordinates: [lng, lat] as [number, number],
           },
-          distanceField: "distance",
+          distanceField: 'distance',
           spherical: true,
           maxDistance,
           query: {
             category: serviceObjectId,
-            isVerified: "approved",
+            isVerified: 'approved',
           },
         },
       },
-      { $count: "totalCount" },
+      { $count: 'totalCount' },
     ];
 
     const count = await WorkerModel.aggregate(countPipeline);
@@ -126,5 +125,4 @@ export class WorkerAggregation
       totalCount: count[0]?.totalCount || 0,
     };
   }
- 
 }

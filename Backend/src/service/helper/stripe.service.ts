@@ -10,12 +10,13 @@ import {
 import { ENV } from '../../config/env/env';
 import { TYPES } from '../../config/constants/types';
 import { BookingSocketHandler } from './booking-socket.service';
-import { io, onlineWorkers } from '../../config/socketServer';
+import { io, onlineUsers } from '../../config/socketServer';
 import { IWorker } from '../../interface/model/worker.model.interface';
 import { IBookingPopulated } from '../../interface/model/booking.model.interface';
 import { bookingSocketHandler } from '../../config/di/resolver';
 import { IWalletService } from '../../interface/service/wallet.service.interface';
 import { PaymentStatus } from '../../interface/model/wallet.model.interface';
+import { INotificationService } from '../../interface/service/notification.service.interface';
 
 @injectable()
 export class StripeService implements IStripeService {
@@ -131,7 +132,8 @@ export class StripeService implements IStripeService {
 
           if (booking && booking.workerId) {
             console.log(`📢 Emitting booking to worker: ${booking.workerId}`);
-            await bookingSocketHandler.emitBookingToWorker(io, onlineWorkers, booking.workerId as IWorker, booking);
+
+            await bookingSocketHandler.emitBookingToWorker(io, onlineUsers, booking.workerId as IWorker, booking);
           } else {
             console.log(`⚠️ Booking not found or worker missing for ${bookingId}`);
           }

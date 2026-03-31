@@ -50,6 +50,7 @@ export class ChatSocketHandler implements ISocketHandler {
 
       /* ---------------- SEND MESSAGE ---------------- */
       socket.on('chat:send', async ({ chatId, message }) => {
+        console.log('send message', message);
         const chat = await this._chatRepo.findById(chatId);
         if (!chat) return;
 

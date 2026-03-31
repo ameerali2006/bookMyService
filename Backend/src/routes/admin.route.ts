@@ -4,6 +4,7 @@ import {
   authAdminController,
   cloudinaryController,
   managementAdminController,
+  reviewController,
   tokenController,
 } from '../config/di/resolver';
 import { authorizeRole, verifyAuth } from '../middleware/auth.middleware';
@@ -149,6 +150,14 @@ export class AdminRoute extends BaseRoute {
       authorizeRole(['admin']),
       (req: Request, res: Response, next: NextFunction) => {
         managementAdminController.getDashboard(req, res, next);
+      },
+    );
+    this.router.get(
+      '/reviews',
+      verifyAuth(),
+      authorizeRole(['admin']),
+      (req: Request, res: Response, next: NextFunction) => {
+        reviewController.allReviewManagement(req, res, next);
       },
     );
   }

@@ -1,4 +1,9 @@
 export const TYPES = {
+  OnlineUsers: Symbol.for('OnlineUsers'),
+  WorkerPayoutService: Symbol.for('WorkerPayoutService'),
+  SocketIO: Symbol.for('SocketIO'),
+  NotificationService: Symbol.for('NotificationService'),
+  NotificationRepository: Symbol.for('NotificationRepository'),
   ReviewService: Symbol.for('ReviewService'),
   ReviewRepository: Symbol.for('ReviewRepository'),
   ChatService: Symbol.for('ChatService'),

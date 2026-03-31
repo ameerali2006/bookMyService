@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/admin/Navbar";
 import Sidebar from "@/components/admin/Sidebar";
@@ -47,6 +47,7 @@ export default function AdminBookingDetailsPage() {
     const fetchBooking = async () => {
       try {
         const response = await adminManagement.getBookingDetailPage(bookingId);
+        console.log(response.data.booking);
         setBooking(response.data.booking);
       } catch (error) {
         ErrorToast("Failed to load booking details");
@@ -219,6 +220,42 @@ export default function AdminBookingDetailsPage() {
                   </p>
                 </CardContent>
               </Card>
+              {booking.rating && (
+                <Card className="shadow-xl border-0 rounded-2xl">
+                  <CardHeader>
+                    <CardTitle>Customer Rating</CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="space-y-3">
+                    {/* Stars */}
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={18}
+                          className={cn(
+                            i < booking.rating!.stars
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300",
+                          )}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Numeric */}
+                    <p className="text-sm text-gray-500">
+                      {booking.rating.stars} out of 5 
+                    </p>
+
+                    {/* Review */}
+                    {booking.rating.review && (
+                      <p className="text-gray-700 text-sm italic">
+                        "{booking.rating.review}"
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* RIGHT SIDEBAR */}
