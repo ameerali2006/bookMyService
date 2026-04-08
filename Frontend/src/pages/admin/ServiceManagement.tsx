@@ -145,7 +145,7 @@ export default function ServiceManagement() {
     setUploading(true);
 
     const { data: { signature, timestamp, apiKey, cloudName } } =
-      await adminManagement.getCloudinarySignature();
+      await adminManagement.getCloudinarySignature("worker-documents");
 
     const formDataCloud = new FormData();
     formDataCloud.append("file", file);

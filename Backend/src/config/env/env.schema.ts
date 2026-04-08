@@ -8,6 +8,7 @@ export const envSchema = z.object({
   REDIS_HOST: z.string().min(1, 'REDIS_HOST is required'),
   REDIS_PORT: z.string().regex(/^\d+$/, 'REDIS_PORT must be a number'),
   REDIS_PASSWORD: z.string().min(1, 'REDIS_PASSWORD is required'),
+  REDIS_URL: z.string().min(1, 'REDIS_URL is required'),
 
   FRONTEND_URI: z.string().url('FRONTEND_URI must be a valid URL'),
 

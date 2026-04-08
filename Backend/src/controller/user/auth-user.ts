@@ -123,7 +123,7 @@ export class AuthUserController implements IAuthController {
           .json({
             success,
             message,
-            user: null,
+            user: null,       
           });
       }
     } catch (error) {

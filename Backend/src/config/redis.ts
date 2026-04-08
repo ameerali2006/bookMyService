@@ -2,13 +2,11 @@ import { createClient } from 'redis';
 import { ENV } from './env/env';
 
 const redisClient = createClient({
-  socket: {
-    host: '127.0.0.1',
-    port: 6379,
-  },
+  url: process.env.REDIS_URL,
 });
 
 redisClient.on('error', (err) => {
+  console.log(err)
   console.error('❌ Redis Client Error:', err);
 });
 

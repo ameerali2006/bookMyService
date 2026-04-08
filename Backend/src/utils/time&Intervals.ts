@@ -11,7 +11,12 @@ export const isTimeGreater = (t1: string, t2: string): boolean => {
   const time2 = toMinutes(t2);
   return time1 > time2;
 };
-export const doTimesOverlap = (startA: string, endA: string, startB: string, endB: string): boolean => {
+export const doTimesOverlap = (
+  startA: string,
+  endA: string,
+  startB: string,
+  endB: string,
+): boolean => {
   const aStart = toMinutes(startA);
   const aEnd = toMinutes(endA);
   const bStart = toMinutes(startB);
@@ -21,7 +26,9 @@ export const doTimesOverlap = (startA: string, endA: string, startB: string, end
 export const fromMinutes = (n: number): string => {
   if (n <= 0) return '00:00';
   if (n >= 1440) return '24:00';
-  const h = Math.floor(n / 60).toString().padStart(2, '0');
+  const h = Math.floor(n / 60)
+    .toString()
+    .padStart(2, '0');
   const m = (n % 60).toString().padStart(2, '0');
   return `${h}:${m}`;
 };
@@ -45,36 +52,46 @@ export const dayBounds = (d: Date): { start: Date; end: Date } => {
 
 export const mergeIntervals = (arr: Interval[]): Interval[] => {
   if (!arr.length) return [];
-  const a = [...arr].sort((x, y) => x.start - y.start);
-  const out: Interval[] = [];
-  for (const it of a) {
-    if (!out.length || it.start > out[out.length - 1].end) {
-      out.push({ ...it });
-    } else {
-      out[out.length - 1].end = Math.max(out[out.length - 1].end, it.end);
+
+  const sorted = [...arr].sort((a, b) => a.start - b.start);
+
+  return sorted.reduce<Interval[]>((acc, curr) => {
+    if (!acc.length || curr.start > acc[acc.length - 1].end) {
+      return [...acc, { ...curr }];
     }
-  }
-  return out;
+
+    const last = acc[acc.length - 1];
+    last.end = Math.max(last.end, curr.end);
+    return acc;
+  }, []);
 };
 
-export const subtractIntervals = (base: Interval[], cuts: Interval[]): Interval[] => {
-  let res = mergeIntervals(base);
-  const cc = mergeIntervals(cuts);
-  for (const c of cc) {
-    const next: Interval[] = [];
-    for (const b of res) {
-      if (c.end <= b.start || c.start >= b.end) {
-        next.push(b);
-        continue;
-      }
+export const subtractIntervals = (
+  base: Interval[],
+  cuts: Interval[],
+): Interval[] => {
+  const initial = mergeIntervals(base);
+  const mergedCuts = mergeIntervals(cuts);
 
-      if (c.start > b.start) next.push({ start: b.start, end: Math.min(c.start, b.end) });
-
-      if (c.end < b.end) next.push({ start: Math.max(c.end, b.start), end: b.end });
+  const result = mergedCuts.reduce<Interval[]>((res, cut) => res.flatMap((b) => {
+    if (cut.end <= b.start || cut.start >= b.end) {
+      return [b];
     }
-    res = next;
-  }
-  return mergeIntervals(res);
+
+    const parts: Interval[] = [];
+
+    if (cut.start > b.start) {
+      parts.push({ start: b.start, end: Math.min(cut.start, b.end) });
+    }
+
+    if (cut.end < b.end) {
+      parts.push({ start: Math.max(cut.end, b.start), end: b.end });
+    }
+
+    return parts;
+  }), initial);
+
+  return mergeIntervals(result);
 };
 
 export const buildLabeledTimeline = (
@@ -83,37 +100,51 @@ export const buildLabeledTimeline = (
   booked: Interval[],
 ): Array<{ start: number; end: number; status: LabeledStatus }> => {
   const points = new Set<number>([0, 1440]);
-  for (const v of available) { points.add(v.start); points.add(v.end); }
-  for (const v of breaks) { points.add(v.start); points.add(v.end); }
-  for (const v of booked) { points.add(v.start); points.add(v.end); }
+
+  [...available, ...breaks, ...booked].forEach((v) => {
+    points.add(v.start);
+    points.add(v.end);
+  });
+
   const xs = [...points].sort((a, b) => a - b);
 
   const contains = (iv: Interval[], s: number, e: number) => iv.some((v) => s < v.end && e > v.start);
 
-  const raw: Array<{ start: number; end: number; status: LabeledStatus }> = [];
-  for (let i = 0; i < xs.length - 1; i++) {
-    const s = xs[i]; const
-      e = xs[i + 1];
-    if (e <= s) continue;
-    let status: LabeledStatus = 'unavailable';
-    if (contains(booked, s, e)) status = 'booked';
-    else if (contains(breaks, s, e)) status = 'break';
-    else if (contains(available, s, e)) status = 'available';
-    raw.push({ start: s, end: e, status });
-  }
+  const raw = xs
+    .slice(0, -1)
+    .map((s, i) => {
+      const e = xs[i + 1];
+      if (e <= s) return null;
 
-  const merged: typeof raw = [];
-  for (const seg of raw) {
-    const last = merged[merged.length - 1];
+      let status: LabeledStatus = 'unavailable';
+
+      if (contains(booked, s, e)) status = 'booked';
+      else if (contains(breaks, s, e)) status = 'break';
+      else if (contains(available, s, e)) status = 'available';
+
+      return { start: s, end: e, status };
+    })
+    .filter(Boolean) as Array<{
+    start: number;
+    end: number;
+    status: LabeledStatus;
+  }>;
+
+  return raw.reduce<typeof raw>((acc, seg) => {
+    const last = acc[acc.length - 1];
+
     if (last && last.status === seg.status && last.end === seg.start) {
       last.end = seg.end;
-    } else {
-      merged.push({ ...seg });
+      return acc;
     }
-  }
-  return merged;
+
+    return [...acc, { ...seg }];
+  }, []);
 };
-export const addDurationToTime = (startTime: string, durationHours: number): string => {
+export const addDurationToTime = (
+  startTime: string,
+  durationHours: number,
+): string => {
   const [hours, minutes] = startTime.split(':').map(Number);
 
   const startDate = new Date();

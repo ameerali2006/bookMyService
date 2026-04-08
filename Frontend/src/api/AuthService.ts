@@ -45,10 +45,7 @@ export const authService={
     },
     logout: async ()=>{
         return await userAxios.post('/logout')
-    },
-
-    
-    
+    }, 
     workerVerifyOtp:async (otp:string,email:string,role:string)=>{
         return await workerAxios.post('/verify-otp',{otp,email,role})
     },
