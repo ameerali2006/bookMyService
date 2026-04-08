@@ -1,20 +1,21 @@
 import {
   getServiceNamesResponse,
   getWorkerAvailableTimeResponse,
-} from "../../dto/shared/helpers.dto";
-import { IService } from "../model/service.model.interface";
+} from '../../dto/shared/helpers.dto';
+import { IService } from '../model/service.model.interface';
+
 export interface ITodayScheduleItem {
   bookingId: string;
   time: string;
   service: string;
   clientName: string;
   status:
-    | "pending"
-    | "confirmed"
-    | "in-progress"
-    | "awaiting-final-payment"
-    | "completed"
-    | "cancelled";
+    | 'pending'
+    | 'confirmed'
+    | 'in-progress'
+    | 'awaiting-final-payment'
+    | 'completed'
+    | 'cancelled';
 }
 
 export interface IWorkerDashboardStats {
@@ -29,7 +30,7 @@ export interface IWorkerDashboardStats {
 }
 
 export interface IWorkerDashboardServiceResponse {
-  workerStatus: "approved" | "pending" | "rejected";
+  workerStatus: 'approved' | 'pending' | 'rejected';
   stats: IWorkerDashboardStats;
   todaySchedule: ITodayScheduleItem[];
 }
@@ -41,5 +42,5 @@ export interface IWorkerHelperService {
     date: Date,
     startTime: string,
   ): Promise<getWorkerAvailableTimeResponse>;
-  getDashboard(workerId: string): Promise<{success:boolean,message:string,data?:IWorkerDashboardServiceResponse}>;
+  getDashboard(workerId: string): Promise<{success:boolean, message:string, data?:IWorkerDashboardServiceResponse}>;
 }

@@ -1,6 +1,6 @@
-import { IAdmin } from "../interface/model/admin.model.interface";
-import { UserDataDTO } from "./user/auth/user-data.dto";
-import { responseDto } from "./worker/auth/worker-register.dto";
+import { IAdmin } from '../interface/model/admin.model.interface';
+import { UserDataDTO } from './user/auth/user-data.dto';
+import { responseDto } from './worker/auth/worker-register.dto';
 
 export interface IIsVerifiedResponseDTO {
   _id: string | null;

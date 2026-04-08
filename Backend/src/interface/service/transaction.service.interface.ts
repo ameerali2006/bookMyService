@@ -1,8 +1,8 @@
-import { TransactionResponseDTO } from "../../dto/shared/transaction.dt";
-import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
+import { TransactionResponseDTO } from '../../dto/shared/transaction.dt';
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
 
-export  interface ITransactionService{
-    getTransactionData(ownerId:string,role:"user"|"admin"|"worker",query:WalletTransactionQuery):Promise<{
+export interface ITransactionService{
+    getTransactionData(ownerId:string, role:'user'|'admin'|'worker', query:WalletTransactionQuery):Promise<{
   success: boolean
   message: string
   data: {
@@ -14,5 +14,5 @@ export  interface ITransactionService{
       totalPages: number
     }
   }
-}> 
+}>
 }

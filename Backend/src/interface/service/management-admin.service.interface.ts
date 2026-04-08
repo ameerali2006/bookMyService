@@ -4,7 +4,9 @@ import {
   IbookingDetailPageResponse,
   serviceCreateDto, serviceManageDto, userManageDto, workerManageDto,
 } from '../../dto/admin/management.dto';
-import { getAllBookingsResponse, getAllServicesResponse, getAllUsersResponse, getUnverifiedWorkersResponse, serviceRegisterResponse, updateServiceStatusResponse, verifyWorkerResponse } from '../../dto/shared/helpers.dto';
+import {
+  getAllBookingsResponse, getAllServicesResponse, getAllUsersResponse, getUnverifiedWorkersResponse, serviceRegisterResponse, updateServiceStatusResponse, verifyWorkerResponse,
+} from '../../dto/shared/helpers.dto';
 import { IUser } from '../model/user.model.interface';
 import { IWorker } from '../model/worker.model.interface';
 
@@ -17,7 +19,7 @@ export interface IManagementAdminService{
     getAllServices(search:string, sort:string, page:number, limit:number,): Promise<getAllServicesResponse>;
     serviceRegister(data:serviceCreateDto):Promise<serviceRegisterResponse>
     updateServiceStatus(serviceId:string, status:'inactive' |'active'):Promise<updateServiceStatusResponse>
-    getAllBookings(search:string,status:string,limit:number,page:number):Promise<getAllBookingsResponse>
+    getAllBookings(search:string, status:string, limit:number, page:number):Promise<getAllBookingsResponse>
     getBookingDetail(bookingId:string):Promise<IbookingDetailPageResponse>
-    getDashboard(): Promise<{success:boolean,message:string,data:IAdminDashboardResponse}> 
+    getDashboard(): Promise<{success:boolean, message:string, data:IAdminDashboardResponse}>
 }

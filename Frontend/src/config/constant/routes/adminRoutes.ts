@@ -7,5 +7,7 @@ export const ADMIN_ROUTES = {
   SERVICES: "/services",
   BOOKINGS:"/bookings",
   BOOKING_DEETAIL:"/bookings/:bookingId",
-  WALLET:"/wallet"
+  WALLET:"/wallet",
+  REVIEW:"/reviews"
+
 };

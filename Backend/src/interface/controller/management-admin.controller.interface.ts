@@ -15,6 +15,6 @@ export interface IAdminManagementController {
     getBookingDetailPage(req: Request, res: Response, next: NextFunction): Promise<void>
     getWalletData(req: Request, res: Response, next: NextFunction): Promise<void>
     getTransactions(req: Request, res: Response, next: NextFunction): Promise<void>
-    getDashboard(req: Request, res: Response, next: NextFunction): Promise<void> 
+    getDashboard(req: Request, res: Response, next: NextFunction): Promise<void>
 
 }

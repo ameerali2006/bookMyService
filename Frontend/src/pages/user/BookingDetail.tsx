@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertCircle,
   ZapOff,
+  Wallet,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
 import { PaymentWrapper } from "@/components/stripe/Stripe";
 import ReviewModal from "@/components/user/Review";
+import type { IAddress } from "@/interface/user/address";
+import { generateBookingCode } from "@/utils/booking-convert";
 
 // -----------------------
 // INTERFACE
@@ -54,7 +57,7 @@ interface BookingDetail {
   workerName: string;
   workerImage: string;
   contact: string;
-  address: string;
+  address: IAddress;
   advanceAmount: number;
   totalAmount: number;
   remainingAmount: number;
@@ -172,7 +175,6 @@ export function BookingDetailPage() {
   const user = useSelector((state: RootState) => state.userTokenSlice.user);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     let mounted = true;
     const fetchDetail = async () => {
@@ -223,6 +225,38 @@ export function BookingDetailPage() {
       setReviewOpen(true);
     }
   }, [booking]);
+  const handleWalletFinalPayment = async () => {
+    try {
+      if (!booking) return;
+
+      setLoadingPayment(true);
+
+      const res = await userService.walletPayment({
+        bookingId: booking.id,
+        addressId: booking.address._id,
+        paymentType: "final",
+      });
+
+      if (!res.data.success) {
+        ErrorToast(res.data.message || "Wallet payment failed");
+        return;
+      }
+
+      SuccessToast("Payment completed successfully");
+
+      // refresh booking details
+      setTimeout(() => {
+          window.location.href = `/booking/${bookingId}/success?type=final`;
+        }, 1200)
+
+      setPaymentMethod(null);
+    } catch (error: any) {
+      console.error(error);
+      ErrorToast(error?.response?.data?.message || "Wallet payment failed");
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
 
   if (error) return <p className="p-6 text-center text-red-500">{error}</p>;
 
@@ -254,7 +288,7 @@ export function BookingDetailPage() {
 
   return (
     <>
-      <Header />
+      
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-18 py-8 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
@@ -266,7 +300,7 @@ export function BookingDetailPage() {
                 </h1>
                 <p className="text-slate-500 mt-2 flex items-center gap-2">
                   <span className="text-sm font-mono bg-slate-200 px-3 py-1 rounded-full">
-                    {booking.id}
+                    {generateBookingCode( booking.id)}
                   </span>
                 </p>
               </div>
@@ -375,7 +409,11 @@ export function BookingDetailPage() {
                     </p>
                     <div className="flex items-center gap-2 text-slate-900 font-semibold">
                       <Calendar size={16} className="text-blue-500" />
-                      {booking.date}
+                      {new Date(booking.date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -455,32 +493,102 @@ export function BookingDetailPage() {
               {booking.otp && <OtpQrCard otp={booking.otp} />}
 
               {/* Address Card */}
-              <Card className="p-6 bg-gradient-to-br from-white to-slate-50 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full" />
-                  <h2 className="text-lg font-bold text-slate-900">Location</h2>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 bg-orange-50 rounded-lg p-4 border border-orange-200">
-                    <MapPin
-                      size={20}
-                      className="text-orange-600 mt-1 flex-shrink-0"
-                    />
-                    <p className="text-slate-900 font-medium leading-relaxed">
-                      {booking.address}
-                    </p>
+              <Card className="p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-orange-100">
+                    <MapPin size={18} className="text-orange-600" />
                   </div>
-                  <div className="w-full h-48 bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl flex items-center justify-center border border-slate-300 shadow-inner overflow-hidden">
-                    <div className="text-center">
-                      <MapPin
-                        size={40}
-                        className="text-slate-400 mx-auto mb-2"
-                      />
-                      <p className="text-sm text-slate-600 font-medium">
-                        Map Preview
+                  <h2 className="text-lg font-semibold text-slate-800">
+                    Location
+                  </h2>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Address List */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    {booking.address.buildingName && (
+                      <div>
+                        <p className="text-slate-500 text-xs">Building</p>
+                        <p className="font-medium text-slate-800">
+                          {booking.address.buildingName}
+                        </p>
+                      </div>
+                    )}
+
+                    {booking.address.street && (
+                      <div>
+                        <p className="text-slate-500 text-xs">Street</p>
+                        <p className="font-medium text-slate-800">
+                          {booking.address.street}
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-slate-500 text-xs">Area</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.address.area}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-slate-500 text-xs">City</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.address.city}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-slate-500 text-xs">State</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.address.state}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-slate-500 text-xs">Pincode</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.address.pinCode}
+                      </p>
+                    </div>
+
+                    {booking.address.landmark && (
+                      <div className="sm:col-span-2">
+                        <p className="text-slate-500 text-xs">Landmark</p>
+                        <p className="font-medium text-slate-800">
+                          {booking.address.landmark}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="sm:col-span-2">
+                      <p className="text-slate-500 text-xs">Contact Phone</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.address.phone}
                       </p>
                     </div>
                   </div>
+
+                  {/* Map Preview */}
+                  <div className="w-full h-48 rounded-lg border border-slate-200 overflow-hidden">
+                    <iframe
+                      className="w-full h-full"
+                      loading="lazy"
+                      src={`https://maps.google.com/maps?q=${booking.address.location.coordinates[1]},${booking.address.location.coordinates[0]}&z=15&output=embed`}
+                    />
+                  </div>
+
+                  {/* Open in Google Maps */}
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://www.google.com/maps?q=${booking.address.location.coordinates[1]},${booking.address.location.coordinates[0]}`}
+                  >
+                    <Button variant="outline" className="w-full">
+                      Open in Google Maps
+                    </Button>
+                  </a>
                 </div>
               </Card>
             </div>
@@ -609,29 +717,59 @@ export function BookingDetailPage() {
               {/* Payment Method */}
               {/* FINAL PAYMENT SECTION */}
               {booking.status === "awaiting-final-payment" && (
-                <Card className="p-8 bg-gradient-to-br from-white to-slate-50 border border-orange-200 shadow-lg mb-8">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full" />
-                    <h2 className="text-2xl font-bold text-slate-900">
-                      Complete Final Payment
-                    </h2>
+                <Card className="p-8 bg-white border border-slate-200 shadow-sm rounded-2xl mb-8">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <CreditCard className="text-orange-600" size={20} />
+                      </div>
+
+                      <div>
+                        <h2 className="text-xl font-semibold text-slate-900">
+                          Complete Final Payment
+                        </h2>
+                        <p className="text-sm text-slate-500">
+                          Choose your preferred payment method
+                        </p>
+                      </div>
+                    </div>
+
+                    <Badge className="bg-orange-100 text-orange-700 border-none">
+                      Pending Payment
+                    </Badge>
                   </div>
 
-                  {/* Payment method selection */}
+                  {/* Payment Method Selection */}
                   {!paymentMethod && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        className="h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-lg"
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Wallet Card */}
+                      <div
                         onClick={() => setPaymentMethod("wallet")}
+                        className="cursor-pointer border border-slate-200 rounded-xl p-5 hover:border-emerald-500 hover:shadow-md transition"
                       >
-                        Pay with Wallet
-                      </Button>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                            <Wallet className="text-emerald-600" size={22} />
+                          </div>
 
-                      <Button
-                        className="h-14 bg-blue-600 hover:bg-blue-700 text-white text-lg"
+                          <div>
+                            <h3 className="font-semibold text-slate-900">
+                              Pay with Wallet
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              Instant payment from your wallet balance
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stripe Card */}
+                      <div
                         onClick={async () => {
                           try {
                             setLoadingPayment(true);
+
                             const res = await userService.createPaymentIntent({
                               amount: Math.round(
                                 Number(booking.remainingAmount) * 100,
@@ -642,7 +780,7 @@ export function BookingDetailPage() {
                               metadata: {
                                 bookingId: booking.id,
                                 paymentType: "final",
-                                addressId: booking.address,
+                                addressId: booking.address._id,
                               },
                             });
 
@@ -659,40 +797,57 @@ export function BookingDetailPage() {
                             setLoadingPayment(false);
                           }
                         }}
+                        className="cursor-pointer border border-slate-200 rounded-xl p-5 hover:border-blue-500 hover:shadow-md transition"
                       >
-                        {loadingPayment ? "Preparing..." : "Pay with Stripe"}
-                      </Button>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                            <CreditCard className="text-blue-600" size={22} />
+                          </div>
+
+                          <div>
+                            <h3 className="font-semibold text-slate-900">
+                              Pay with Card
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              Secure payment via Stripe
+                            </p>
+                          </div>
+                        </div>
+
+                        {loadingPayment && (
+                          <p className="text-xs text-blue-500 mt-3">
+                            Preparing payment...
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
 
                   {/* WALLET PAYMENT */}
                   {paymentMethod === "wallet" && (
-                    <div className="space-y-4 max-w-md">
-                      <p className="text-slate-600">
-                        Amount to pay:{" "}
-                        <span className="font-bold text-slate-900">
+                    <div className="max-w-md space-y-6">
+                      <div className="p-5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p className="text-sm text-slate-500 mb-1">
+                          Amount to Pay
+                        </p>
+                        <p className="text-2xl font-bold text-slate-900">
                           {formatCurrency(booking.remainingAmount)}
-                        </span>
-                      </p>
+                        </p>
+                      </div>
 
                       <Button
-                        className="w-full h-12 bg-emerald-600"
-                        // onClick={async () => {
-                        //   const res = await userService.walletFinalPayment(booking.id);
-
-                        //   if (res.data.success) {
-                        //     SuccessToast("Payment successful");
-                        //     window.location.reload();
-                        //   } else {
-                        //     ErrorToast(res.data.message);
-                        //   }
-                        // }}
+                        onClick={handleWalletFinalPayment}
+                        disabled={loadingPayment}
+                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg"
                       >
-                        Confirm Wallet Payment
+                        {loadingPayment
+                          ? "Processing..."
+                          : "Confirm Wallet Payment"}
                       </Button>
 
                       <Button
                         variant="outline"
+                        className="w-full"
                         onClick={() => setPaymentMethod(null)}
                       >
                         Back
@@ -702,7 +857,7 @@ export function BookingDetailPage() {
 
                   {/* STRIPE PAYMENT */}
                   {paymentMethod === "stripe" && clientSecret && (
-                    <div className="mt-6">
+                    <div className="mt-6 space-y-4">
                       <PaymentWrapper
                         clientSecret={clientSecret}
                         bookingId={booking.id}
@@ -711,7 +866,7 @@ export function BookingDetailPage() {
 
                       <Button
                         variant="outline"
-                        className="mt-4"
+                        className="w-full"
                         onClick={() => {
                           setPaymentMethod(null);
                           setClientSecret(null);
@@ -767,15 +922,14 @@ export function BookingDetailPage() {
 
                 {/* Date */}
                 <p className="text-xs text-slate-500">
-                  Reviewed on{" "}
-                  {review.createdAt}
+                  Reviewed on {review.createdAt}
                 </p>
               </div>
             </Card>
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
+          {/* <div className="flex flex-col md:flex-row gap-4 mb-8">
             {canCancel && (
               <Button
                 variant="destructive"
@@ -795,7 +949,7 @@ export function BookingDetailPage() {
                 Booking Confirmed
               </Button>
             )}
-          </div>
+          </div> */}
         </div>
       </main>
       <ReviewModal
@@ -813,7 +967,7 @@ export function BookingDetailPage() {
           });
         }}
       />
-      <Footer />
+    
     </>
   );
 }

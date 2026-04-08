@@ -123,7 +123,7 @@ export class AuthUserController implements IAuthController {
           .json({
             success,
             message,
-            user: null,
+            user: null,       
           });
       }
     } catch (error) {
@@ -148,14 +148,14 @@ export class AuthUserController implements IAuthController {
           accessTokenName,
           refreshTokenName,
         );
-        console.log(user)
+        console.log(user);
         res
           .status(STATUS_CODES.OK)
           .json({
             success: true,
             message: MESSAGES.LOGIN_SUCCESS,
             user: {
-              _id:user._id,
+              _id: user._id,
               name: user.name,
               email: user.email,
               image: user?.image,
@@ -206,12 +206,9 @@ export class AuthUserController implements IAuthController {
           message: MESSAGES.VALIDATION_ERROR,
         });
       }
-      await this._resetPassword.forgotPassword(email, 'user');
+      const result = await this._resetPassword.forgotPassword(email, 'user');
 
-      res.status(STATUS_CODES.OK).json({
-        success: true,
-        message: MESSAGES.EMAIL_VERIFICATION_SENT,
-      });
+      res.status(STATUS_CODES.OK).json(result);
     } catch (error) {
       next(error);
     }
@@ -239,51 +236,48 @@ export class AuthUserController implements IAuthController {
   }
 
   async handleTokenRefresh(req: Request, res: Response): Promise<void> {
-  try {
+    try {
+      console.log('ALL COOKIES:', req.cookies);
 
-    console.log("ALL COOKIES:", req.cookies);
+      const refreshToken = req.cookies?.refresh_token;
 
-    const refreshToken = req.cookies?.refresh_token;
+      console.log('REFRESH TOKEN FROM COOKIE:', refreshToken);
 
-    console.log("REFRESH TOKEN FROM COOKIE:", refreshToken);
+      if (!refreshToken) {
+        console.log('NO REFRESH TOKEN FOUND');
+        res.status(401).json({
+          message: 'Refresh token missing',
+        });
+        return;
+      }
 
-    if (!refreshToken) {
-      console.log("NO REFRESH TOKEN FOUND");
-      res.status(401).json({
-        message: "Refresh token missing",
+      const payload = this._jwtService.verifyToken(
+        refreshToken,
+        'refresh',
+      );
+
+      console.log('REFRESH PAYLOAD:', payload);
+
+      const newTokens = await this._tokenService.refreshToken(refreshToken);
+
+      updateCookieWithAccessToken(
+        res,
+        newTokens.accessToken,
+        'access_token',
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Token refreshed',
       });
-      return;
+    } catch (error) {
+      console.log('REFRESH ERROR:', error);
+
+      clearAuthCookies(res, 'access_token', 'refresh_token');
+
+      res.status(401).json({
+        message: 'Invalid refresh token',
+      });
     }
-
-    const payload = this._jwtService.verifyToken(
-      refreshToken,
-      "refresh"
-    );
-
-    console.log("REFRESH PAYLOAD:", payload);
-
-    const newTokens = await this._tokenService.refreshToken(refreshToken);
-
-    updateCookieWithAccessToken(
-      res,
-      newTokens.accessToken,
-      "access_token"
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Token refreshed",
-    });
-
-  } catch (error) {
-
-    console.log("REFRESH ERROR:", error);
-
-    clearAuthCookies(res, "access_token", "refresh_token");
-
-    res.status(401).json({
-      message: "Invalid refresh token",
-    });
   }
-}
 }

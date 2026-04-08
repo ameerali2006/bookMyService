@@ -41,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick, onLogout }) 
     { id: "Verification", label: "Worker Verification", icon: Shield, path: "/admin/unverified" },
     { id: "Users", label: "Users", icon: Users, path: "/admin/users" },
     { id: "Wallet", label: "Wallet", icon: Wallet, path: "/admin/wallet" },
-    { id: "ServiceTypes", label: "Worker Skills", icon: Wrench, path: "/admin/service-types" },
+   
   ];
 
   const handleItemClick = (itemId: string, path: string) => {

@@ -59,6 +59,8 @@ export const workerService = {
     name?: string;
     phone?: string;
     experience?: string;
+    description?:string
+    skills?:string[]
     fees?: number;
     image?: string;
   }) => {
@@ -145,4 +147,16 @@ export const workerService = {
   getDashboard: async () => {
     return await workerAxios.get("/dashboard");
   },
+  getNotifications: async () => {
+      return await workerAxios.get("/notifications");
+    },
+  
+    markAsRead: async (notificationId: string) => {
+      return await workerAxios.patch(`/notifications/${notificationId}/read`);
+    },
+  
+   
+    markAllAsRead: async () => {
+      return await workerAxios.patch("/notifications/read-all");
+    },
 };

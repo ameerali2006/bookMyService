@@ -21,7 +21,7 @@ export const ServiceCategories = ({ setShowLocationModal }: Props) => {
   const navigate = useNavigate();
 
   const location = useSelector(
-    (state: RootState) => state.userTokenSlice.user?.location
+    (state: RootState) => state.userTokenSlice.location
   );
   console.log(location)
 
@@ -31,13 +31,14 @@ export const ServiceCategories = ({ setShowLocationModal }: Props) => {
 
   useEffect(() => {
     if (!city || !lat || !lng) {
-     
+     console.log("location")
       return;
     }
 
     const fetchCategories = async () => {
       try {
         const res = await authService.getUserServices({ city, lat, lng });
+        console.log(res)
         setCategories(res.data.services || []);
       } catch (error) {
         console.error("Failed to fetch categories", error);

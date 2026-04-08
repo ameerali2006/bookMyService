@@ -17,31 +17,24 @@ import { IRedisTokenService } from '../../interface/service/redis.service.interf
 @injectable()
 export class ResetPassword implements IResetPassword {
   constructor(
-        @inject(TYPES.AuthUserRepository) private _authUserRepo:IUserRepository,
-        @inject(TYPES.PasswordService) private _passwordHash:IHashService,
-        @inject(TYPES.EmailService) private _emailService:IEmailService,
-        @inject(TYPES.OtpRepository) private _otpRepo:IOtpRepository,
-        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
-        @inject(TYPES.JwtService) private _jwtService:IJwtService,
-        @inject(TYPES.RedisTokenService) private _redisRepo:IRedisTokenService,
-  ) {
+    @inject(TYPES.AuthUserRepository) private _authUserRepo: IUserRepository,
+    @inject(TYPES.PasswordService) private _passwordHash: IHashService,
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.OtpRepository) private _otpRepo: IOtpRepository,
+    @inject(TYPES.WorkerRepository) private _workerRepo: IWorkerRepository,
+    @inject(TYPES.JwtService) private _jwtService: IJwtService,
+    @inject(TYPES.RedisTokenService) private _redisRepo: IRedisTokenService,
+  ) {}
 
-  }
-
-  async forgotPassword(email: string, role: 'worker' | 'user'): Promise<void> {
+  async forgotPassword(
+    email: string,
+    role: 'worker' | 'user',
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      let Repository;
-      if (role == 'user') {
-        Repository = this._authUserRepo;
-      } else if (role == 'worker') {
-        Repository = this._workerRepo;
-      } else {
-        throw new CustomError(
-          MESSAGES.INVALID_CREDENTIALS,
-          STATUS_CODES.FORBIDDEN,
-        );
-      }
-      const user = await Repository.findOne({ email });
+      const repository = role === 'user' ? this._authUserRepo : this._workerRepo;
+
+      const user = await repository.findOne({ email });
+
       if (!user) {
         throw new CustomError(
           MESSAGES.INVALID_CREDENTIALS,
@@ -49,20 +42,31 @@ export class ResetPassword implements IResetPassword {
         );
       }
 
-      const resetToken = this._jwtService.generateResetToken(email);
-      console.log(
-        user._id ?? '',
-        resetToken,
-      );
       if (!user._id) {
-        throw new CustomError('User ID missing', STATUS_CODES.INTERNAL_SERVER_ERROR);
+        throw new CustomError(
+          'User ID missing',
+          STATUS_CODES.INTERNAL_SERVER_ERROR,
+        );
       }
-      const redis = await this._redisRepo.storeResetToken(
-        user._id.toString(),
-        resetToken,
-      );
-      console.log('redis', redis);
-      const rolePrefix = role !== 'user' ? `/${role}` : '';
+      console.log(user);
+      if (user.googleId) {
+        console.log({
+          success: false,
+          message: 'you are login with googleId',
+        });
+        return {
+          success: false,
+          message: 'you are login with googleId',
+        };
+      }
+      console.log('sjdlfdslkfdlskfslkfd');
+
+      const resetToken = this._jwtService.generateResetToken(email);
+
+      await this._redisRepo.storeResetToken(user._id.toString(), resetToken);
+
+      const rolePrefix = role === 'worker' ? '/worker' : '';
+
       const resetUrl = new URL(
         `${rolePrefix}/reset-password/${resetToken}`,
         ENV.FRONTEND_URI,
@@ -73,8 +77,14 @@ export class ResetPassword implements IResetPassword {
         'BookMyService - Reset your password',
         resetUrl,
       );
+
+      return {
+        success: true,
+        message: 'Password reset link sent to email',
+      };
     } catch (error) {
-      console.error('Failed to store reset token in Redis:', error);
+      console.error('Forgot password error:', error);
+
       throw new CustomError(
         MESSAGES.SERVER_ERROR,
         STATUS_CODES.INTERNAL_SERVER_ERROR,
@@ -82,21 +92,24 @@ export class ResetPassword implements IResetPassword {
     }
   }
 
-  async resetPassword(token: string, password: string, role: 'worker' | 'user'): Promise<void> {
+  async resetPassword(
+    token: string,
+    password: string,
+    role: 'worker' | 'user',
+  ): Promise<void> {
     try {
       console.log('resetPassword');
-      const payload = this._jwtService.verifyResetToken(token) as ResetTokenPayload;
+      const payload = this._jwtService.verifyResetToken(
+        token,
+      ) as ResetTokenPayload;
       if (!payload || !payload.email) {
-        throw new CustomError(
-          MESSAGES.INVALID_TOKEN,
-          STATUS_CODES.BAD_REQUEST,
-        );
+        throw new CustomError(MESSAGES.INVALID_TOKEN, STATUS_CODES.BAD_REQUEST);
       }
 
       const { email } = payload;
-		    let repository;
+      let repository;
       if (role === 'user') {
-			    repository = this._authUserRepo;
+        repository = this._authUserRepo;
       } else if (role === 'worker') {
         repository = this._workerRepo;
       } else {
@@ -107,10 +120,7 @@ export class ResetPassword implements IResetPassword {
       }
       const user = await repository.findOne({ email });
       if (!user) {
-        throw new CustomError(
-          MESSAGES.USER_NOT_FOUND,
-          STATUS_CODES.NOT_FOUND,
-        );
+        throw new CustomError(MESSAGES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
       }
       console.log(`${user._id}***************${token}`);
       const tokenValid = await this._redisRepo.verifyResetToken(
@@ -119,10 +129,7 @@ export class ResetPassword implements IResetPassword {
       );
       console.log(tokenValid);
       if (!tokenValid) {
-        throw new CustomError(
-          MESSAGES.INVALID_TOKEN,
-          STATUS_CODES.BAD_REQUEST,
-        );
+        throw new CustomError(MESSAGES.INVALID_TOKEN, STATUS_CODES.BAD_REQUEST);
       }
 
       const isSamePasswordAsOld = await this._passwordHash.compare(
@@ -141,8 +148,6 @@ export class ResetPassword implements IResetPassword {
       await repository.update({ email }, { password: hashedPassword });
 
       await this._redisRepo.deleteResetToken(user._id.toString() ?? '');
-    } catch (error) {
-
-    }
+    } catch (error) {}
   }
 }

@@ -46,25 +46,25 @@ export class WorkerHelperService implements IWorkerHelperService {
       );
     }
   }
-  async getWorkerAvailableTime(
-    workerId: string, 
-    date: Date, 
-    startTime: string
-  ): Promise<getWorkerAvailableTimeResponse> {
 
+  async getWorkerAvailableTime(
+    workerId: string,
+    date: Date,
+    startTime: string,
+  ): Promise<getWorkerAvailableTimeResponse> {
     const working = await this.workingRepo.findByWorkerId(workerId);
     if (!working) return { success: false };
 
-    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-    const schedule = working.days.find(d => d.day === dayName && d.enabled);
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const schedule = working.days.find((d) => d.day === dayName && d.enabled);
 
-    if (!schedule) return { success: true, availableTime: "0.00" };
+    if (!schedule) return { success: true, availableTime: '0.00' };
 
     const startMin = toMinutes(startTime);
     const endMin = toMinutes(schedule.endTime);
 
     // Convert breaks into time blocks
-    const breakBlocks = schedule.breaks.map(b => ({
+    const breakBlocks = schedule.breaks.map((b) => ({
       start: toMinutes(b.breakStart),
       end: toMinutes(b.breakEnd),
     }));
@@ -72,8 +72,8 @@ export class WorkerHelperService implements IWorkerHelperService {
     // Convert bookings into time blocks
     const bookings = await this.bookingRepo.findByWorkerAndDate(workerId, date);
     const bookingBlocks = bookings
-      .filter(b => b.startTime && b.endTime)
-      .map(b => ({
+      .filter((b) => b.startTime && b.endTime)
+      .map((b) => ({
         start: toMinutes(b.startTime),
         end: toMinutes(b.endTime!),
       }));
@@ -82,61 +82,61 @@ export class WorkerHelperService implements IWorkerHelperService {
     const blocks = [...breakBlocks, ...bookingBlocks].sort((a, b) => a.start - b.start);
 
     // Find the closest upcoming block after startTime
-    const nextBlock = blocks.find(b => b.start > startMin);
+    const nextBlock = blocks.find((b) => b.start > startMin);
 
-    let nextStart = nextBlock ? nextBlock.start : endMin;
+    const nextStart = nextBlock ? nextBlock.start : endMin;
 
     const diff = nextStart - startMin;
     const availableMinutes = diff > 0 ? diff : 0;
 
     return {
       success: true,
-      availableTime: fromMinutes(availableMinutes),  // returns 1.30 for 1 hr 30 mins
+      availableTime: fromMinutes(availableMinutes), // returns 1.30 for 1 hr 30 mins
     };
   }
-  async  getDashboard(workerId: string): Promise<{success:boolean,message:string,data?:IWorkerDashboardServiceResponse}> {
+
+  async getDashboard(workerId: string): Promise<{success:boolean, message:string, data?:IWorkerDashboardServiceResponse}> {
     const worker = await this.workerRepo.findById(workerId);
 
     if (!worker) {
-      return {success:false,message:"worker not fount"}
+      return { success: false, message: 'worker not fount' };
     }
 
-    const dashboardData =
-      await this.bookingRepo.getWorkerDashboardStats(workerId);
+    const dashboardData = await this.bookingRepo.getWorkerDashboardStats(workerId);
 
     const efficiency = dashboardData.totalJobs
       ? Math.round(
-          (dashboardData.completedJobs / dashboardData.totalJobs) * 100
-        )
+        (dashboardData.completedJobs / dashboardData.totalJobs) * 100,
+      )
       : 0;
 
     const satisfaction = Math.round(
-      (dashboardData.avgRating / 5) * 100
+      (dashboardData.avgRating / 5) * 100,
     );
 
     return {
-      success:true,
-      message:"dashboardfetch successfully",
-      data:{
-      workerStatus: worker.isVerified,
-      stats: {
-        totalJobs: dashboardData.totalJobs,
-        monthlyEarnings: dashboardData.monthlyEarnings,
-        upcomingJobs: dashboardData.upcomingJobs,
-        averageRating: Number(dashboardData.avgRating.toFixed(1)),
-        totalReviews: dashboardData.totalReviews,
-        todayJobs: dashboardData.todaySchedule.length,
-        efficiency,
-        satisfaction,
+      success: true,
+      message: 'dashboardfetch successfully',
+      data: {
+        workerStatus: worker.isVerified,
+        stats: {
+          totalJobs: dashboardData.totalJobs,
+          monthlyEarnings: dashboardData.monthlyEarnings,
+          upcomingJobs: dashboardData.upcomingJobs,
+          averageRating: Number(dashboardData.avgRating.toFixed(1)),
+          totalReviews: dashboardData.totalReviews,
+          todayJobs: dashboardData.todaySchedule.length,
+          efficiency,
+          satisfaction,
+        },
+        todaySchedule: dashboardData.todaySchedule.map((job: any) => ({
+          bookingId: job._id,
+          time: job.startTime,
+          service: job.serviceId?.category,
+          clientName: job.userId?.name,
+          status: job.status,
+        })),
       },
-      todaySchedule: dashboardData.todaySchedule.map((job: any) => ({
-        bookingId: job._id,
-        time: job.startTime,
-        service: job.serviceId?.category,
-        clientName: job.userId?.name,
-        status: job.status,
-      })),
-    }}
+    };
   }
-
 }

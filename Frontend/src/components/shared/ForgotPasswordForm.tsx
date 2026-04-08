@@ -3,6 +3,7 @@ import { Mail, ArrowLeft, Send } from 'lucide-react';
 // import logo from "@/assets/user/logo.png";
 import { useNavigate } from 'react-router-dom';
 import {authService} from '@/api/AuthService'
+import { WarningToast } from './Toaster';
 
 interface ForgotPasswordFormProps {
   role: 'user' | 'worker';
@@ -21,7 +22,14 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ role, onBack })
     setIsLoading(true);
 
     try {
-      await (role === 'user' ? authService.userResetLink : authService.workerResetLink)(email);
+      const result =await (role === 'user' ? authService.userResetLink : authService.workerResetLink)(email);
+      console.log(result)
+      if(!result.data.success){
+        console.log('xvdxchvbxkcjvkkjbkjb')
+        WarningToast(result.data.message)
+        role=='user'?navigate("/login"):navigate("/worker/login")
+        return
+      }
       setIsSubmitted(true);
       console.log('Reset link sent for:', { email, role });
     } catch (error) {

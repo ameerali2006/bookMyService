@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, Eye, Search } from "lucide-react"
 import { userService } from "@/api/UserService"
 import { ErrorToast } from "@/components/shared/Toaster"
 import Header from "@/components/user/shared/Header"
+import { formatDate } from "@/utils/timeUtils"
 
 interface Booking {
   id: string
@@ -146,7 +147,7 @@ export default function UserBookingsPage() {
                       >
                         <TableCell className="font-medium">{booking.serviceName}</TableCell>
                         <TableCell>{booking.workerName}</TableCell>
-                        <TableCell>{booking.date}</TableCell>
+                        <TableCell>{formatDate( booking.date)}</TableCell>
                         <TableCell>{booking.time}</TableCell>
 
                         <TableCell>

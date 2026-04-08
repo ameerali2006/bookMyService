@@ -1,11 +1,13 @@
-import { InferSchemaType, model, Schema, Types } from "mongoose";
-import { ITransaction } from "../interface/model/transactions.modal.interface";
+import {
+  InferSchemaType, model, Schema, Types,
+} from 'mongoose';
+import { ITransaction } from '../interface/model/transactions.modal.interface';
 
 const TransactionSchema = new Schema(
   {
     walletId: {
       type: Schema.Types.ObjectId,
-      ref: "Wallet",
+      ref: 'Wallet',
       required: true,
       index: true,
     },
@@ -13,15 +15,15 @@ const TransactionSchema = new Schema(
     type: {
       type: String,
       enum: [
-        "TOPUP",
-        "HOLD",
-        "RELEASE",
-        "PAYOUT",
-        "REFUND",
-        "COMMISSION",
-        "ADJUSTMENT",
-        "BONUS",
-        "PENALTY",
+        'TOPUP',
+        'HOLD',
+        'RELEASE',
+        'PAYOUT',
+        'REFUND',
+        'COMMISSION',
+        'ADJUSTMENT',
+        'BONUS',
+        'PENALTY',
       ],
       required: true,
     },
@@ -33,7 +35,7 @@ const TransactionSchema = new Schema(
 
     direction: {
       type: String,
-      enum: ["CREDIT", "DEBIT"],
+      enum: ['CREDIT', 'DEBIT'],
       required: true,
     },
 
@@ -53,17 +55,14 @@ const TransactionSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["SUCCESS", "PENDING", "FAILED"],
-      default: "SUCCESS",
+      enum: ['SUCCESS', 'PENDING', 'FAILED'],
+      default: 'SUCCESS',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-
-
-
 export const TransactionModel = model<ITransaction>(
-  "Transaction",
-  TransactionSchema
+  'Transaction',
+  TransactionSchema,
 );

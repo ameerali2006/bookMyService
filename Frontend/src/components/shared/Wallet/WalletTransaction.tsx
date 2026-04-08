@@ -92,7 +92,7 @@ export function WalletTransactionsTable({
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "inr",
     }).format(amount)
 
   const formatDate = (date: Date) =>
@@ -196,7 +196,7 @@ export function WalletTransactionsTable({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {tx.description || "-"}
+                      {tx.description?.substring(0, 25) + "..." || "-"}
                     </TableCell>
                   </TableRow>
                 ))}

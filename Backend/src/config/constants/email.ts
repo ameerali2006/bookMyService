@@ -156,12 +156,12 @@ export const SERVICE_REJECTED_MAIL_CONTENT = (
   userName: string,
   serviceName: string,
   reason?: string,
-  refundAmount?: number
+  refundAmount?: number,
 ) => {
-  const reasonHtml = reason ? `<p><strong>Reason:</strong> ${reason}</p>` : "";
-  const refundHtml = typeof refundAmount === "number"
+  const reasonHtml = reason ? `<p><strong>Reason:</strong> ${reason}</p>` : '';
+  const refundHtml = typeof refundAmount === 'number'
     ? `<p><strong>Refund processed:</strong> ₹${refundAmount.toFixed(2)}</p>`
-    : "";
+    : '';
 
   return `
     <div style="font-family: Arial, sans-serif; line-height:1.5; color:#333;">
@@ -190,14 +190,13 @@ export const SERVICE_REJECTED_MAIL_CONTENT = (
   `;
 };
 
-
 function escapeHtml(str: string) {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 export const SENT_REJECTION_EMAIL = (entityLabel: string, reason: string, retryUrl?: string) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

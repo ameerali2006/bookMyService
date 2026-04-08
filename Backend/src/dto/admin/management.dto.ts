@@ -1,5 +1,5 @@
-import { response } from "express"
-import { responsePart } from "../shared/responsePart"
+import { response } from 'express';
+import { responsePart } from '../shared/responsePart';
 
 export interface userManageDto{
     _id:string,
@@ -47,7 +47,7 @@ export interface AdminBookingDto {
   date: Date
   startTime: string
   endTime?: string
-  status: "pending" | "confirmed" | "in-progress" | "awaiting-final-payment" | "completed" | "cancelled"
+  status: 'pending' | 'confirmed' | 'in-progress' | 'awaiting-final-payment' | 'completed' | 'cancelled'
   createdAt: Date
 }
 export interface AdminBookingDetailsDto {
@@ -123,4 +123,3 @@ export interface IbookingDetailPageResponse extends responsePart{
   booking?:AdminBookingDetailsDto
 
 }
-

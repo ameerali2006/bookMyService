@@ -10,6 +10,9 @@ const compat = new FlatCompat({
 
 export default [
 
+  {
+    ignores: ['dist/**', 'node_modules/**'],
+  },
   // 1. Base ESLint recommended
   eslint.configs.recommended,
 
@@ -21,7 +24,6 @@ export default [
 
   {
     files: ['**/*.ts'],
-    ignores: ['dist/**'],
 
     languageOptions: {
       parser: tseslint.parser,
@@ -41,11 +43,30 @@ export default [
       'import/extensions': 'off',
 
       // TypeScript rules
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
 
-      // Backend convenience
+      // Backend friendly rules
       'no-console': 'off',
       'import/prefer-default-export': 'off',
+
+      // ✅ Mongo support
+      'no-underscore-dangle': 'off',
+
+      // ✅ Disable unnecessary strict rules
+      'class-methods-use-this': 'off',
+      'no-return-await': 'off',
+      'no-param-reassign': 'off',
+
+      // ✅ Allow backend patterns
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      // ✅ Relax comparisons (optional)
+      eqeqeq: ['error', 'always'], // keep strict OR change to 'off'
+
     },
   },
 ];

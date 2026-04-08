@@ -1,6 +1,6 @@
-import type { Server as IOServer } from "socket.io";
-import { IBookingPopulated } from "../model/booking.model.interface";
-import { IWorker } from "../model/worker.model.interface";
+import type { Server as IOServer } from 'socket.io';
+import { IBookingPopulated } from '../model/booking.model.interface';
+import { IWorker } from '../model/worker.model.interface';
 
 export interface IBookingSocketHandler {
   emitBookingToWorker(

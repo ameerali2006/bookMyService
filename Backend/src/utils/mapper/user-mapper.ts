@@ -50,77 +50,79 @@ export class UserMapper {
       isPrimary: address.isPrimary,
     };
   }
+
   static formatAddress(address?: IAddress): string {
-  if (!address) return "";
+    if (!address) return '';
 
-  const parts = [
-    address.buildingName,
-    address.street,
-    address.area,
-    address.landmark,
-    address.city,
-    address.state,
-    address.country,
-    address.pinCode,
-  ];
+    const parts = [
+      address.buildingName,
+      address.street,
+      address.area,
+      address.landmark,
+      address.city,
+      address.state,
+      address.country,
+      address.pinCode,
+    ];
 
- 
-  return parts.filter(Boolean).join(", ");
-}
+    return parts.filter(Boolean).join(', ');
+  }
+
   static toDTOAddressList(addresses: IAddress[]): Address[] {
     return addresses.map((addr) => this.toDTOAddress(addr));
   }
+
   static ongoingBooking(data: IBookingPopulated[]): ongoingBookingDto[] {
-      return data.map((b) => ({
-          id: b._id.toString(),
-          serviceName: b.serviceId.category,
-          workerName: b.workerId?.name,
-          date: b.date.toISOString(), 
-          time: b.startTime,
-          status: b.workerResponse,
-          
-          image: b.serviceId.image,
-      }));
+    return data.map((b) => ({
+      id: b._id.toString(),
+      serviceName: b.serviceId.category,
+      workerName: b.workerId?.name,
+      date: b.date.toISOString(),
+      time: b.startTime,
+      status: b.workerResponse,
+
+      image: b.serviceId.image,
+    }));
   }
-  static bookingDetail(b:IBookingPopulated):BookingDetailDto{
+
+  static bookingDetail(b:IBookingPopulated):BookingDetailDto {
     return {
       id: b._id.toString(),
       serviceName: b.serviceId.category,
-      description: b.description || "",
+      description: b.description || '',
 
       date: b.date.toString(),
       startTime: b.startTime,
       endTime: b.endTime,
 
-      workerName: b.workerId?.name || "",
-      workerImage: b.workerId?.profileImage || "https://cdn.vectorstock.com/i/1000v/06/52/dabbing-construction-worker-cartoon-vector-51110652.jpg",
-      contact: b.workerId?.phone || "",
+      workerName: b.workerId?.name || '',
+      workerImage: b.workerId?.profileImage || 'https://cdn.vectorstock.com/i/1000v/06/52/dabbing-construction-worker-cartoon-vector-51110652.jpg',
+      contact: b.workerId?.phone || '',
 
-      address: this.formatAddress(b.address)|| "",
+      address: b.address,
 
       advanceAmount: b.advanceAmount,
-      totalAmount: b.totalAmount||0,
-      remainingAmount: b.remainingAmount||0,
+      totalAmount: b.totalAmount || 0,
+      remainingAmount: b.remainingAmount || 0,
 
-      advancePaymentStatus: b.advancePaymentStatus||"unpaid",
-      finalPaymentStatus: b.finalPaymentStatus||"unpaid",
+      advancePaymentStatus: b.advancePaymentStatus || 'unpaid',
+      finalPaymentStatus: b.finalPaymentStatus || 'unpaid',
 
       paymentMethod: b.paymentMethod,
 
       additionalItems: b.additionalItems || [],
-      paymentItems:b?.paymentBreakdown,
+      paymentItems: b?.paymentBreakdown,
 
       status: b.status,
       workerResponse: b.workerResponse,
 
       otp: b.otp ?? undefined,
-      review:b.reviewId?{
-        comment:b.reviewId.comment,
-        rating:b.reviewId.rating,
-        createdAt:b.reviewId.createdAt.toLocaleDateString()
+      review: b.reviewId ? {
+        comment: b.reviewId.comment,
+        rating: b.reviewId.rating,
+        createdAt: b.reviewId.createdAt.toLocaleDateString(),
 
-        
-      }:undefined
-    }
+      } : undefined,
+    };
   }
 }

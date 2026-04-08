@@ -32,11 +32,12 @@ export function ChatWindow({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  console.log(messages)
 
   return (
     <div
       className={cn(
-        "flex flex-col flex-1 overflow-y-auto bg-white",
+        "flex flex-col flex-1 overflow-y-auto bg-white pb-28",
         className
       )}
     >

@@ -1,5 +1,5 @@
-import { IMessage, IMessagePopulated } from "../model/message.model.interface";
-import { IBaseRepository } from "./base.repository.interface";
+import { IMessage, IMessagePopulated } from '../model/message.model.interface';
+import { IBaseRepository } from './base.repository.interface';
 
 export interface IMessageRepository extends IBaseRepository<IMessage> {
   createMessage(data: Partial<IMessage>): Promise<IMessage>;

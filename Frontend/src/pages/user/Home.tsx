@@ -8,10 +8,35 @@ import { useDispatch,useSelector } from "react-redux";
 import { updateLocation } from "@/redux/slice/userTokenSlice";
 import type { RootState } from "@/redux/store";
 
-
+const features = [
+  {
+    title: "On Demand / Scheduled",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/On-Demand-Scheduled.webp",
+  },
+  {
+    title: "Verified Partners",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/Verified-Partners.webp",
+  },
+  {
+    title: "Service Warranty",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/Service-Warranty.webp",
+  },
+  {
+    title: "Transparent Pricing",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/Transparent-Pricing.webp",
+  },
+  {
+    title: "Online Payments",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/Online-Payments.webp",
+  },
+  {
+    title: "Support",
+    icon: "https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/customer-support.webp",
+  },
+];
 
 export default function Homepage() {
-  const location=useSelector((state:RootState)=>state.userTokenSlice.user?.location)
+  const location=useSelector((state:RootState)=>state.userTokenSlice.location)
   const user=useSelector((state:RootState)=>state.userTokenSlice.user)
   console.log(location)
   console.log(user)
@@ -88,31 +113,41 @@ export default function Homepage() {
         <ServiceCategories setShowLocationModal={setShowLocationModal} />
 
         {/* Why bookMyService Section */}
-        <section className="bg-gray-100 py-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">Why bookMyService ?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-              {[
-                { title: "On Demand / Scheduled" },
-                { title: "Verified Partners" },
-                { title: "Service Warranty" },
-                { title: "Transparent Pricing" },
-                { title: "Online Payments" },
-                { title: "Support" },
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-                >
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                  </div>
-                  <h3 className="font-semibold text-gray-800 text-sm">{feature.title}</h3>
-                </div>
-              ))}
+        <section className="bg-white py-12">
+      <div className="max-w-7xl mx-auto px-4 text-center">
+        <h2 className="text-2xl font-bold mb-10">WHY bookMyService?</h2>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
+          {features.map((item, index) => (
+            <div key={index} className="group flex flex-col items-center">
+              
+              {/* ICON SECTION */}
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                
+                {/* Background Shape */}
+                <img
+                  src="https://d27vg8jo26ejl7.cloudfront.net/images/why_joboy/services-ball-shape.png"
+                  alt="shape"
+                  className="absolute w-full h-full object-contain animate-spin-slow"
+                />
+
+                {/* Icon */}
+                <img
+                  src={item.icon}
+                  alt={item.title}
+                  className="w-10 h-10 object-contain z-10 group-hover:scale-110 transition-transform"
+                />
+              </div>
+
+              {/* TEXT */}
+              <h3 className="mt-4 text-sm font-semibold text-gray-800 leading-tight">
+                {item.title}
+              </h3>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
+      </div>
+    </section>
 
         {/* Call to Action Section */}
         <section className="bg-white py-12">
@@ -120,7 +155,7 @@ export default function Homepage() {
             <div className="flex flex-col lg:flex-row items-center justify-between">
               <div className="lg:w-1/2 mb-8 lg:mb-0">
                 <img
-                  src="/placeholder.svg?height=300&width=400"
+                  src="https://static.vecteezy.com/system/resources/thumbnails/007/407/128/small/mechanic-technician-fixing-car-engine-free-vector.jpg"
                   alt="Mechanic with car illustration"
                   className="w-full max-w-md mx-auto"
                 />
@@ -131,9 +166,7 @@ export default function Homepage() {
                   <br />
                   Mechanic
                 </h2>
-                <button className="bg-yellow-400 text-blue-900 px-8 py-3 rounded-md font-bold text-lg hover:bg-yellow-300 transition-colors">
-                  Find Now
-                </button>
+                
               </div>
             </div>
           </div>

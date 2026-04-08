@@ -7,4 +7,3 @@ export interface ICloudinaryService {
     folder: string;
   };
 }
- 

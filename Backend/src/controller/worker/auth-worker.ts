@@ -204,54 +204,52 @@ export class AuthWorkerController implements IWorkerAuthController {
       next(error);
     }
   }
-async handleTokenRefresh(req: Request, res: Response): Promise<void> {
-  try {
 
-    console.log("ALL COOKIES:", req.cookies);
+  async handleTokenRefresh(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('ALL COOKIES:', req.cookies);
 
-    const refreshToken = req.cookies?.refresh_token;
+      const refreshToken = req.cookies?.refresh_token;
 
-    console.log("REFRESH TOKEN FROM COOKIE:", refreshToken);
+      console.log('REFRESH TOKEN FROM COOKIE:', refreshToken);
 
-    if (!refreshToken) {
-      console.log("NO REFRESH TOKEN FOUND");
-      res.status(401).json({
-        message: "Refresh token missing",
+      if (!refreshToken) {
+        console.log('NO REFRESH TOKEN FOUND');
+        res.status(401).json({
+          message: 'Refresh token missing',
+        });
+        return;
+      }
+
+      const payload = this._jwtService.verifyToken(
+        refreshToken,
+        'refresh',
+      );
+
+      console.log('REFRESH PAYLOAD:', payload);
+
+      const newTokens = await this._tokenService.refreshToken(refreshToken);
+
+      updateCookieWithAccessToken(
+        res,
+        newTokens.accessToken,
+        'access_token',
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Token refreshed',
       });
-      return;
+    } catch (error) {
+      console.log('REFRESH ERROR:', error);
+
+      clearAuthCookies(res, 'access_token', 'refresh_token');
+
+      res.status(401).json({
+        message: 'Invalid refresh token',
+      });
     }
-
-    const payload = this._jwtService.verifyToken(
-      refreshToken,
-      "refresh"
-    );
-
-    console.log("REFRESH PAYLOAD:", payload);
-
-    const newTokens = await this._tokenService.refreshToken(refreshToken);
-
-    updateCookieWithAccessToken(
-      res,
-      newTokens.accessToken,
-      "access_token"
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Token refreshed",
-    });
-
-  } catch (error) {
-
-    console.log("REFRESH ERROR:", error);
-
-    clearAuthCookies(res, "access_token", "refresh_token");
-
-    res.status(401).json({
-      message: "Invalid refresh token",
-    });
   }
-}
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {

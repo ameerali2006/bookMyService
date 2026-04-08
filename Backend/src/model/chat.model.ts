@@ -1,24 +1,23 @@
-import { Schema, model, Types } from "mongoose";
-import { IChat } from "../interface/model/chat.model.interface";
-
+import { Schema, model, Types } from 'mongoose';
+import { IChat } from '../interface/model/chat.model.interface';
 
 const chatSchema = new Schema<IChat>(
   {
-   
+
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     workerId: {
       type: Schema.Types.ObjectId,
-      ref: "Worker",
+      ref: 'Worker',
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const ChatModel = model<IChat>("Chat", chatSchema);
+export const ChatModel = model<IChat>('Chat', chatSchema);

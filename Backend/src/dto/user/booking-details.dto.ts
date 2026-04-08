@@ -1,7 +1,9 @@
-import { IPaymentItem } from "../../interface/model/booking.model.interface"
-import { responsePart } from "../shared/responsePart"
-import { responseDto } from "../worker/auth/worker-register.dto"
-import { Address, ProfileDetails } from "./auth/profile.dto"
+import { IAddress } from '../../interface/model/address.model.interface';
+import { IPaymentItem } from '../../interface/model/booking.model.interface';
+import { responsePart } from '../shared/responsePart';
+import { responseDto } from '../worker/auth/worker-register.dto';
+
+import { Address, ProfileDetails } from './auth/profile.dto';
 
 export interface ongoingBookingDto{
     id: string
@@ -26,29 +28,29 @@ export interface BookingDetailDto {
   workerName: string
   workerImage: string
   contact: string
-  address: string
+  address: IAddress
   advanceAmount: number
   totalAmount: number
   remainingAmount: number
-  advancePaymentStatus: "unpaid" | "paid" | "failed" | "refunded"
-  finalPaymentStatus: "unpaid" | "paid" | "failed" | "refunded"
-  paymentMethod?: "stripe" | "upi" | "cash"
-  additionalItems?: { name: string;  price: number }[]
+  advancePaymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded'
+  finalPaymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded'
+  paymentMethod?: 'stripe' | 'upi' | 'cash'
+  additionalItems?: { name: string; price: number }[]
   paymentItems?:IPaymentItem[]
   status:
-    | "pending"
-    | "confirmed"
-    | "in-progress"
-    | "awaiting-final-payment"
-    | "completed"
-    | "cancelled"
-  workerResponse: "accepted" | "rejected" | "pending"
+    | 'pending'
+    | 'confirmed'
+    | 'in-progress'
+    | 'awaiting-final-payment'
+    | 'completed'
+    | 'cancelled'
+  workerResponse: 'accepted' | 'rejected' | 'pending'
   otp?: string
   review?:IReviewResponseData
 }
 
 export interface ongoingBookingsResponseDto extends responsePart{
-  data?:{data:ongoingBookingDto[],total:number}
+  data?:{data:ongoingBookingDto[], total:number}
 }
 export interface bookingDetailDataResponseDto extends responsePart{
   booking?:BookingDetailDto
@@ -63,5 +65,3 @@ export interface getUserAddressResponseDto extends responsePart{
 export interface addUserAddressResponseDto extends responsePart{
   address:Address|null
 }
-
-

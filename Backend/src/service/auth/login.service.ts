@@ -25,7 +25,7 @@ import { AdminMapper } from '../../utils/mapper/admin-mapper';
 export class LoginService implements ILoginService {
   constructor(
         @inject(TYPES.AdminRepository) private _adminRepo:IAdminRepository,
-        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository, 
+        @inject(TYPES.WorkerRepository) private _workerRepo:IWorkerRepository,
         @inject(TYPES.AuthUserRepository) private _userRepo:IUserRepository,
         @inject(TYPES.PasswordService) private _passwordHash:IHashService,
         @inject(TYPES.JwtService) private _jwtService:IJwtService,
@@ -51,6 +51,7 @@ export class LoginService implements ILoginService {
       }
 
       const userData: IUser |IWorker|IAdmin| null = await repository.findByEmail(user.email);
+      console.log(userData);
       if (!userData) {
         throw new CustomError(
           MESSAGES.USER_NOT_FOUND,
@@ -100,20 +101,19 @@ export class LoginService implements ILoginService {
           STATUS_CODES.UNAUTHORIZED,
         );
       }
-      let data
-      if(user.role=="user"){
-        data=UserMapper.resposeWorkerDto(userData as IUser)
-      }else if(user.role=="worker"){
-        data=WorkerMapper.responseWorkerDto(userData as IWorker)
-      }else if(user.role=="admin"){
-        data=AdminMapper.resAdminData(userData as IAdmin)
-      }else{
+      let data;
+      if (user.role == 'user') {
+        data = UserMapper.resposeWorkerDto(userData as IUser);
+      } else if (user.role == 'worker') {
+        data = WorkerMapper.responseWorkerDto(userData as IWorker);
+      } else if (user.role == 'admin') {
+        data = AdminMapper.resAdminData(userData as IAdmin);
+      } else {
         throw new CustomError(
-        MESSAGES.INVALID_CREDENTIALS,
-        STATUS_CODES.UNAUTHORIZED,
-      );
+          MESSAGES.INVALID_CREDENTIALS,
+          STATUS_CODES.UNAUTHORIZED,
+        );
       }
-      
 
       return {
         success: true, message: MESSAGES.LOGIN_SUCCESS, accessToken, refreshToken, user: data,

@@ -35,6 +35,14 @@ export const WorkerSchema: Schema = new Schema<IWorker>(
       ref: 'Service',
       required: true,
     },
+    description: {
+      type: String,
+      require: false,
+    },
+    skills: {
+      type: [String],
+      require: false,
+    },
 
     fees: { type: Number, default: 200 },
     isBlocked: { type: Boolean, default: false },

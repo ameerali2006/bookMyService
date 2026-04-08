@@ -1,17 +1,15 @@
 // src/repository/implementation/wallet.repository.ts
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 
-import { BaseRepository } from "./base.repository";
-import { WalletModel } from "../../model/wallet.model";
-import { IWallet } from "../../interface/model/wallet.model.interface";
-import { IWalletRepository } from "../../interface/repository/wallet.repository.interface";
-
+import { BaseRepository } from './base.repository';
+import { WalletModel } from '../../model/wallet.model';
+import { IWallet } from '../../interface/model/wallet.model.interface';
+import { IWalletRepository } from '../../interface/repository/wallet.repository.interface';
 
 @injectable()
 export class WalletRepository
   extends BaseRepository<IWallet>
-  implements IWalletRepository
-{
+  implements IWalletRepository {
   constructor() {
     super(WalletModel);
   }
@@ -32,7 +30,7 @@ export class WalletRepository
     return await WalletModel.findByIdAndUpdate(
       id,
       { balance, lastActivityAt: new Date() },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -40,7 +38,7 @@ export class WalletRepository
     return await WalletModel.findByIdAndUpdate(
       id,
       { isFrozen: true, lastActivityAt: new Date() },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -48,7 +46,7 @@ export class WalletRepository
     return await WalletModel.findByIdAndUpdate(
       id,
       { isFrozen: false, lastActivityAt: new Date() },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -56,7 +54,7 @@ export class WalletRepository
     return await WalletModel.findByIdAndUpdate(
       id,
       { lastActivityAt: new Date() },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -64,10 +62,11 @@ export class WalletRepository
     return await WalletModel.findByIdAndDelete(id);
   }
 
-  async findByRole(role: "user"|"admin"|"worker"): Promise<IWallet[]> {
+  async findByRole(role: 'user'|'admin'|'worker'): Promise<IWallet[]> {
     return await WalletModel.find({ role }).sort({ createdAt: -1 }).exec();
   }
+
   async findAdminWallet(): Promise<IWallet|null> {
-    return await WalletModel.findOne({ role:"admin" })
+    return await WalletModel.findOne({ role: 'admin' });
   }
 }

@@ -1,21 +1,21 @@
-import { Request, Response, NextFunction } from "express";
-import { inject, injectable } from "tsyringe";
-import { IWorkingDetailsController } from "../../interface/controller/working-details.controller.interface";
-import { TYPES } from "../../config/constants/types";
-import { STATUS_CODES } from "../../config/constants/status-code";
-import { MESSAGES } from "../../config/constants/message";
-import { CustomError } from "../../utils/custom-error";
+import { Request, Response, NextFunction } from 'express';
+import { inject, injectable } from 'tsyringe';
+import { IWorkingDetailsController } from '../../interface/controller/working-details.controller.interface';
+import { TYPES } from '../../config/constants/types';
+import { STATUS_CODES } from '../../config/constants/status-code';
+import { MESSAGES } from '../../config/constants/message';
+import { CustomError } from '../../utils/custom-error';
 import {
   IWorkingDetailsManagement,
   updateWorker,
-} from "../../interface/service/worker/workingDetails.service.interface";
-import { CustomRequest } from "../../middleware/auth.middleware";
-import { workerProfileUpdateSchema } from "../validation/update-worker-profile";
-import { changePasswordSchema } from "../validation/change-password.zod";
-import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
-import { IWalletService } from "../../interface/service/wallet.service.interface";
-import { ITransactionService } from "../../interface/service/transaction.service.interface";
-import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
+} from '../../interface/service/worker/workingDetails.service.interface';
+import { CustomRequest } from '../../middleware/auth.middleware';
+import { workerProfileUpdateSchema } from '../validation/update-worker-profile';
+import { changePasswordSchema } from '../validation/change-password.zod';
+import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { IWalletService } from '../../interface/service/wallet.service.interface';
+import { ITransactionService } from '../../interface/service/transaction.service.interface';
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
 
 @injectable()
 export class WorkingDetailsController implements IWorkingDetailsController {
@@ -124,7 +124,7 @@ export class WorkingDetailsController implements IWorkingDetailsController {
         const errors = parsed.error.format();
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: "Validation failed",
+          message: 'Validation failed',
           errors,
         });
       }
@@ -153,7 +153,7 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       const parsed = changePasswordSchema.parse(req.body);
       const userId = (req as CustomRequest).user?._id;
       const result = await this._changePassword.changePassword(
-        "worker",
+        'worker',
         userId,
         parsed,
       );
@@ -208,47 +208,49 @@ export class WorkingDetailsController implements IWorkingDetailsController {
       next(error);
     }
   }
+
   async getWalletData(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     const userId = (req as CustomRequest).user._id;
-    const role = (req as CustomRequest).user.role;
+    const { role } = (req as CustomRequest).user;
     console.log(userId, role);
     const wallet = await this._walletService.getWalletData(userId, role);
     console.log(wallet);
 
     res.status(200).json(wallet);
   }
+
   async getTransactions(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     const userId = (req as CustomRequest).user._id;
-    const role = (req as CustomRequest).user.role;
+    const { role } = (req as CustomRequest).user;
     const query: WalletTransactionQuery = {
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 10,
 
-      type: typeof req.query.type === "string" ? req.query.type : undefined,
+      type: typeof req.query.type === 'string' ? req.query.type : undefined,
       status:
-        typeof req.query.status === "string" ? req.query.status : undefined,
+        typeof req.query.status === 'string' ? req.query.status : undefined,
 
       sortBy:
-        typeof req.query.sortBy === "string" ? req.query.sortBy : "createdAt",
+        typeof req.query.sortBy === 'string' ? req.query.sortBy : 'createdAt',
       sortOrder:
-        req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+        req.query.sortOrder === 'asc' || req.query.sortOrder === 'desc'
           ? req.query.sortOrder
-          : "desc",
+          : 'desc',
 
       startDate:
-        typeof req.query.startDate === "string"
+        typeof req.query.startDate === 'string'
           ? req.query.startDate
           : undefined,
       endDate:
-        typeof req.query.endDate === "string" ? req.query.endDate : undefined,
+        typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
     };
     console.log(userId, role);
     const result = await this._transactionService.getTransactionData(

@@ -13,17 +13,35 @@ import { IBookingRepository } from '../../interface/repository/booking.repositor
 import { IWorkingHelper } from '../../interface/service/working-helper.service.interface';
 import { IWorkingDetails } from '../../interface/model/working-details.interface';
 import {
-  buildLabeledTimeline, dateKey, dayBounds, fromMinutes, Interval, LabeledStatus, mergeIntervals, subtractIntervals, toMinutes,
+  buildLabeledTimeline,
+  dateKey,
+  dayBounds,
+  fromMinutes,
+  Interval,
+  LabeledStatus,
+  mergeIntervals,
+  subtractIntervals,
+  toMinutes,
 } from '../../utils/time&Intervals';
+import {
+  IWorkerListItem,
+  IWorkerProfileResponse,
+} from '../../dto/user/worker-listing-home.dto';
+
+import { IReviewRepository } from '../../interface/repository/review.repository.interface';
+import { IWorkerRepository } from '../../interface/repository/worker.repository.interface';
 
 @injectable()
 export class ServiceDetails implements IServiceDetails {
   constructor(
-        @inject(TYPES.WorkerAggregation) private _workerAgg: IWorkerAggregation,
-        @inject(TYPES.ServiceRepository) private _serviceRepo: IServiceRepository,
-        @inject(TYPES.WorkingDetailsRepository) private _workingDetails: IWorkingDetailsRepository,
-        @inject(TYPES.BookingRepository) private _booking: IBookingRepository,
-         @inject(TYPES.WorkingHelper) private _workingHelper: IWorkingHelper,
+    @inject(TYPES.WorkerAggregation) private _workerAgg: IWorkerAggregation,
+    @inject(TYPES.ServiceRepository) private _serviceRepo: IServiceRepository,
+    @inject(TYPES.WorkingDetailsRepository)
+    private _workingDetails: IWorkingDetailsRepository,
+    @inject(TYPES.BookingRepository) private _booking: IBookingRepository,
+    @inject(TYPES.WorkingHelper) private _workingHelper: IWorkingHelper,
+    @inject(TYPES.ReviewRepository) private _reviewRepo: IReviewRepository,
+    @inject(TYPES.WorkerRepository) private _workerRepo: IWorkerRepository,
   ) {}
 
   async getNearByWorkers(
@@ -35,16 +53,22 @@ export class ServiceDetails implements IServiceDetails {
     page: number,
     pageSize: number,
   ): Promise<{
-        success: boolean;
-        message: string;
-        data: { workers: IWorker[]; totalCount: number } | null;
-    }> {
+    success: boolean;
+    message: string;
+    data: { workers: IWorkerListItem[]; totalCount: number } | null;
+  }> {
     try {
       if (!lat || !lng || !serviceId) {
         throw new Error('Latitude, longitude and serviceId are required');
       }
       console.log({
-        serviceId, lat, lng, search, sort, page, pageSize,
+        serviceId,
+        lat,
+        lng,
+        search,
+        sort,
+        page,
+        pageSize,
       });
       const data = await this._workerAgg.findNearbyWorkersByServiceId(
         serviceId,
@@ -55,6 +79,7 @@ export class ServiceDetails implements IServiceDetails {
         page,
         pageSize,
       );
+
       console.log(data);
       if (!data) {
         return { success: false, message: 'Worker not Found', data: null };
@@ -71,11 +96,11 @@ export class ServiceDetails implements IServiceDetails {
     lng: number,
     maxDistance: number,
   ): Promise<{
-        status: number;
-        success: boolean;
-        message: string;
-        services?: serviceCreateDto[];
-    }> {
+    status: number;
+    success: boolean;
+    message: string;
+    services?: serviceCreateDto[];
+  }> {
     try {
       if (!lat || !lng) {
         return {
@@ -139,38 +164,50 @@ export class ServiceDetails implements IServiceDetails {
     return h * 60 + m;
   }
 
-  async getWorkerAvailablity(
-    workerId: string,
-  ): Promise<{
-  status: number;
-  success: boolean;
-  message: string;
-  data?: {
-    dates: {
-      date: string;
-      enabled: boolean;
-      day: string;
-      availableTimes: {
-        start: string;
-        end: string;
-        status: 'available' | 'unavailable' | 'break' | 'booked';
+  async getWorkerAvailablity(workerId: string): Promise<{
+    status: number;
+    success: boolean;
+    message: string;
+    data?: {
+      dates: {
+        date: string;
+        enabled: boolean;
+        day: string;
+        availableTimes: {
+          start: string;
+          end: string;
+          status: 'available' | 'unavailable' | 'break' | 'booked';
+        }[];
       }[];
-    }[];
-  };
+    };
   }> {
     try {
       // 1) Working details
       let details = await this._workingDetails.findByWorkerId(workerId);
       if (!details) {
-        return { status: 404, success: false, message: 'Working details not found' };
+        return {
+          status: 404,
+          success: false,
+          message: 'Working details not found',
+        };
       }
 
       // 2) Apply week rotation if needed (prefer non-destructive rotation)
-      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const daysOfWeek = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
       const today = new Date();
       const todayName = daysOfWeek[today.getDay()];
       if (details.weekStartDay && todayName !== details.weekStartDay) {
-        details = await this._workingHelper.rotateDayShedule(String(details._id)) as typeof details;
+        details = (await this._workingHelper.rotateDayShedule(
+          String(details._id),
+        )) as typeof details;
       }
 
       const rotatedDays = details.days ?? [];
@@ -186,12 +223,20 @@ export class ServiceDetails implements IServiceDetails {
         startTime: string;
         endTime?: string | null;
         advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
-      }> = await this._booking.findByWorkerAndRange(workerId, startBounds, endBounds);
+      }> = await this._booking.findByWorkerAndRange(
+        workerId,
+        startBounds,
+        endBounds,
+      );
 
       // 4) Index bookings by local dateKey
       const bookingsByKey = new Map<
         string,
-        Array<{ startTime: string; endTime?: string | null; advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded' }>
+        Array<{
+          startTime: string;
+          endTime?: string | null;
+          advancePaymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+        }>
       >();
 
       for (const b of bookingsRange ?? []) {
@@ -205,12 +250,19 @@ export class ServiceDetails implements IServiceDetails {
       }
 
       // 5) Pre-index holidays & custom slots for O(1) lookup
-      const holidaysSet = new Set((details.holidays ?? []).map((h) => dateKey(h.date)));
-      const customByKey = new Map<string, Array<{ startTime: string; endTime: string }>>();
-      for (const cs of (details.customSlots ?? [])) {
+      const holidaysSet = new Set(
+        (details.holidays ?? []).map((h) => dateKey(h.date)),
+      );
+      const customByKey = new Map<
+        string,
+        Array<{ startTime: string; endTime: string }>
+      >();
+      for (const cs of details.customSlots ?? []) {
         const dk = dateKey(cs.date);
         if (!customByKey.has(dk)) customByKey.set(dk, []);
-        customByKey.get(dk)!.push({ startTime: cs.startTime, endTime: cs.endTime });
+        customByKey
+          .get(dk)!
+          .push({ startTime: cs.startTime, endTime: cs.endTime });
       }
 
       // 6) Build 7-day availability
@@ -218,7 +270,11 @@ export class ServiceDetails implements IServiceDetails {
         date: string;
         day: string;
         enabled: boolean;
-        availableTimes: Array<{ start: string; end: string; status: LabeledStatus }>;
+        availableTimes: Array<{
+          start: string;
+          end: string;
+          status: LabeledStatus;
+        }>;
       }> = [];
 
       for (let i = 0; i < 7; i++) {
@@ -240,8 +296,11 @@ export class ServiceDetails implements IServiceDetails {
           });
 
           // Custom slots for that day (additional availability)
-          for (const cs of (customByKey.get(dk) ?? [])) {
-            base.push({ start: toMinutes(cs.startTime), end: toMinutes(cs.endTime) });
+          for (const cs of customByKey.get(dk) ?? []) {
+            base.push({
+              start: toMinutes(cs.startTime),
+              end: toMinutes(cs.endTime),
+            });
           }
 
           // Merge & guard invalid ranges
@@ -250,7 +309,10 @@ export class ServiceDetails implements IServiceDetails {
 
         // Breaks
         const breakCuts: Interval[] = (daySchedule?.breaks ?? [])
-          .map((b) => ({ start: toMinutes(b.breakStart), end: toMinutes(b.breakEnd) }))
+          .map((b) => ({
+            start: toMinutes(b.breakStart),
+            end: toMinutes(b.breakEnd),
+          }))
           .filter((iv) => iv.end > iv.start);
 
         // Booked cuts (with 60-min buffer rule for advance-paid bookings with no endTime)
@@ -282,11 +344,15 @@ export class ServiceDetails implements IServiceDetails {
         const labeled = buildLabeledTimeline(available, breakCuts, bookedCuts);
 
         // Enabled if not holiday, schedule enabled, and has some available segment
-        const enabled = !isHoliday && !!daySchedule?.enabled && labeled.some((x) => x.status === 'available');
+        const enabled = !isHoliday
+          && !!daySchedule?.enabled
+          && labeled.some((x) => x.status === 'available');
 
         results.push({
           date: dk,
-          day: daySchedule?.day ?? target.toLocaleString('en-US', { weekday: 'long' }),
+          day:
+            daySchedule?.day
+            ?? target.toLocaleString('en-US', { weekday: 'long' }),
           enabled,
           availableTimes: labeled.map((seg) => ({
             start: fromMinutes(seg.start),
@@ -309,6 +375,47 @@ export class ServiceDetails implements IServiceDetails {
         status: 500,
         success: false,
         message: 'Failed to fetch availability',
+      };
+    }
+  }
+
+  async getWorkerProfile(workerId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: IWorkerProfileResponse | null;
+  }> {
+    try {
+      const worker = await this._workerRepo.findById(workerId);
+
+      if (!worker) {
+        return {
+          success: false,
+          message: 'Worker not found',
+          data: null,
+        };
+      }
+
+      const reviews = await this._reviewRepo.getRecentReviewsByWorker(workerId);
+
+      const ratingSummary = await this._reviewRepo.getWorkerRatingSummary(workerId);
+
+      const response: IWorkerProfileResponse = {
+        ...worker.toObject(),
+        avgRating: ratingSummary.avgRating,
+        totalReviews: ratingSummary.totalReviews,
+        recentReviews: reviews,
+      };
+
+      return {
+        success: true,
+        message: 'Worker profile fetched successfully',
+        data: response,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to fetch worker profile',
+        data: null,
       };
     }
   }

@@ -12,6 +12,7 @@ import { ADMIN_ROUTES } from "./config/constant/routes/adminRoutes";
 import AdminBookingsPage from "./pages/admin/BookingLising";
 import AdminBookingDetailsPage from "./pages/admin/BookingDetail";
 import AdminWallet from "./pages/admin/AdminWallet";
+import AdminReviewsPage from "./pages/admin/Reviews";
 
 
 const LoginPage = lazy(()=>import("./pages/admin/LoginPage"));
@@ -59,6 +60,10 @@ const Admin = () => {
         <Route
           path={ADMIN_ROUTES.WALLET}
           element={<IsAdminLogin><AdminWallet /></IsAdminLogin>}
+        />
+        <Route
+          path={ADMIN_ROUTES.REVIEW}
+          element={<IsAdminLogin><AdminReviewsPage /></IsAdminLogin>}
         />
       </Routes>
     </Suspense></>

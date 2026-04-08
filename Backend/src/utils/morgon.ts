@@ -12,16 +12,21 @@ const accessLogStream = fs.createWriteStream(path.join(logDir, 'access.log'), { 
 const morganFormat = process.env.LOGGER_STATUS
   || (process.env.NODE_ENV === 'production' ? 'combined' : 'dev');
 
-export const morganLogger = (req: Request, res: Response, next: NextFunction) => {
-  if (!morganFormat || morganFormat === 'off') return next();
+const fileLogger = morgan('combined', { stream: accessLogStream });
 
-  // Write request logs to file
-  morgan('combined', { stream: accessLogStream })(req, res, () => {});
+const consoleLogger = morgan(morganFormat, {
+  stream: {
+    write: (message) => logger.http(message.trim()),
+  },
+});
 
-  // Log to console using selected format
-  morgan(morganFormat, {
-    stream: {
-      write: (message) => logger.http(message.trim()),
-    },
-  })(req, res, next);
+export const morganLogger = (req: Request, res: Response, next: NextFunction): void => {
+  if (!morganFormat || morganFormat === 'off') {
+    next();
+    return;
+  }
+
+  fileLogger(req, res, () => {
+    consoleLogger(req, res, next);
+  });
 };

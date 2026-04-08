@@ -9,6 +9,7 @@ import { getTimeBasedIndicator } from "@/utils/timeUtils"
 import { useNavigate } from "react-router-dom"
 import { API_ENDPOINTS } from "@/config/constant/apiEndpoint"
 import { WORKER_ROUTES } from "@/config/constant/routes/workerRoutes"
+import { generateBookingCode } from "@/utils/booking-convert"
 
 
 type ServiceStatus = | 'confirmed'
@@ -68,7 +69,7 @@ export function ServiceCard({ service, isToday }: ServiceCardProps) {
         <div className="flex-1 space-y-2">
           {/* Header Row */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">{service.id}</span>
+            <span className="text-xs font-medium text-muted-foreground">{ generateBookingCode( service.id)}</span>
             {isToday && (
               <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
                 Today

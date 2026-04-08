@@ -12,7 +12,9 @@ export const workerProfileUpdateSchema = z.object({
     .optional(),
 
   experience: z
-    .enum(['0-1', '2-5', '6-10', '10+'], { message: 'Invalid experience range' })
+    .enum(['0-1', '2-5', '6-10', '10+'], {
+      message: 'Invalid experience range',
+    })
     .optional(),
   fees: z
     .number()
@@ -22,5 +24,15 @@ export const workerProfileUpdateSchema = z.object({
   profileImage: z
     .string()
 
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(500, 'Description cannot exceed 500 characters')
+    .optional(),
+
+  skills: z
+    .array(z.string().trim().min(2, 'Skill must be at least 2 characters'))
+    .max(20, 'Maximum 20 skills allowed')
     .optional(),
 });

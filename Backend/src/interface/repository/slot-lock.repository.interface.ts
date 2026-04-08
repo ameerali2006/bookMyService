@@ -1,6 +1,6 @@
 export interface ISlotLockRepository {
   acquireLock(
-    
+
     workerId: string,
     date:Date,
     startTime: Date,

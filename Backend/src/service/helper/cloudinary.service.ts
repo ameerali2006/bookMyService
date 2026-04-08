@@ -7,7 +7,6 @@ import { ENV } from '../../config/env/env';
 export class CloudinaryService implements ICloudinaryService {
   generateSignature(folder:string) {
     const timestamp = Math.floor(Date.now() / 1000);
-    
 
     const signature = cloudinary.utils.api_sign_request(
       { timestamp, folder },

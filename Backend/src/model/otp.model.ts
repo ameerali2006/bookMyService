@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { IOtp } from '../interface/model/otp.model.interface';
 
 const OtpSchema = new Schema<IOtp>(

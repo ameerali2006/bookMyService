@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface ITransaction extends Document{
   _id: string;
@@ -15,8 +15,8 @@ export interface ITransaction extends Document{
     | 'BONUS'
     | 'PENALTY';
 
-  amount: number;              
-  direction: 'CREDIT' | 'DEBIT'; 
+  amount: number;
+  direction: 'CREDIT' | 'DEBIT';
 
   balanceBefore: number;
   balanceAfter: number;

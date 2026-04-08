@@ -94,4 +94,7 @@ export const adminManagement = {
   getDashBoard: async () => {
     return await adminAxios.get(`/dashboard`);
   },
+  getReviews: async ({search,sort}:{search:string,sort:string,page:number,limit:number}) => {
+    return await adminAxios.get(`/reviews`,{params:{search,sort}});
+  },
 };

@@ -1,9 +1,9 @@
-import { Document, Types } from "mongoose";
-import { IChat } from "./chat.model.interface";
-import { IUser } from "./user.model.interface";
-import { IWorker } from "./worker.model.interface";
+import { Document, Types } from 'mongoose';
+import { IChat } from './chat.model.interface';
+import { IUser } from './user.model.interface';
+import { IWorker } from './worker.model.interface';
 
-export type MessageType = "TEXT" | "IMAGE" | "VIDEO" | "AUDIO";
+export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO';
 
 export interface IMessage extends Document {
   _id: Types.ObjectId;
@@ -12,7 +12,7 @@ export interface IMessage extends Document {
 
   senderId: Types.ObjectId | string;
 
-  role: "User" | "Worker" | "Admin";
+  role: 'User' | 'Worker' | 'Admin';
 
   type: MessageType;
 
@@ -40,9 +40,9 @@ export interface IMessage extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-export type IMessagePopulated = Omit<IMessage, 'chatId' | 'senderId'| "replyTo" > & {
+export type IMessagePopulated = Omit<IMessage, 'chatId' | 'senderId'| 'replyTo' > & {
   chatId: IChat;
   senderId: IUser|IWorker;
   replyTo?: IMessage | null;
-  
+
 };

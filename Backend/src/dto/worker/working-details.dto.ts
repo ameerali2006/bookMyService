@@ -1,23 +1,24 @@
-import { BookingStatus, IBookingPopulated } from "../../interface/model/booking.model.interface";
-import { ICustomSlot, IHoliday, IWorkingDetailsDocument } from "../../interface/model/working-details.interface";
-import { responsePart } from "../shared/responsePart";
+import { BookingStatus, IBookingPopulated } from '../../interface/model/booking.model.interface';
+import { ICustomSlot, IHoliday, IWorkingDetailsDocument } from '../../interface/model/working-details.interface';
+import { responsePart } from '../shared/responsePart';
+
 export interface allBookingDto{
-  
+
   id: string
   userId: string
   userName: string
   serviceName: string
-  date: string      
-  time: string      
+  date: string
+  time: string
   address: string
   status:
-    | "pending"
-    | "confirmed"
-    | "in-progress"
-    | "awaiting-final-payment"
-    | "completed"
-    | "cancelled"
-    workerResponse: "accepted" | "rejected" | "pending" 
+    | 'pending'
+    | 'confirmed'
+    | 'in-progress'
+    | 'awaiting-final-payment'
+    | 'completed'
+    | 'cancelled'
+    workerResponse: 'accepted' | 'rejected' | 'pending'
 }
 export interface WorkerBookingListResponseDto {
   bookings: allBookingDto[];
@@ -25,8 +26,6 @@ export interface WorkerBookingListResponseDto {
   page: number;
   limit: number;
 }
-
-
 
 export interface WorkerProfileDTO {
   id: string;
@@ -44,6 +43,8 @@ export interface WorkerProfileDTO {
     lat: number;
     lng: number;
   };
+  description:string
+  skills:string[]
   documents?: string;
 }
 export interface ServiceRequest {
@@ -66,11 +67,11 @@ export interface ApprovedServices {
   date: Date
   startTime: string
   endTime?: string
-  
-  status: "confirmed" | "in-progress"|'awaiting-final-payment'
+
+  status: 'confirmed' | 'in-progress'|'awaiting-final-payment'
 }
 export interface ILocation {
-  type: "Point";
+  type: 'Point';
   coordinates: [number, number];
 }
 export interface IAddress {
@@ -82,14 +83,12 @@ export interface IAddress {
   location: ILocation;
 }
 
-
 export interface IWorkerRequestResponse {
-  
+
   data: ServiceRequest[];
   page: number;
   total: number;
 }
-
 
 export interface getServiceRequestsResponseDto extends responsePart{
    data?: IWorkerRequestResponse;
@@ -99,7 +98,7 @@ export interface getWorkerApprovedBookingsRequestDto {
     page: number;
     limit: number;
     search?: string;
-    status?: "approved" | "in-progress" | "awaiting-final-payment";
+    status?: 'approved' | 'in-progress' | 'awaiting-final-payment';
 }
 export interface getWorkerApprovedBookingsResponseDto extends responsePart{
    today?: ApprovedServices[];
@@ -111,10 +110,10 @@ export interface getWorkerApprovedBookingsResponseDto extends responsePart{
       totalPages: number;
     };
 }
-export interface  getWorkerAprrovalpageDetailsResponseDto extends responsePart{
+export interface getWorkerAprrovalpageDetailsResponseDto extends responsePart{
   booking?:(IBookingPopulated&{verification:boolean})
 }
-export interface  reachedCustomerLocationResponseDto extends responsePart{
+export interface reachedCustomerLocationResponseDto extends responsePart{
   booking?:(IBookingPopulated&{verification:boolean})
 }
 
@@ -124,17 +123,17 @@ export interface updateWorkingDetailsResponseDto extends responsePart{
 export interface getProfileDetailsResponseDto extends responsePart{
   worker:WorkerProfileDTO|null
 }
-export interface  updateWorkerProfileResponseDto extends responsePart{
+export interface updateWorkerProfileResponseDto extends responsePart{
   worker:WorkerProfileDTO|null
 }
-export interface  getCalenderDetailsResponseDto extends responsePart{
-  customSlots:ICustomSlot[]|null, 
+export interface getCalenderDetailsResponseDto extends responsePart{
+  customSlots:ICustomSlot[]|null,
   holidays:IHoliday[]|null
 }
-export interface  updateCalenderDetailsResponseDto extends responsePart{
-  customSlots:ICustomSlot[]|null, 
+export interface updateCalenderDetailsResponseDto extends responsePart{
+  customSlots:ICustomSlot[]|null,
   holidays:IHoliday[]|null
 }
-export interface  workerComplateWorkResponseDto extends responsePart{
+export interface workerComplateWorkResponseDto extends responsePart{
   booking?:(IBookingPopulated&{verification:boolean})
 }

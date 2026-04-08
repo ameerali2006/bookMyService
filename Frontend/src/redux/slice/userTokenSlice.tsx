@@ -14,12 +14,15 @@ interface UserData {
   location?:LocationData
 }
 
+
 interface UserState {
   user: UserData | null;
+  location?:LocationData
 }
 
 const initialState: UserState = {
   user: JSON.parse(localStorage.getItem("userData") || "null"),
+  location:JSON.parse(localStorage.getItem("location") || "null"),
 };
 
 const userSlice = createSlice({
@@ -36,6 +39,9 @@ const userSlice = createSlice({
         state.user.location = action.payload;
         localStorage.setItem("userData", JSON.stringify(state.user));
       }
+        state.location=action.payload
+        localStorage.setItem("location", JSON.stringify(state.location));
+      
     },
     removeUser: (state) => {
       state.user = null;

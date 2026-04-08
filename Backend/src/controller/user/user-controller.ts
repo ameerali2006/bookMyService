@@ -1,22 +1,22 @@
-import { Request, Response, NextFunction } from "express";
-import { inject, injectable } from "tsyringe";
-import { IUserController } from "../../interface/controller/user-controller.controller.interface";
-import { CustomRequest } from "../../middleware/auth.middleware";
-import { TYPES } from "../../config/constants/types";
-import { STATUS_CODES } from "../../config/constants/status-code";
+import { Request, Response, NextFunction } from 'express';
+import { inject, injectable } from 'tsyringe';
+import { success } from 'zod';
+import { IUserController } from '../../interface/controller/user-controller.controller.interface';
+import { CustomRequest } from '../../middleware/auth.middleware';
+import { TYPES } from '../../config/constants/types';
+import { STATUS_CODES } from '../../config/constants/status-code';
 
-import { CustomError } from "../../utils/custom-error";
-import { MESSAGES } from "../../config/constants/message";
-import { updateUserProfileSchema } from "../validation/update-user-profile-details";
-import { IProfileManagement } from "../../interface/service/user/profile-management.serice.interface";
-import { addressSchema } from "../validation/add-address.zod";
-import { changePasswordSchema } from "../validation/change-password.zod";
-import { IChangePasswordService } from "../../interface/service/change-password.service.interface";
-import { IBookingDetailsService } from "../../interface/service/user/booking-details.service.interface";
-import { success } from "zod";
-import { IWalletService } from "../../interface/service/wallet.service.interface";
-import { ITransactionService } from "../../interface/service/transaction.service.interface";
-import { WalletTransactionQuery } from "../../dto/shared/wallet.dto";
+import { CustomError } from '../../utils/custom-error';
+import { MESSAGES } from '../../config/constants/message';
+import { updateUserProfileSchema } from '../validation/update-user-profile-details';
+import { IProfileManagement } from '../../interface/service/user/profile-management.serice.interface';
+import { addressSchema } from '../validation/add-address.zod';
+import { changePasswordSchema } from '../validation/change-password.zod';
+import { IChangePasswordService } from '../../interface/service/change-password.service.interface';
+import { IBookingDetailsService } from '../../interface/service/user/booking-details.service.interface';
+import { IWalletService } from '../../interface/service/wallet.service.interface';
+import { ITransactionService } from '../../interface/service/transaction.service.interface';
+import { WalletTransactionQuery } from '../../dto/shared/wallet.dto';
 
 @injectable()
 export class UserController implements IUserController {
@@ -62,7 +62,7 @@ export class UserController implements IUserController {
         const errors = parsedData.error.format();
         res.status(STATUS_CODES.BAD_REQUEST).json({
           success: false,
-          message: "Validation failed",
+          message: 'Validation failed',
           errors,
         });
         throw new CustomError(MESSAGES.VALIDATION_ERROR, STATUS_CODES.CONFLICT);
@@ -152,7 +152,7 @@ export class UserController implements IUserController {
     const parsed = changePasswordSchema.parse(req.body);
     const userId = (req as CustomRequest).user?._id;
     const result = await this._changePassword.changePassword(
-      "user",
+      'user',
       userId,
       parsed,
     );
@@ -162,6 +162,7 @@ export class UserController implements IUserController {
       res.status(STATUS_CODES.CONFLICT).json(result);
     }
   }
+
   async ongoingBookings(
     req: Request,
     res: Response,
@@ -170,7 +171,7 @@ export class UserController implements IUserController {
     try {
       const limit = Number(req.query.limit) || 10;
       const page = Number(req.query.page) || 1;
-      const search = (req.query.search as string) || "";
+      const search = (req.query.search as string) || '';
 
       const userId = (req as CustomRequest).user._id;
 
@@ -192,20 +193,20 @@ export class UserController implements IUserController {
       next(error);
     }
   }
+
   async bookingDetailData(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const bookingId = req.params.bookingId;
+      const { bookingId } = req.params;
       if (!bookingId) {
         res
           .status(STATUS_CODES.BAD_REQUEST)
-          .json({ success: false, message: "ubooking details missing" });
+          .json({ success: false, message: 'ubooking details missing' });
       }
-      const response =
-        await this._bookingDetailsService.bookingDetailData(bookingId);
+      const response = await this._bookingDetailsService.bookingDetailData(bookingId);
       console.log(response);
 
       if (response.success) {
@@ -217,55 +218,143 @@ export class UserController implements IUserController {
       next(error);
     }
   }
+
   async getWalletData(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     const userId = (req as CustomRequest).user._id;
-    const role = (req as CustomRequest).user.role;
+    const { role } = (req as CustomRequest).user;
     console.log(userId, role);
     const wallet = await this._walletService.getWalletData(userId, role);
     console.log(wallet);
 
-    res.status(200).json( wallet );
+    res.status(200).json(wallet);
   }
+
   async getTransactions(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     const userId = (req as CustomRequest).user._id;
-    const role = (req as CustomRequest).user.role;
+    const { role } = (req as CustomRequest).user;
     const query: WalletTransactionQuery = {
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 10,
 
-      type: typeof req.query.type === "string" ? req.query.type : undefined,
+      type: typeof req.query.type === 'string' ? req.query.type : undefined,
       status:
-        typeof req.query.status === "string" ? req.query.status : undefined,
+        typeof req.query.status === 'string' ? req.query.status : undefined,
 
       sortBy:
-        typeof req.query.sortBy === "string" ? req.query.sortBy : "createdAt",
+        typeof req.query.sortBy === 'string' ? req.query.sortBy : 'createdAt',
       sortOrder:
-        req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+        req.query.sortOrder === 'asc' || req.query.sortOrder === 'desc'
           ? req.query.sortOrder
-          : "desc",
+          : 'desc',
 
       startDate:
-        typeof req.query.startDate === "string"
+        typeof req.query.startDate === 'string'
           ? req.query.startDate
           : undefined,
       endDate:
-        typeof req.query.endDate === "string" ? req.query.endDate : undefined,
+        typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
     };
     console.log(userId, role);
     const result = await this._transactionServcie.getTransactionData(
       userId,
       role,
-      query
+      query,
     );
 
-    res.status(STATUS_CODES.OK).json(result)
+    res.status(STATUS_CODES.OK).json(result);
+  }
+
+  async walletPayment(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const userId = (req as CustomRequest).user._id;
+
+      const { bookingId, addressId, paymentType } = req.body;
+
+      if (!bookingId || !paymentType || !addressId) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          message: 'bookingId, addressId and paymentType are required',
+        });
+        return;
+      }
+
+      const booking = await this._bookingDetailsService.bookingDetailData(bookingId);
+
+      if (!booking.success || !booking.booking) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          message: 'Booking not found',
+        });
+        return;
+      }
+
+      const bookingData = booking.booking;
+
+      const amount = paymentType === 'advance'
+        ? bookingData.advanceAmount
+        : bookingData.remainingAmount;
+
+      if (
+        paymentType === 'advance'
+        && bookingData.advancePaymentStatus === 'paid'
+      ) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          message: 'Advance already paid',
+        });
+        return;
+      }
+
+      if (
+        paymentType === 'final'
+        && bookingData.finalPaymentStatus === 'paid'
+      ) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          message: 'Final payment already completed',
+        });
+        return;
+      }
+
+      // 💰 wallet debit
+      const walletResult = await this._walletService.debitBalance({
+        userId,
+        role: 'user',
+        amount,
+        type: 'ADJUSTMENT',
+        description: `${paymentType} payment for booking ${bookingId}`,
+      });
+
+      if (!walletResult.success) {
+        res.status(STATUS_CODES.BAD_REQUEST).json(walletResult);
+        return;
+      }
+
+      // 🧾 Update booking payment status
+      await this._bookingDetailsService.updatePaymentStatus(
+        bookingId,
+        addressId,
+        paymentType,
+      );
+
+      res.status(STATUS_CODES.OK).json({
+        success: true,
+        message: 'Wallet payment successful',
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }
