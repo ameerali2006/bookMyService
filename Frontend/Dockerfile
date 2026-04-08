@@ -1,16 +1,12 @@
-FROM node:20 as build
+FROM node:20-alpine
 
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
 
-COPY . .
+COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-FROM nginx:alpine
+COPY . .
 
-COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 5173
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
